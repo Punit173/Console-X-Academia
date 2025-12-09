@@ -1,8 +1,9 @@
 // app/api/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
+
 // Adjust this to your exact endpoint
-const ACADEMIA_API_URL = "https://academia-scrapper-api-fast.onrender.com/scrape";
+const ACADEMIA_API_URL =  process.env.ACADEMIA_SCRAPPER_URL;
 
 export async function POST(req: NextRequest) {
   try {

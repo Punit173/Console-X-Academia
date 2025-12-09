@@ -32,7 +32,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 sm:gap-3 group flex-shrink-0"
+          className="flex items-center gap-2 sm:gap-3 group shrink-0"
         >
           <div className="rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 overflow-hidden">
             <Image
