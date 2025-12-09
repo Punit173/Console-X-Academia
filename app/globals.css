@@ -113,3 +113,13 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+
+
+/* Mobile-only navbar solidity */
+@media (max-width: 768px) {
+  .mobile-solid-nav {
+    backdrop-filter: none !important;
+    background: rgba(20, 20, 20, 0.92) !important; /* almost solid dark */
+  }
+}
