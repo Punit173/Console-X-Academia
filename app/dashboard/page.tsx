@@ -541,7 +541,6 @@ export default function DashboardPage() {
                   paddingAngle={6}
                   dataKey="value"
                   labelLine={false}
-                  label={renderPieLabel}
                 >
                   {pieData.map((entry, index) => (
                     <Cell

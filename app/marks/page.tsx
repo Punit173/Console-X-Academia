@@ -89,8 +89,20 @@ export default function MarksPage() {
       const pageHeight = doc.internal.pageSize.height;
 
       // --- 1. Dark Theme Background ---
-      doc.setFillColor(0, 0, 0);
-      doc.rect(0, 0, pageWidth, pageHeight, "F");
+      const drawBackground = () => {
+        doc.setFillColor(0, 0, 0);
+        doc.rect(0, 0, pageWidth, pageHeight, "F");
+      };
+      
+      // Monkey-patch addPage to ensure background is drawn on every new page
+      const originalAddPage = doc.addPage;
+      doc.addPage = function (...args) {
+        const result = originalAddPage.apply(this, args);
+        drawBackground();
+        return result;
+      };
+
+      drawBackground();
 
       // Set default text color to white
       doc.setTextColor(255, 255, 255);

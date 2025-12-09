@@ -16,8 +16,22 @@ export const generateStandardPDF = async (
     const pageHeight = doc.internal.pageSize.height;
 
     // --- 1. Dark Theme Background ---
-    doc.setFillColor(0, 0, 0); 
-    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+    // --- 1. Dark Theme Background ---
+    const drawBackground = () => {
+      doc.setFillColor(0, 0, 0);
+      doc.rect(0, 0, pageWidth, pageHeight, "F");
+    };
+    
+    // Apply key patches to ensure background persists on new pages
+    const originalAddPage = doc.addPage;
+    doc.addPage = function (...args) {
+      const result = originalAddPage.apply(this, args);
+      drawBackground();
+      return result;
+    };
+
+    // Draw on first page
+    drawBackground();
     doc.setTextColor(255, 255, 255);
 
     // --- 2. Logo & Branding ---
