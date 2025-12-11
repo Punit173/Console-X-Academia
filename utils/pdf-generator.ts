@@ -1,5 +1,4 @@
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import type { jsPDF } from "jspdf";
 import logo from "../public/assets/logo.jpg";
 
 export const generateStandardPDF = async (
@@ -7,10 +6,13 @@ export const generateStandardPDF = async (
   data: any,
   generateContent: (doc: jsPDF, formatNumber: (n: number) => string) => void,
   action: 'download' | 'share' = 'download',
-  onComplete: () => void = () => {},
-  onError: () => void = () => {}
+  onComplete: () => void = () => { },
+  onError: () => void = () => { }
 ) => {
   try {
+    const { default: jsPDF } = await import("jspdf");
+    const { default: autoTable } = await import("jspdf-autotable");
+
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.width;
     const pageHeight = doc.internal.pageSize.height;
@@ -21,7 +23,7 @@ export const generateStandardPDF = async (
       doc.setFillColor(0, 0, 0);
       doc.rect(0, 0, pageWidth, pageHeight, "F");
     };
-    
+
     // Apply key patches to ensure background persists on new pages
     const originalAddPage = doc.addPage;
     doc.addPage = function (...args) {
@@ -43,7 +45,7 @@ export const generateStandardPDF = async (
         reader.onload = () => resolve(reader.result as string);
         reader.readAsDataURL(blob);
       });
-      doc.addImage(base64, "JPEG", 14, 15, 12, 12); 
+      doc.addImage(base64, "JPEG", 14, 15, 12, 12);
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
       doc.text("CONSOLE X ACADEMIA", 30, 23);
@@ -61,7 +63,7 @@ export const generateStandardPDF = async (
     doc.setFontSize(14);
     doc.setTextColor(255, 255, 255);
     doc.text(title, 14, 40);
-    
+
     doc.setFontSize(10);
     doc.setTextColor(200, 200, 200);
     const studentInfo = data.attendance?.student_info || {};

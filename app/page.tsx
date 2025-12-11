@@ -8,8 +8,14 @@ import type { ApiResponse } from "@/types/academia";
 import Image from "next/image";
 import logo from "../public/assets/logo.jpg";
 
+
+
+import { DEMO_DATA } from "@/data/demo-data";
+
 export default function LoginPage() {
   const router = useRouter();
+
+
   const { data, setData, setCredentials } = useAppData();
 
   const [email, setEmail] = useState("");
@@ -37,15 +43,25 @@ export default function LoginPage() {
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || "Login failed");
+        console.warn("API Error, falling back to Demo Mode");
+        // Fallback to Demo Data
+        setData(DEMO_DATA);
+        setCredentials({ email: "demo@srmist.edu.in", password: "demo" });
+        router.push("/dashboard");
         return;
       }
 
       const json = (await res.json()) as ApiResponse;
 
       if (json.status !== "success") {
-        setError("Invalid credentials or API error");
+        // Even on invalid credentials to real API, if strictly requested we could fall back, 
+        // but usually we want to show "Invalid Creds". 
+        // However, user said "if login fails... fill with default".
+        // Let's fallback here too for now to be safe as per user request "login wont work".
+        console.warn("Login failed, falling back to Demo Mode");
+        setData(DEMO_DATA);
+        setCredentials({ email: "demo@srmist.edu.in", password: "demo" });
+        router.push("/dashboard");
         return;
       }
 
@@ -53,30 +69,65 @@ export default function LoginPage() {
       setCredentials({ email, password });
       router.push("/dashboard");
     } catch (err: any) {
-      setError("Something went wrong");
+      console.error("Network/System Error, falling back to Demo Mode");
+      setData(DEMO_DATA);
+      setCredentials({ email: "demo@srmist.edu.in", password: "demo" });
+      router.push("/dashboard");
     } finally {
       setLoading(false);
     }
   };
 
+
+  // --- Starry Background Logic ---
+  const [starsSmall, setStarsSmall] = useState("");
+  const [starsMedium, setStarsMedium] = useState("");
+  const [starsBig, setStarsBig] = useState("");
+
+  const generateBoxShadows = (n: number) => {
+    let value = `${Math.floor(Math.random() * 2000)}px ${Math.floor(Math.random() * 2000)}px #FFF`;
+    for (let i = 2; i <= n; i++) {
+      value += `, ${Math.floor(Math.random() * 2000)}px ${Math.floor(Math.random() * 2000)}px #FFF`;
+    }
+    return value;
+  };
+
+  useEffect(() => {
+    setStarsSmall(generateBoxShadows(700));
+    setStarsMedium(generateBoxShadows(200));
+    setStarsBig(generateBoxShadows(100));
+  }, []);
+
   if (data) return null; // Prevent flashing if redirecting
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background flex items-center justify-center p-4">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[150px] opacity-40 animate-pulse"></div>
-        <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-500/10 rounded-full blur-[150px] opacity-30"></div>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-hidden"
+      style={{ background: "radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%)" }}>
+
+      {/* Star Layers */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Small Stars */}
+        <div style={{ width: 1, height: 1, background: "transparent", boxShadow: starsSmall, animation: "animStar 50s linear infinite" }} />
+        <div style={{ width: 1, height: 1, background: "transparent", boxShadow: starsSmall, animation: "animStar 50s linear infinite", position: "absolute", top: 2000 }} />
+
+        {/* Medium Stars */}
+        <div style={{ width: 2, height: 2, background: "transparent", boxShadow: starsMedium, animation: "animStar 100s linear infinite" }} />
+        <div style={{ width: 2, height: 2, background: "transparent", boxShadow: starsMedium, animation: "animStar 100s linear infinite", position: "absolute", top: 2000 }} />
+
+        {/* Big Stars */}
+        <div style={{ width: 3, height: 3, background: "transparent", boxShadow: starsBig, animation: "animStar 150s linear infinite" }} />
+        <div style={{ width: 3, height: 3, background: "transparent", boxShadow: starsBig, animation: "animStar 150s linear infinite", position: "absolute", top: 2000 }} />
       </div>
 
-      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center relative z-10">
         {/* Left Side: Branding */}
         <div className="hidden md:flex flex-col justify-center space-y-8 p-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl shadow-2xl shadow-primary/30">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl shadow-2xl shadow-white/10">
+
             {/* <span className="text-4xl font-bold text-white">⌘</span> */}
             <Image src={logo} className="rounded-4xl" alt="Console X Academia Logo" width={80} height={80} />
           </div>
-          
+
           <div className="space-y-4">
             <h1 className="text-5xl font-black text-white tracking-tight leading-tight">
               Level Up Your <br />
@@ -103,7 +154,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md mx-auto">
           <div className="glass-card rounded-2xl p-8 sm:p-10 shadow-2xl shadow-black/50 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-orange-400 to-primary"></div>
-            
+
             <div className="mb-8 text-center md:text-left">
               <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
               <p className="text-muted-foreground text-sm">Enter your credentials to access the console.</p>
@@ -127,7 +178,7 @@ export default function LoginPage() {
                     className="w-full bg-black/20 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-200 text-sm"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@university.edu"
+                    placeholder="xy1234@srmist.edu.in"
                   />
                 </div>
               </div>
@@ -166,11 +217,10 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full font-bold py-4 px-4 rounded-xl text-white transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg ${
-                  loading
-                    ? "bg-gray-800 cursor-not-allowed opacity-60"
-                    : "bg-gradient-to-r from-primary to-orange-600 hover:shadow-primary/25 active:scale-95"
-                }`}
+                className={`w-full font-bold py-4 px-4 rounded-xl text-white transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg ${loading
+                  ? "bg-gray-800 cursor-not-allowed opacity-60"
+                  : "bg-gradient-to-r from-primary to-orange-600 hover:shadow-primary/25 active:scale-95"
+                  }`}
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -186,7 +236,7 @@ export default function LoginPage() {
               </button>
             </form>
           </div>
-          
+
           <p className="text-center text-gray-600 text-xs mt-6">
             Protected by Console Security Systems • v2.0
           </p>

@@ -2,8 +2,8 @@
 "use client";
 
 import { useAppData } from "@/components/AppDataContext";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import type { jsPDF } from "jspdf";
+
 import { useState } from "react";
 import logo from "../../public/assets/logo.jpg";
 import {
@@ -14,21 +14,33 @@ import {
   YAxis
 } from "recharts";
 
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 export default function MarksPage() {
+  const router = useRouter();
   const { data, refreshData, isLoading } = useAppData();
+
+  useEffect(() => {
+    if (!data) {
+      router.push("/");
+    }
+  }, [data, router]);
+
   const [isGenerating, setIsGenerating] = useState(false);
+
 
   // Simple color variants
   const getPerformanceTextColor = (percentage: number) => {
-    if (percentage >= 80) return "text-[#62D834]"; 
-    if (percentage >= 60) return "text-[#62D834]/80"; 
-    return "text-[#62D834]/60"; 
+    if (percentage >= 80) return "text-[#62D834]";
+    if (percentage >= 60) return "text-[#62D834]/80";
+    return "text-[#62D834]/60";
   };
 
   const getProgressBarColor = (percentage: number) => {
-    if (percentage >= 80) return "bg-[#62D834]"; 
-    if (percentage >= 60) return "bg-[#62D834]/80"; 
-    return "bg-[#62D834]/60"; 
+    if (percentage >= 80) return "bg-[#62D834]";
+    if (percentage >= 60) return "bg-[#62D834]/80";
+    return "bg-[#62D834]/60";
   };
 
   if (!data) {
@@ -47,8 +59,9 @@ export default function MarksPage() {
     );
   }
 
-  const marks = data.attendance.marks;
-  const timetableCourses = data.timetable.courses;
+  const marks = data.attendance?.marks || {};
+  const timetableCourses = data.timetable?.courses || [];
+
 
   const getCourseTitle = (marksCode: string) => {
     const normalizedCode = marksCode
@@ -86,7 +99,11 @@ export default function MarksPage() {
   const generatePDF = async (action: "download" | "share") => {
     setIsGenerating(true);
     try {
+      const { default: jsPDF } = await import("jspdf");
+      const { default: autoTable } = await import("jspdf-autotable");
+
       const doc = new jsPDF();
+
       const pageWidth = doc.internal.pageSize.width;
       const pageHeight = doc.internal.pageSize.height;
 
@@ -94,7 +111,7 @@ export default function MarksPage() {
         doc.setFillColor(0, 0, 0);
         doc.rect(0, 0, pageWidth, pageHeight, "F");
       };
-      
+
       const originalAddPage = doc.addPage;
       doc.addPage = function (...args) {
         const result = originalAddPage.apply(this, args);
@@ -126,21 +143,21 @@ export default function MarksPage() {
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(200, 200, 200);
-      doc.text(`Name: ${data.attendance.student_info.name}`, 14, 35);
-      doc.text(`Reg No: ${data.attendance.student_info.registration_number}`, 14, 40);
+      doc.text(`Name: ${data.attendance?.student_info?.name || "Student"}`, 14, 35);
+      doc.text(`Reg No: ${data.attendance?.student_info?.registration_number || "N/A"}`, 14, 40);
       doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 45);
 
       const tableRows: any[] = [];
       Object.entries(marks).forEach(([courseCode, course]) => {
         const subjectName = getCourseTitle(courseCode);
-        
+
         tableRows.push([
           {
             content: `${courseCode} - ${subjectName}`,
             colSpan: 3,
             styles: {
               fillColor: [98, 216, 52],
-              textColor: [0, 0, 0], 
+              textColor: [0, 0, 0],
               fontStyle: "bold",
             },
           },
@@ -162,14 +179,14 @@ export default function MarksPage() {
         body: tableRows,
         theme: "grid",
         styles: {
-          fillColor: [10, 10, 10], 
+          fillColor: [10, 10, 10],
           textColor: [255, 255, 255],
-          lineColor: [98, 216, 52], 
+          lineColor: [98, 216, 52],
           lineWidth: 0.1,
         },
         headStyles: {
-          fillColor: [30, 30, 30], 
-          textColor: [98, 216, 52], 
+          fillColor: [30, 30, 30],
+          textColor: [98, 216, 52],
           fontStyle: "bold",
         },
         alternateRowStyles: {
@@ -218,8 +235,8 @@ export default function MarksPage() {
   return (
     <div className="w-full pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        
-      {/* Performance Overview Card */}
+
+        {/* Performance Overview Card */}
         <div className="rounded-3xl bg-[#62D834] p-4 sm:p-6 lg:p-8 shadow-xl text-white">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-8">
             {/* Student Info */}
@@ -230,11 +247,11 @@ export default function MarksPage() {
 
               <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-white/80">
                 <span className="font-mono bg-white/10 px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold">
-                  {data.attendance.student_info.registration_number}
+                  {data.attendance?.student_info?.registration_number || "N/A"}
                 </span>
                 <span className="hidden sm:inline text-white/50">•</span>
                 <span className="font-medium text-xs sm:text-sm">
-                  {data.attendance.student_info.name}
+                  {data.attendance?.student_info?.name || "Student"}
                 </span>
               </div>
             </div>
@@ -287,9 +304,8 @@ export default function MarksPage() {
               <button
                 onClick={refreshData}
                 disabled={isLoading || isGenerating}
-                className={`p-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center ${
-                  isLoading ? "animate-spin" : ""
-                }`}
+                className={`p-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center ${isLoading ? "animate-spin" : ""
+                  }`}
                 title="Refresh Data"
               >
                 <svg
@@ -317,18 +333,18 @@ export default function MarksPage() {
             const cleanedCourseCode = courseCode?.replace(/theory/gi, "")?.replace(/practical/gi, "")?.trim();
             // @ts-ignore
             const totalObtained = course.tests.reduce((sum: number, t: any) => sum + (t.obtained_marks ?? 0), 0);
-             // @ts-ignore
+            // @ts-ignore
             const totalMax = course.tests.reduce((sum: number, t: any) => sum + (t.max_marks ?? 0), 0);
             const avgPercentage = course.tests.length > 0 && totalMax > 0 ? (totalObtained / totalMax) * 100 : 0;
             const subjectName = getCourseTitle(courseCode);
 
             // @ts-ignore
             const graphData = course.tests.map((t: any) => ({
-                name: t.test_name,
-                score: t.percentage
+              name: t.test_name,
+              score: t.percentage
             }));
             if (graphData.length === 1) {
-                graphData.unshift({ name: 'Start', score: 0 });
+              graphData.unshift({ name: 'Start', score: 0 });
             }
 
             return (
@@ -345,7 +361,7 @@ export default function MarksPage() {
                           {cleanedCourseCode}
                         </span>
                         <span className="text-xs text-white/40 uppercase tracking-wider">
-                           {/* @ts-ignore */}
+                          {/* @ts-ignore */}
                           {course.course_type}
                         </span>
                       </div>
@@ -353,7 +369,7 @@ export default function MarksPage() {
                         {subjectName}
                       </h3>
                     </div>
-                    
+
                     <div className="text-right">
                       <span className={`text-3xl font-bold text-white ${getPerformanceTextColor(avgPercentage)}`}>
                         {formatNumber(avgPercentage)}%
@@ -363,45 +379,45 @@ export default function MarksPage() {
 
                   {/* Mini Chart */}
                   {graphData.length > 0 && (
-                      <div className="h-16 w-full">
-                           <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={graphData}>
-                                    <defs>
-                                        <linearGradient id={`gradient-${index}`} x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#62D834" stopOpacity={0.3}/>
-                                            <stop offset="95%" stopColor="#62D834" stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <Tooltip content={<CustomTooltip />} cursor={false} />
-                                    <Area 
-                                        type="monotone" 
-                                        dataKey="score" 
-                                        stroke="#62D834" 
-                                        strokeWidth={2} 
-                                        fillOpacity={1} 
-                                        fill={`url(#gradient-${index})`} 
-                                    />
-                                    <YAxis domain={[0, 100]} hide />
-                                </AreaChart>
-                           </ResponsiveContainer>
-                      </div>
+                    <div className="h-16 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={graphData}>
+                          <defs>
+                            <linearGradient id={`gradient-${index}`} x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#62D834" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="#62D834" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <Tooltip content={<CustomTooltip />} cursor={false} />
+                          <Area
+                            type="monotone"
+                            dataKey="score"
+                            stroke="#62D834"
+                            strokeWidth={2}
+                            fillOpacity={1}
+                            fill={`url(#gradient-${index})`}
+                          />
+                          <YAxis domain={[0, 100]} hide />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
                   )}
                 </div>
 
                 {/* Assessments List */}
                 <div className="p-6 space-y-4">
-                   {/* @ts-ignore */}
+                  {/* @ts-ignore */}
                   {course.tests.length === 0 ? (
                     <p className="text-white/40 text-sm text-center py-4">No assessments yet</p>
                   ) : (
-                     // @ts-ignore
+                    // @ts-ignore
                     course.tests.map((t: any) => (
                       <div key={t.test_name} className="space-y-2">
                         <div className="flex justify-between items-baseline">
-                           <span className="text-sm text-white/70">{t.test_name}</span>
-                           <span className="text-sm font-medium text-white">
-                             {formatNumber(t.obtained_marks)} <span className="text-white/30">/</span> {formatNumber(t.max_marks)}
-                           </span>
+                          <span className="text-sm text-white/70">{t.test_name}</span>
+                          <span className="text-sm font-medium text-white">
+                            {formatNumber(t.obtained_marks)} <span className="text-white/30">/</span> {formatNumber(t.max_marks)}
+                          </span>
                         </div>
                       </div>
                     ))

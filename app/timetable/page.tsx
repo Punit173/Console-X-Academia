@@ -3,11 +3,11 @@
 import { useAppData } from "@/components/AppDataContext";
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Clock, 
-  MapPin, 
-  Calendar, 
-  BookOpen, 
+import {
+  Clock,
+  MapPin,
+  Calendar,
+  BookOpen,
   Coffee,
   ChevronRight
 } from "lucide-react";
@@ -44,9 +44,19 @@ const BATCH_TIMETABLES: any = {
   }
 };
 
+import { useRouter } from "next/navigation";
+
 export default function TimetablePage() {
+  const router = useRouter();
   const { data } = useAppData();
-  
+
+  useEffect(() => {
+    if (!data) {
+      router.push("/");
+    }
+  }, [data, router]);
+
+
   // State for selected tab (Day 1-5)
   const [selectedDay, setSelectedDay] = useState<number>(1);
 
@@ -62,13 +72,13 @@ export default function TimetablePage() {
     // Helper: Match Slot to Course
     const getCourseForSlot = (slotCode: string) => {
       const slotOptions = slotCode.split('/').map(s => s.trim());
-      
+
       for (const course of courses) {
         // Clean trailing hyphens (e.g., "A-" -> "A")
         const rawSlot = (course.slot || "").replace(/-+$/, '').trim();
-        
+
         let match = false;
-        
+
         // Handle ranges like "L41-L42"
         if (rawSlot.includes('-')) {
           const parts = rawSlot.split('-').map((p: string) => p.trim());
@@ -108,7 +118,7 @@ export default function TimetablePage() {
 
         // Calculate visual status
         const now = new Date();
-        
+
         if (courseInfo.found) {
           results.push({
             time: timeSlot,
@@ -143,25 +153,25 @@ export default function TimetablePage() {
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in p-1">
-      
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-pink-500/10 relative">
-         <div className="absolute -left-4 top-0 w-20 h-20 bg-pink-500/10 blur-3xl rounded-full pointer-events-none"></div>
+        <div className="absolute -left-4 top-0 w-20 h-20 bg-pink-500/10 blur-3xl rounded-full pointer-events-none"></div>
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight mb-2 flex items-center gap-3">
-             <Calendar className="w-8 h-8 text-pink-500" />
-             Timetable
+            <Calendar className="w-8 h-8 text-pink-500" />
+            Timetable
           </h1>
           <p className="text-pink-200/50 text-sm">
             Batch {timetableLogic.studentBatch} • Day Order System
           </p>
         </div>
-        
+
         <div className="glass-card px-4 py-2 rounded-lg border border-pink-500/30 bg-pink-950/30 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse shadow-[0_0_8px_rgba(236,72,153,0.6)]" />
-            <span className="text-pink-400 font-mono font-bold">
-                Today is Day Order {timetableLogic.currentDayOrder}
-            </span>
+          <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse shadow-[0_0_8px_rgba(236,72,153,0.6)]" />
+          <span className="text-pink-400 font-mono font-bold">
+            Today is Day Order {timetableLogic.currentDayOrder}
+          </span>
         </div>
       </div>
 
@@ -170,15 +180,15 @@ export default function TimetablePage() {
         {[1, 2, 3, 4, 5].map((day) => {
           const isCurrent = day === timetableLogic.currentDayOrder;
           const isSelected = day === selectedDay;
-          
+
           return (
             <button
               key={day}
               onClick={() => setSelectedDay(day)}
               className={`
                 relative flex-shrink-0 px-6 py-3 rounded-xl font-medium transition-all duration-300
-                ${isSelected 
-                  ? "bg-pink-600 text-white shadow-lg shadow-pink-500/20 scale-105" 
+                ${isSelected
+                  ? "bg-pink-600 text-white shadow-lg shadow-pink-500/20 scale-105"
                   : "border border-pink-500/10 hover:bg-pink-900/30 hover:text-pink-200 hover:border-pink-500/30"
                 }
               `}
@@ -187,7 +197,7 @@ export default function TimetablePage() {
                 <span className={`text-xs uppercase tracking-widest ${isSelected ? 'text-pink-100' : 'text-pink-400/50'}`}>Day Order</span>
                 <span className="text-xl font-bold">{day}</span>
               </div>
-              
+
               {isCurrent && !isSelected && (
                 <span className="absolute top-2 right-2 w-2 h-2 bg-pink-500 rounded-full shadow-[0_0_5px_rgba(236,72,153,0.8)]" />
               )}
@@ -208,55 +218,55 @@ export default function TimetablePage() {
             className="space-y-4"
           >
             {classes.length === 0 ? (
-                // Empty State
-                <div className="flex flex-col items-center justify-center py-20 text-pink-300/50 glass-card rounded-2xl border border-pink-500/10 bg-pink-950/10">
-                    <Coffee className="w-12 h-12 mb-4 opacity-50 text-pink-400" />
-                    <p>No classes scheduled for Day Order {selectedDay}</p>
-                </div>
+              // Empty State
+              <div className="flex flex-col items-center justify-center py-20 text-pink-300/50 glass-card rounded-2xl border border-pink-500/10 bg-pink-950/10">
+                <Coffee className="w-12 h-12 mb-4 opacity-50 text-pink-400" />
+                <p>No classes scheduled for Day Order {selectedDay}</p>
+              </div>
             ) : (
-                // Class List
-                classes.map((item: any, idx: number) => (
-                    <div key={idx} className="group relative flex gap-6">
-                        
-                        {/* Timeline Spine */}
-                        <div className="flex flex-col items-center">
-                            <div className="w-3 h-3 rounded-full bg-pink-900/40 border border-pink-500/30 group-hover:bg-pink-500 group-hover:border-pink-400 group-hover:ring-4 group-hover:ring-pink-500/20 transition-all z-10 mt-6" />
-                            {idx !== classes.length - 1 && (
-                                <div className="w-0.5 h-full bg-pink-500/10 group-hover:bg-pink-500/30 transition-colors -mb-6" />
-                            )}
-                        </div>
+              // Class List
+              classes.map((item: any, idx: number) => (
+                <div key={idx} className="group relative flex gap-6">
 
-                        {/* Card */}
-                        <div className="flex-1 glass-card p-5 rounded-2xl border-l-4 border-l-transparent border border-pink-500/5 bg-pink-950/10 hover:border-l-pink-500 hover:bg-pink-900/20 transition-all mb-2">
-                            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2 text-xs font-mono text-pink-300 bg-pink-500/10 border border-pink-500/20 px-2 py-1 rounded w-fit mb-2">
-                                        <Clock className="w-3 h-3" />
-                                        {item.time}
-                                    </div>
-                                    <h3 className="text-lg font-bold text-white group-hover:text-pink-300 transition-colors">
-                                        {item.title}
-                                    </h3>
-                                    <div className="flex items-center gap-2 text-sm text-pink-200/60">
-                                        <span className="bg-pink-500/10 px-1.5 rounded text-xs text-pink-300">{item.code}</span>
-                                        <span>•</span>
-                                        <span className="text-xs">{item.faculty?.split('(')[0]}</span>
-                                    </div>
-                                </div>
+                  {/* Timeline Spine */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-3 h-3 rounded-full bg-pink-900/40 border border-pink-500/30 group-hover:bg-pink-500 group-hover:border-pink-400 group-hover:ring-4 group-hover:ring-pink-500/20 transition-all z-10 mt-6" />
+                    {idx !== classes.length - 1 && (
+                      <div className="w-0.5 h-full bg-pink-500/10 group-hover:bg-pink-500/30 transition-colors -mb-6" />
+                    )}
+                  </div>
 
-                                <div className="flex flex-col items-end gap-2 mt-2 md:mt-0">
-                                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-pink-500/5 border border-pink-500/10 text-xs font-medium text-pink-100">
-                                        <MapPin className="w-3 h-3 text-pink-500" />
-                                        {item.venue}
-                                     </div>
-                                     <div className="text-[10px] text-pink-300/40 font-mono">
-                                        Slot: {item.slotCode}
-                                     </div>
-                                </div>
-                            </div>
+                  {/* Card */}
+                  <div className="flex-1 glass-card p-5 rounded-2xl border-l-4 border-l-transparent border border-pink-500/5 bg-pink-950/10 hover:border-l-pink-500 hover:bg-pink-900/20 transition-all mb-2">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-xs font-mono text-pink-300 bg-pink-500/10 border border-pink-500/20 px-2 py-1 rounded w-fit mb-2">
+                          <Clock className="w-3 h-3" />
+                          {item.time}
                         </div>
+                        <h3 className="text-lg font-bold text-white group-hover:text-pink-300 transition-colors">
+                          {item.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-pink-200/60">
+                          <span className="bg-pink-500/10 px-1.5 rounded text-xs text-pink-300">{item.code}</span>
+                          <span>•</span>
+                          <span className="text-xs">{item.faculty?.split('(')[0]}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-2 mt-2 md:mt-0">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-pink-500/5 border border-pink-500/10 text-xs font-medium text-pink-100">
+                          <MapPin className="w-3 h-3 text-pink-500" />
+                          {item.venue}
+                        </div>
+                        <div className="text-[10px] text-pink-300/40 font-mono">
+                          Slot: {item.slotCode}
+                        </div>
+                      </div>
                     </div>
-                ))
+                  </div>
+                </div>
+              ))
             )}
           </motion.div>
         </AnimatePresence>

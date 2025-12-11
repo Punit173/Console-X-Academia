@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 
 // Adjust this to your exact endpoint
-const ACADEMIA_API_URL =  process.env.ACADEMIA_SCRAPPER_URL || "";
+const ACADEMIA_API_URL = process.env.ACADEMIA_SCRAPPER_URL || "";
+// Endpoint populated from .env.local
 
 export async function POST(req: NextRequest) {
   try {
