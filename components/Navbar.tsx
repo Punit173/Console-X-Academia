@@ -100,6 +100,7 @@ export default function Navbar() {
               { href: "/attendance", label: "Attendance" },
               { href: "/timetable", label: "Timetable" },
               { href: "/calendar", label: "Calendar" },
+              { href: "/calculator", label: "CGPA Calculator" },
             ]}
             pathname={pathname}
             theme={theme}
@@ -111,6 +112,7 @@ export default function Navbar() {
             items={[
               { href: "/announcements", label: "Announcements" },
               { href: "/resources", label: "Resources" },
+              { href: "/links", label: "Important Links" },
             ]}
             pathname={pathname}
             theme={theme}
@@ -118,20 +120,40 @@ export default function Navbar() {
 
           <div className="w-px h-6 bg-white/10 mx-2 flex-shrink-0" />
 
-          {/* Install Now Button - Dynamic Gradient */}
-          <a
-            href="https://play.google.com/store/apps/details?id=com.akshat.academia"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`px-4 py-2 text-sm font-bold bg-gradient-to-r ${theme.installButton} text-white rounded-lg transition-all duration-200 flex items-center gap-2 active:scale-95`}
-          >
-            Install on
-            <img
-              src="https://img.icons8.com/?size=100&id=22982&format=png&color=ffffff"
-              alt="Google Play Icon"
-              className="w-4 h-4"
-            />
-          </a>
+          {/* Install Now Button - Dynamic Gradient based on Semester */}
+          {(() => {
+            const sem = data?.attendance?.student_info?.semester || "5";
+            const getSemBtnColor = (s: string) => {
+              const map: any = {
+                '1': "from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 hover:shadow-red-500/50",
+                '2': "from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/50",
+                '3': "from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 hover:shadow-purple-500/50",
+                '4': "from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:shadow-green-500/50",
+                '5': "from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 hover:shadow-orange-500/50",
+                '6': "from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 hover:shadow-pink-500/50",
+                '7': "from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 hover:shadow-cyan-500/50",
+                '8': "from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 hover:shadow-indigo-500/50",
+              };
+              return map[s] || map['5'];
+            };
+            const btnClass = getSemBtnColor(sem.toString());
+
+            return (
+              <a
+                href="https://play.google.com/store/apps/details?id=com.akshat.academia"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`px-4 py-2 text-sm font-bold bg-gradient-to-r ${btnClass} text-white rounded-lg transition-all duration-200 flex items-center gap-2 active:scale-95`}
+              >
+                Install on
+                <img
+                  src="https://img.icons8.com/?size=100&id=22982&format=png&color=ffffff"
+                  alt="Google Play Icon"
+                  className="w-4 h-4"
+                />
+              </a>
+            );
+          })()}
 
           <button
             onClick={handleLogout}
@@ -226,10 +248,12 @@ export default function Navbar() {
             <NavLink href="/attendance" label="Attendance" active={pathname === "/attendance"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
             <NavLink href="/timetable" label="Timetable" active={pathname === "/timetable"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
             <NavLink href="/calendar" label="Calendar" active={pathname === "/calendar"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
+            <NavLink href="/calculator" label="CGPA Calculator" active={pathname === "/calculator"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
 
             <div className="px-3 text-xs font-bold text-white/40 uppercase mt-2">Campus</div>
             <NavLink href="/announcements" label="Announcements" active={pathname === "/announcements"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
             <NavLink href="/resources" label="Resources" active={pathname === "/resources"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
+            <NavLink href="/links" label="Important Links" active={pathname === "/links"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
 
             <a
               href="https://play.google.com/store/apps/details?id=com.akshat.academia"

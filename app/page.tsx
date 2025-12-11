@@ -7,6 +7,8 @@ import { useAppData } from "@/components/AppDataContext";
 import type { ApiResponse } from "@/types/academia";
 import Image from "next/image";
 import logo from "../public/assets/logo.jpg";
+import notifPreview from "../public/assets/notification-preview.jpg";
+import { Smartphone, Chrome, ExternalLink } from "lucide-react";
 
 
 
@@ -35,11 +37,16 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
+    // Normalize email: Append @srmist.edu.in if missing
+    const normalizedEmail = email.trim().includes("@")
+      ? email.trim()
+      : `${email.trim()}@srmist.edu.in`;
+
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: normalizedEmail, password }),
       });
 
       if (!res.ok) {
@@ -66,7 +73,7 @@ export default function LoginPage() {
       }
 
       setData(json);
-      setCredentials({ email, password });
+      setCredentials({ email: normalizedEmail, password });
       router.push("/dashboard");
     } catch (err: any) {
       console.error("Network/System Error, falling back to Demo Mode");
@@ -123,8 +130,6 @@ export default function LoginPage() {
         {/* Left Side: Branding */}
         <div className="hidden md:flex flex-col justify-center space-y-8 p-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl shadow-2xl shadow-white/10">
-
-            {/* <span className="text-4xl font-bold text-white">⌘</span> */}
             <Image src={logo} className="rounded-4xl" alt="Console X Academia Logo" width={80} height={80} />
           </div>
 
@@ -140,12 +145,49 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 text-sm font-medium text-gray-400">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
-              <span>📊</span> Real-time Stats
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
-              <span>🔒</span> Secure Access
+          {/* Promotions - Moved to Left Side */}
+          <div className="grid grid-cols-2 gap-4 max-w-md">
+            {/* Mobile App */}
+            <a
+              href="https://play.google.com/store/apps/details?id=com.akshat.academia"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex flex-col items-start p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all text-left relative overflow-hidden"
+            >
+              <div className="flex items-center gap-3 w-full relative z-10">
+                <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400 group-hover:scale-110 transition-transform">
+                  <Smartphone className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="block text-sm font-bold text-white group-hover:text-blue-300">Mobile App</span>
+                  <span className="text-[10px] text-gray-400 leading-tight block mt-1">Get &lt;75% Attendance Alerts and more</span>
+                </div>
+              </div>
+
+              {/* Image Preview on Hover/Interaction */}
+              {/* Image Preview - Full Notification */}{/* Resizing container to fit aspect ratio loosely, auto height */}
+              <div className="mt-3 w-full rounded-lg overflow-hidden border border-white/10 relative group-hover:shadow-lg group-hover:shadow-blue-500/20 transition-all bg-black/50">
+                {/* Full Image - No Crop */}
+                <Image
+                  src={notifPreview}
+                  alt="Attendance Alert Context"
+                  className="w-full h-auto object-contain opacity-90 group-hover:opacity-100 transition-all duration-500"
+                />
+
+                {/* Subtle Scan Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-700 animate-scan-slow pointer-events-none" />
+              </div>
+            </a>
+
+            {/* Extension */}
+            <div className="group flex flex-col items-start p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-orange-500/10 hover:border-orange-500/30 transition-all text-left cursor-pointer">
+              <div className="p-2 bg-orange-500/20 rounded-lg text-orange-400 mb-3 group-hover:rotate-12 transition-transform">
+                <Chrome className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="block text-sm font-bold text-white group-hover:text-orange-300">Chrome Extension</span>
+                <span className="text-[10px] text-gray-400 leading-tight block mt-1">Auto-fill Course Feedback in 1-Click</span>
+              </div>
             </div>
           </div>
         </div>
@@ -163,7 +205,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <label className="text-xs font-medium text-gray-400 uppercase tracking-wider ml-1">
-                  Email Address
+                  Email Address (or) NET ID
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -231,7 +273,7 @@ export default function LoginPage() {
                     Authenticating...
                   </span>
                 ) : (
-                  "Initialize Session"
+                  "Login to Academia"
                 )}
               </button>
             </form>
