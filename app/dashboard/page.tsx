@@ -383,10 +383,24 @@ export default function DashboardPage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                  className={`absolute inset-0 p-8 flex flex-col justify-center relative overflow-hidden ${isAdmin ? "bg-black" : "bg-white"
-                    }`}
+                  // Use item.img as background if available; otherwise use previous bg utility classes
+                  style={
+                    item.img
+                      ? {
+                          backgroundImage: `url(${item.img})`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                        }
+                      : undefined
+                  }
+                  className={`absolute inset-0 p-8 flex flex-col justify-center relative overflow-hidden rounded-2xl shadow-inner z-0 ${
+                    item.img ? "" : isAdmin ? "bg-black" : "bg-white"
+                  }`}
                 >
-                  {/* Background Effects */}
+                  {/* If there's a banner image, add a subtle overlay for contrast */}
+                  {item.img && <div className="absolute inset-0 bg-black/40 pointer-events-none" />}
+
+                  {/* Background Effects (keeps the decorative blur circles) */}
                   {isAdmin ? (
                     <div className="absolute top-[-50%] right-[-10%] w-[300px] h-[300px] bg-white/5 rounded-full blur-3xl pointer-events-none" />
                   ) : (
@@ -404,19 +418,20 @@ export default function DashboardPage() {
                         </span>
                       </div>
                       <span className={`text-xs font-bold px-2 py-1 rounded ${isAdmin ? "bg-white/10 text-white" : "bg-black/5 text-gray-600"}`}>
-                        {item.date ? item.date.replace(/_/g, '/') : ''}
+                        {item.date ? item.date.replace(/_/g, "/") : ""}
                       </span>
                     </div>
 
-                    <h2 className={`text-2xl font-bold mb-2 line-clamp-2 ${isAdmin ? "text-white" : "text-gray-900"}`}>
+                    <h2 className={`text-2xl font-bold mb-2 line-clamp-2 ${isAdmin ? "text-white" : item.img ? "text-white" : "text-gray-900"}`}>
                       {item.title}
                     </h2>
-                    <p className={`text-sm font-medium line-clamp-2 ${isAdmin ? "text-white/70" : "text-gray-600"}`}>
+                    <p className={`text-sm font-medium line-clamp-2 ${isAdmin ? "text-white/70" : item.img ? "text-white/80" : "text-gray-600"}`}>
                       {item.desc || item.para || "No description available."}
                     </p>
                   </div>
                 </motion.div>
               );
+
             })()
           )}
         </AnimatePresence>
