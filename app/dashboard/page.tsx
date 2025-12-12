@@ -376,61 +376,76 @@ export default function DashboardPage() {
               if (!item) return null; // Fallback
               const isAdmin = item.type === "admin";
 
-              return (
-                <motion.div
-                  key={`announcement-${item.id}`}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
-                  // Use item.img as background if available; otherwise use previous bg utility classes
-                  style={
-                    item.img
-                      ? {
-                          backgroundImage: `url(${item.img})`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                        }
-                      : undefined
+        return (
+          <motion.div
+            key={`announcement-${item.id}`}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            style={
+              item.img
+                ? {
+                    backgroundImage: `url(${item.img})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
                   }
-                  className={`absolute inset-0 p-8 flex flex-col justify-center relative overflow-hidden rounded-2xl shadow-inner z-0 ${
-                    item.img ? "" : isAdmin ? "bg-black" : "bg-white"
-                  }`}
-                >
-                  {/* If there's a banner image, add a subtle overlay for contrast */}
-                  {item.img && <div className="absolute inset-0 bg-black/40 pointer-events-none" />}
+                : undefined
+            }
+            className={`absolute inset-0 p-8 flex flex-col justify-center relative overflow-hidden rounded-2xl shadow-inner z-0 ${
+              item.img ? "" : isAdmin ? "bg-black" : "bg-white"
+            }`}
+          >
+            {item.img && <div className="absolute inset-0 bg-black/40 pointer-events-none" />}
 
-                  {/* Background Effects (keeps the decorative blur circles) */}
-                  {isAdmin ? (
-                    <div className="absolute top-[-50%] right-[-10%] w-[300px] h-[300px] bg-white/5 rounded-full blur-3xl pointer-events-none" />
-                  ) : (
-                    <div className="absolute top-[-50%] right-[-10%] w-[300px] h-[300px] bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-                  )}
+            {isAdmin ? (
+              <div className="absolute top-[-50%] right-[-10%] w-[300px] h-[300px] bg-white/5 rounded-full blur-3xl pointer-events-none" />
+            ) : (
+              <div className="absolute top-[-50%] right-[-10%] w-[300px] h-[300px] bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+            )}
 
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg backdrop-blur-sm ${isAdmin ? "bg-white/20" : "bg-orange-100"}`}>
-                          <Calendar className={`w-5 h-5 ${isAdmin ? "text-white" : "text-orange-600"}`} />
-                        </div>
-                        <span className={`font-medium tracking-wide text-sm uppercase ${isAdmin ? "text-white/60" : "text-gray-500"}`}>
-                          {item.type || "Announcement"}
-                        </span>
-                      </div>
-                      <span className={`text-xs font-bold px-2 py-1 rounded ${isAdmin ? "bg-white/10 text-white" : "bg-black/5 text-gray-600"}`}>
-                        {item.date ? item.date.replace(/_/g, "/") : ""}
-                      </span>
-                    </div>
-
-                    <h2 className={`text-2xl font-bold mb-2 line-clamp-2 ${isAdmin ? "text-white" : item.img ? "text-white" : "text-gray-900"}`}>
-                      {item.title}
-                    </h2>
-                    <p className={`text-sm font-medium line-clamp-2 ${isAdmin ? "text-white/70" : item.img ? "text-white/80" : "text-gray-600"}`}>
-                      {item.desc || item.para || "No description available."}
-                    </p>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg backdrop-blur-sm ${isAdmin ? "bg-white/20" : "bg-orange-100"}`}>
+                    <Calendar className={`w-5 h-5 ${isAdmin ? "text-white" : "text-orange-600"}`} />
                   </div>
-                </motion.div>
-              );
+                  <span className={`font-medium tracking-wide text-sm uppercase ${isAdmin ? "text-white/60" : "text-gray-500"}`}>
+                    {item.type || "Announcement"}
+                  </span>
+                </div>
+                <span className={`text-xs font-bold px-2 py-1 rounded ${isAdmin ? "bg-white/10 text-white" : "bg-black/5 text-gray-600"}`}>
+                  {item.date ? item.date.replace(/_/g, "/") : ""}
+                </span>
+              </div>
+
+              <h2 className={`text-2xl font-bold mb-2 line-clamp-2 ${isAdmin ? "text-white" : item.img ? "text-white" : "text-gray-900"}`}>
+                {item.title}
+              </h2>
+
+              <p className={`text-sm font-medium line-clamp-2 ${isAdmin ? "text-white/70" : item.img ? "text-white/80" : "text-gray-600"}`}>
+                {item.desc || item.para || "No description available."}
+              </p>
+
+              {/* 🔗 LINK BUTTON (only appears if item.link exists) */}
+              {item.link && (
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-white/20 
+                            hover:bg-white/30 transition text-white text-sm font-medium backdrop-blur-sm"
+                >
+                  Visit
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 3h7v7m0 0L10 21l-7-7L21 10z" />
+                  </svg>
+                </a>
+              )}
+            </div>
+          </motion.div>
+        );
+
 
             })()
           )}

@@ -32,14 +32,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Footer */}
           <footer className="border-t border-white/5 py-8 mt-auto w-full glass-card">
             <div className="w-full max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+              
               <p>© 2025 Console Academia. All rights reserved.</p>
-              <div className="flex gap-6">
-                <a href="#" className="hover:text-primary transition-colors">Privacy</a>
-                <a href="#" className="hover:text-primary transition-colors">Terms</a>
-                <a href="#" className="hover:text-primary transition-colors">Support</a>
+
+              <div className="flex gap-6 items-center">
+
+                {/* 🔗 Play Store Link */}
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.akshat.academia"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-colors flex items-center gap-1"
+                >
+                  <span>Android App</span>
+                </a>
+
+                {/* 🤝 Community Link */}
+                <a
+                  href="https://chat.whatsapp.com/B4lNYZtRrAj6lqqRMIGvF5"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-colors flex items-center gap-1"
+                >
+                  <span>Community</span>
+                </a>
+
               </div>
             </div>
           </footer>
+
           
         </AppDataProvider>
       </body>
