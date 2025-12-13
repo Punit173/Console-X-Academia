@@ -75,11 +75,11 @@ export default function DashboardPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  useEffect(() => {
-    if (!data && !fetchError) {
-      router.push("/");
-    }
-  }, [data, fetchError, router]);
+  // useEffect(() => {
+  //   if (!data && !fetchError) {
+  //     router.push("/");
+  //   }
+  // }, [data, fetchError, router]);
 
   // --- Fetch Announcements ---
   useEffect(() => {

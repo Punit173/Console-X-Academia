@@ -134,12 +134,6 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    setData(null);
-    setCredentials(null);
-    if (typeof window !== "undefined") {
-      // Optional: force reload to plain login state
-      window.location.href = "/";
-    }
   };
 
   return (
