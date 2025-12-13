@@ -186,7 +186,7 @@ export default function TimetablePage() {
               key={day}
               onClick={() => setSelectedDay(day)}
               className={`
-                relative flex-shrink-0 px-6 py-3 rounded-xl font-medium transition-all duration-300
+                relative shrink-0 px-6 py-3 rounded-xl font-medium transition-all duration-300
                 ${isSelected
                   ? "bg-pink-600 text-white shadow-lg shadow-pink-500/20 scale-105"
                   : "border border-pink-500/10 hover:bg-pink-900/30 hover:text-pink-200 hover:border-pink-500/30"
