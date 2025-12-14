@@ -99,7 +99,7 @@ export default function LoginPage() {
 
             <h1 className="text-5xl font-black text-white leading-tight mb-6">
               Academic <br />
-              <span className="bg-gradient-to-r from-blue-400 to-orange-500 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-blue-400 to-orange-500 bg-clip-text text-transparent">
                 Intelligence.
               </span>
             </h1>
