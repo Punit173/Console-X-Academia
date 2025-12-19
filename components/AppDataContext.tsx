@@ -21,6 +21,7 @@ interface AppDataContextValue {
   logout: () => void;
   isLoading: boolean;
   fetchError: boolean;
+  isInitialized: boolean;
 }
 
 const AppDataContext = createContext<AppDataContextValue | undefined>(undefined);
@@ -30,6 +31,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   const [credentials, setCredentialsState] = useState<Credentials | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Helper helper to validate data structure
   const isValidData = (d: any): d is ApiResponse => {
@@ -65,6 +67,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
         } catch { }
       }
     }
+    setIsInitialized(true);
   }, []);
 
   const setData = (newData: ApiResponse | null) => {
@@ -137,7 +140,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AppDataContext.Provider value={{ data, setData, credentials, setCredentials, refreshData, isLoading, fetchError, logout }}>
+    <AppDataContext.Provider value={{ data, setData, credentials, setCredentials, refreshData, isLoading, fetchError, logout, isInitialized }}>
       {children}
     </AppDataContext.Provider>
   );

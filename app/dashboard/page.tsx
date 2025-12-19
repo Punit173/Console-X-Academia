@@ -68,7 +68,7 @@ const BATCH_TIMETABLES: any = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { data, fetchError, logout, credentials } = useAppData();
+  const { data, fetchError, logout, credentials, isInitialized } = useAppData();
 
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [activeSlide, setActiveSlide] = useState(0);
@@ -184,6 +184,14 @@ export default function DashboardPage() {
       border: "border-purple-400/20",
     };
   };
+
+  if (!isInitialized) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh] animate-fade-in">
+        <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!data) {
     return (
