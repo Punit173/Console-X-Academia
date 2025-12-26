@@ -271,7 +271,7 @@ export default function DashboardPage() {
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-orange-500/50 transition-all text-orange-400"
+              className="hidden md:flex lg:flex p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-orange-500/50 transition-all text-orange-400"
             >
               <User className="w-5 h-5" />
             </button>
@@ -284,16 +284,16 @@ export default function DashboardPage() {
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   className="absolute right-0 top-full mt-2 w-64 glass-card rounded-xl border border-white/10 shadow-2xl z-50 overflow-hidden"
                 >
-                  <div className="p-4 border-b border-white/10 bg-black/20">
-                    <p className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Signed in as</p>
+                  <div className="p-4 border-b border-white/10 bg-amber-500">
+                    <p className="text-xs text-black uppercase font-bold tracking-wider mb-1">Signed in as</p>
                     <p className="text-white text-sm font-medium truncate">{credentials?.email || "User"}</p>
                   </div>
-                  <div className="p-1">
+                  <div className="p-1 bg-amber-900">
                     <button
                       onClick={() => {
                         logout();
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-red-500/10 rounded-lg transition-colors"
                     >
                       Log Out
                     </button>
