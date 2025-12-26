@@ -49,9 +49,10 @@ export default function LoginPage() {
       setCredentials({ email: normalizedEmail, password });
       router.push("/dashboard");
     } catch {
-      setData(DEMO_DATA);
-      setCredentials({ email: "demo@srmist.edu.in", password: "demo" });
-      router.push("/dashboard");
+      // setData(DEMO_DATA);
+      // setCredentials({ email: "demo@srmist.edu.in", password: "demo" });
+      // router.push("/dashboard");
+      setError("Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }
