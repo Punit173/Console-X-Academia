@@ -289,14 +289,14 @@ export default function DashboardPage() {
                     <p className="text-white text-sm font-medium truncate">{credentials?.email || "User"}</p>
                   </div>
                   <div className="p-1 bg-amber-900">
-                    <button
+                    {/* <button
                       onClick={() => {
                         logout();
                       }}
                       className="w-full flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-red-500/10 rounded-lg transition-colors"
                     >
                       Log Out
-                    </button>
+                    </button> */}
                   </div>
                 </motion.div>
               )}
