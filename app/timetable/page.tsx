@@ -270,8 +270,145 @@ export default function TimetablePage() {
   const classes = timetableLogic.getClassesForDay(selectedDay);
   const fullSchedule = timetableLogic.getFullSchedule();
 
+  // --- 3. REUSABLE GRID RENDERER ---
+  const TimetableGrid = React.forwardRef(({ style, id }: any, ref: any) => (
+    <div
+      id={id}
+      ref={ref}
+      style={{
+        width: "1600px",
+        padding: "60px",
+        background: "#F8FAFC", // Slate-50
+        color: "#1E293B", // Slate-800
+        fontFamily: "'Inter', system-ui, sans-serif",
+        position: 'relative',
+        ...style
+      }}
+    >
+      {/* Background Pattern */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: "12px", background: "linear-gradient(to right, #EC4899, #8B5CF6)" }}></div>
+
+      {/* Header Section */}
+      <div style={{ marginBottom: "40px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <div>
+          <h1 style={{ fontSize: "48px", fontWeight: "800", color: "#0F172A", marginBottom: "8px", letterSpacing: "-0.02em" }}>Weekly Schedule</h1>
+          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+            <p style={{ fontSize: "20px", fontWeight: "500", color: "#64748B" }}>Batch {timetableLogic.studentBatch}</p>
+            <span style={{ height: "6px", width: "6px", background: "#CBD5E1", borderRadius: "50%" }}></span>
+            <p style={{ fontSize: "20px", fontWeight: "600", color: "#475569" }}>{data?.timetable?.student_info?.name}</p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ textAlign: "right" }}>
+            <p style={{ fontSize: "14px", fontWeight: "600", color: "#94A3B8", textTransform: 'uppercase', letterSpacing: '0.05em' }}>Powered by</p>
+            <p style={{ fontSize: "18px", fontWeight: "bold", color: "#334155" }}>Console X Academia</p>
+          </div>
+          <img
+            src="/assets/logo.jpg"
+            alt="Logo"
+            style={{ height: "64px", width: "64px", objectFit: "contain", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}
+          />
+        </div>
+      </div>
+
+      {/* Grid Layout */}
+      <div style={{ display: "grid", gridTemplateColumns: "100px repeat(12, 1fr)", gap: "12px" }}>
+
+        {/* Time Header Row */}
+        <div style={{ padding: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <img
+            src="/assets/logo.jpg"
+            alt="Logo"
+            style={{
+              width: "60px",
+              height: "60px",
+              objectFit: "contain",
+              borderRadius: "8px",
+              mixBlendMode: "multiply"
+            }}
+          />
+        </div>
+        {fullSchedule.timeSlots.map((slot: string, i: number) => (
+          <div key={i} style={{
+            padding: "0 4px", fontSize: "12px", fontFamily: "monospace", color: "#64748B",
+            textAlign: "center", display: "flex", alignItems: "end", justifyContent: "center",
+            fontWeight: "600", height: "40px", borderBottom: "2px solid #E2E8F0", paddingBottom: "8px"
+          }}>
+            {slot}
+          </div>
+        ))}
+
+        {/* Days & Classes */}
+        {fullSchedule.days.map((dayData: any) => (
+          <React.Fragment key={dayData.dayOrder}>
+            {/* Day Label */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: "#FFFFFF", borderRadius: "12px",
+              boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)",
+              color: "#334155", fontWeight: "bold", fontSize: "18px"
+            }}>
+              Day {dayData.dayOrder}
+            </div>
+
+            {/* Slots */}
+            {dayData.slots.map((slotData: any, i: number) => {
+              const colors = slotData && slotData.code ? timetableLogic.subjectColors[slotData.code] : null;
+
+              if (slotData && slotData.found && colors) {
+                return (
+                  <div key={i} style={{
+                    padding: "12px 8px",
+                    borderRadius: "12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    position: "relative",
+                    background: colors.bg,
+                    border: `1px solid ${colors.border}`,
+                    color: colors.text,
+                    minHeight: "100px",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
+                  }}>
+                    <p style={{ fontSize: "13px", fontWeight: "700", lineHeight: "1.3", marginBottom: "4px", width: "100%" }}>{slotData.title}</p>
+                    <div style={{ fontSize: "11px", opacity: 0.8, fontWeight: "500", marginTop: "auto" }}>
+                      {slotData.code}
+                    </div>
+                  </div>
+                );
+              } else {
+                return (
+                  <div key={i} style={{
+                    minHeight: "100px",
+                    background: "rgba(255,255,255,0.4)",
+                    borderRadius: "12px",
+                    border: "1px dashed #E2E8F0"
+                  }} />
+                );
+              }
+            })}
+          </React.Fragment>
+        ))}
+      </div>
+
+      <div style={{ marginTop: "40px", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
+        <div style={{ height: "4px", width: "40px", background: "#E2E8F0", borderRadius: "2px" }}></div>
+        <p style={{ color: "#94A3B8", fontSize: "14px", fontWeight: "500" }}>Generated on {new Date().toLocaleDateString()}</p>
+        <div style={{ height: "4px", width: "40px", background: "#E2E8F0", borderRadius: "2px" }}></div>
+      </div>
+    </div>
+  ));
+  TimetableGrid.displayName = "TimetableGrid";
+
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in p-1">
+
+      {/* --- HIDDEN MASTER TABLE FOR DOWNLOADS (Always Present) --- */}
+      <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
+        <TimetableGrid id="hidden-full-table" ref={hiddenTableRef} />
+      </div>
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-pink-500/10 relative">
@@ -288,7 +425,15 @@ export default function TimetablePage() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setShowPreview(true)}
+            onClick={() => {
+              if (window.innerWidth < 768) {
+                // Direct download on mobile
+                handleDownloadImage();
+              } else {
+                // Preview on desktop
+                setShowPreview(true);
+              }
+            }}
             className="glass-card px-4 py-2 rounded-lg border border-pink-500/30 bg-pink-950/30 flex items-center gap-2 hover:bg-pink-900/40 transition-colors"
           >
             <Download className="w-4 h-4 text-pink-400" />
@@ -354,7 +499,7 @@ export default function TimetablePage() {
             ) : (
               // Class List
               classes.map((item: any, idx: number) => (
-                <div key={idx} className="group relative flex gap-6">
+                <div key={idx} className="group relative flex gap-3 md:gap-6">
 
                   {/* Timeline Spine */}
                   <div className="flex flex-col items-center">
@@ -365,24 +510,24 @@ export default function TimetablePage() {
                   </div>
 
                   {/* Card */}
-                  <div className="flex-1 glass-card p-5 rounded-2xl border-l-4 border-l-transparent border border-pink-500/5 bg-pink-950/10 hover:border-l-pink-500 hover:bg-pink-900/20 transition-all mb-2">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                  <div className="flex-1 glass-card p-4 md:p-5 rounded-2xl border-l-4 border-l-transparent border border-pink-500/5 bg-pink-950/10 hover:border-l-pink-500 hover:bg-pink-900/20 transition-all mb-2">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 md:gap-4">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-xs font-mono text-pink-300 bg-pink-500/10 border border-pink-500/20 px-2 py-1 rounded w-fit mb-2">
                           <Clock className="w-3 h-3" />
                           {item.time}
                         </div>
-                        <h3 className="text-lg font-bold text-white group-hover:text-pink-300 transition-colors">
+                        <h3 className="text-base md:text-lg font-bold text-white group-hover:text-pink-300 transition-colors">
                           {item.title}
                         </h3>
-                        <div className="flex items-center gap-2 text-sm text-pink-200/60">
+                        <div className="flex flex-wrap items-center gap-2 text-sm text-pink-200/60">
                           <span className="bg-pink-500/10 px-1.5 rounded text-xs text-pink-300">{item.code}</span>
-                          <span>•</span>
-                          <span className="text-xs">{item.faculty?.split('(')[0]}</span>
+                          <span className="hidden md:inline">•</span>
+                          <span className="text-xs w-full md:w-auto">{item.faculty?.split('(')[0]}</span>
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-end gap-2 mt-2 md:mt-0">
+                      <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-2 mt-2 md:mt-0 border-t border-white/5 md:border-0 pt-3 md:pt-0">
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-pink-500/5 border border-pink-500/10 text-xs font-medium text-pink-100">
                           <MapPin className="w-3 h-3 text-pink-500" />
                           {item.venue}
@@ -400,7 +545,7 @@ export default function TimetablePage() {
         </AnimatePresence>
       </div>
 
-      {/* --- PREVIEW MODAL (The Creative One) --- */}
+      {/* --- PREVIEW MODAL --- */}
       <AnimatePresence>
         {showPreview && (
           <motion.div
@@ -466,7 +611,6 @@ export default function TimetablePage() {
                   ref={scrollContainerRef}
                   className="flex-1 overflow-auto bg-zinc-950 p-8 custom-scrollbar relative flex items-start justify-center"
                 >
-                  {/* This is the Actual Content to Capture - Light Theme */}
                   {/* Wrapper for Scaling */}
                   <div
                     style={{
@@ -475,134 +619,8 @@ export default function TimetablePage() {
                       transition: 'transform 0.2s ease-out'
                     }}
                   >
-
-                    {/* --- GENERATED TABLE START --- */}
-                    <div
-                      id="hidden-full-table"
-                      ref={hiddenTableRef}
-                      style={{
-                        width: "1600px",
-                        padding: "60px",
-                        background: "#F8FAFC", // Slate-50: Premium Light Gray Background
-                        color: "#1E293B", // Slate-800
-                        fontFamily: "'Inter', system-ui, sans-serif",
-                        position: 'relative'
-                      }}
-                    >
-                      {/* Background Pattern */}
-                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: "12px", background: "linear-gradient(to right, #EC4899, #8B5CF6)" }}></div>
-
-                      {/* Header Section */}
-                      <div style={{ marginBottom: "40px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                        <div>
-                          <h1 style={{ fontSize: "48px", fontWeight: "800", color: "#0F172A", marginBottom: "8px", letterSpacing: "-0.02em" }}>Weekly Schedule</h1>
-                          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-                            <p style={{ fontSize: "20px", fontWeight: "500", color: "#64748B" }}>Batch {timetableLogic.studentBatch}</p>
-                            <span style={{ height: "6px", width: "6px", background: "#CBD5E1", borderRadius: "50%" }}></span>
-                            <p style={{ fontSize: "20px", fontWeight: "600", color: "#475569" }}>{data?.timetable?.student_info?.name}</p>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                          <div style={{ textAlign: "right" }}>
-                            <p style={{ fontSize: "14px", fontWeight: "600", color: "#94A3B8", textTransform: 'uppercase', letterSpacing: '0.05em' }}>Powered by</p>
-                            <p style={{ fontSize: "18px", fontWeight: "bold", color: "#334155" }}>Console X Academia</p>
-                          </div>
-                          {/* Logo moved to grid corner */}
-                        </div>
-                      </div>
-
-                      {/* New Creative Grid Layout (No Borders, Just Gaps) */}
-                      <div style={{ display: "grid", gridTemplateColumns: "100px repeat(12, 1fr)", gap: "12px" }}>
-
-                        {/* Time Header Row */}
-                        <div style={{ padding: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <img
-                            src="/assets/logo.jpg"
-                            alt="Logo"
-                            style={{
-                              width: "60px",
-                              height: "60px",
-                              objectFit: "contain",
-                              borderRadius: "8px",
-                              mixBlendMode: "multiply" // Blend with background
-                            }}
-                          />
-                        </div>
-                        {fullSchedule.timeSlots.map((slot: string, i: number) => (
-                          <div key={i} style={{
-                            padding: "0 4px", fontSize: "12px", fontFamily: "monospace", color: "#64748B",
-                            textAlign: "center", display: "flex", alignItems: "end", justifyContent: "center",
-                            fontWeight: "600", height: "40px", borderBottom: "2px solid #E2E8F0", paddingBottom: "8px"
-                          }}>
-                            {slot}
-                          </div>
-                        ))}
-
-                        {/* Days & Classes */}
-                        {fullSchedule.days.map((dayData: any) => (
-                          <React.Fragment key={dayData.dayOrder}>
-                            {/* Day Label */}
-                            <div style={{
-                              display: "flex", alignItems: "center", justifyContent: "center",
-                              background: "#FFFFFF", borderRadius: "12px",
-                              boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)",
-                              color: "#334155", fontWeight: "bold", fontSize: "18px"
-                            }}>
-                              Day {dayData.dayOrder}
-                            </div>
-
-                            {/* Slots */}
-                            {dayData.slots.map((slotData: any, i: number) => {
-                              const colors = slotData && slotData.code ? timetableLogic.subjectColors[slotData.code] : null;
-
-                              // Creative Card Style
-                              if (slotData && slotData.found && colors) {
-                                return (
-                                  <div key={i} style={{
-                                    padding: "12px 8px",
-                                    borderRadius: "12px",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    textAlign: "center",
-                                    position: "relative",
-                                    background: colors.bg,
-                                    border: `1px solid ${colors.border}`,
-                                    color: colors.text,
-                                    minHeight: "100px",
-                                    boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
-                                  }}>
-                                    <p style={{ fontSize: "13px", fontWeight: "700", lineHeight: "1.3", marginBottom: "4px", width: "100%" }}>{slotData.title}</p>
-                                    <div style={{ fontSize: "11px", opacity: 0.8, fontWeight: "500", marginTop: "auto" }}>
-                                      {slotData.code}
-                                    </div>
-                                  </div>
-                                );
-                              } else {
-                                // Empty Slot
-                                return (
-                                  <div key={i} style={{
-                                    minHeight: "100px",
-                                    background: "rgba(255,255,255,0.4)",
-                                    borderRadius: "12px",
-                                    border: "1px dashed #E2E8F0"
-                                  }} />
-                                );
-                              }
-                            })}
-                          </React.Fragment>
-                        ))}
-                      </div>
-
-                      <div style={{ marginTop: "40px", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
-                        <div style={{ height: "4px", width: "40px", background: "#E2E8F0", borderRadius: "2px" }}></div>
-                        <p style={{ color: "#94A3B8", fontSize: "14px", fontWeight: "500" }}>Generated on {new Date().toLocaleDateString()}</p>
-                        <div style={{ height: "4px", width: "40px", background: "#E2E8F0", borderRadius: "2px" }}></div>
-                      </div>
-                    </div>
-                    {/* --- GENERATED TABLE END --- */}
-
+                    {/* --- PREVIEW INSTANCE --- */}
+                    <TimetableGrid />
                   </div>
                 </div>
               </motion.div>

@@ -66,7 +66,14 @@ export const generateStandardPDF = async (
 
     doc.setFontSize(10);
     doc.setTextColor(200, 200, 200);
-    const studentInfo = data.attendance?.student_info || {};
+
+    // Robustly extract student info from likely paths
+    const studentInfo =
+      data.attendance?.student_info ||
+      data.timetable?.student_info ||
+      data.student_info ||
+      {};
+
     doc.text(`Name: ${studentInfo.name || 'N/A'}`, 14, 48);
     doc.text(`Reg No: ${studentInfo.registration_number || 'N/A'}`, 14, 53);
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 58);

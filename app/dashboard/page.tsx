@@ -248,7 +248,80 @@ export default function DashboardPage() {
   const handleExport = (action: "download" | "share") => {
     setIsGenerating(true);
     generateStandardPDF("Comprehensive Report", data, (doc, formatNumber) => {
-      setIsGenerating(false);
+      // --- 1. Attendance Table ---
+      doc.setFontSize(14);
+      doc.setTextColor(255, 255, 255);
+      doc.text("Attendance Summary", 14, 70);
+
+      const attendanceRows = attendanceData.map((s: any) => [
+        s.name,
+        `${s.attendance}%`,
+        `${s.attended}/${s.conducted}`
+      ]);
+
+      (doc as any).autoTable({
+        startY: 75,
+        head: [["Course", "Percentage", "Classes"]],
+        body: attendanceRows,
+        theme: 'grid',
+        styles: {
+          fillColor: [30, 41, 59],
+          textColor: 255,
+          lineColor: [50, 60, 80],
+          lineWidth: 0.1
+        },
+        headStyles: {
+          fillColor: [236, 72, 153], // Pink accent
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: {
+          fillColor: [40, 50, 70]
+        }
+      });
+
+      // --- 2. Marks Table (If available) ---
+      let finalY = (doc as any).lastAutoTable.finalY + 15;
+
+      const marksData = data?.attendance?.marks || {};
+      const marksRows: any[] = [];
+      Object.entries(marksData).forEach(([code, details]: any) => {
+        details.tests.forEach((test: any) => {
+          marksRows.push([
+            code,
+            test.test_name,
+            `${test.obtained_marks}/${test.max_marks}`
+          ]);
+        });
+      });
+
+      if (marksRows.length > 0) {
+        doc.setFontSize(14);
+        doc.setTextColor(255, 255, 255);
+        doc.text("Recent Marks", 14, finalY);
+
+        (doc as any).autoTable({
+          startY: finalY + 5,
+          head: [["Course", "Assessment", "Score"]],
+          body: marksRows,
+          theme: 'grid',
+          styles: {
+            fillColor: [30, 41, 59],
+            textColor: 255,
+            lineColor: [50, 60, 80],
+            lineWidth: 0.1
+          },
+          headStyles: {
+            fillColor: [245, 158, 11], // Amber accent
+            textColor: 255,
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: {
+            fillColor: [40, 50, 70]
+          }
+        });
+      }
+
     }, action, () => setIsGenerating(false), () => setIsGenerating(false));
   };
 
