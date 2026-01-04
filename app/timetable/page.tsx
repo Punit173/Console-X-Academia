@@ -1,15 +1,17 @@
 "use client";
 
 import { useAppData } from "@/components/AppDataContext";
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import html2canvas from "html2canvas";
 import {
   Clock,
   MapPin,
   Calendar,
   BookOpen,
   Coffee,
-  ChevronRight
+  ChevronRight,
+  Download
 } from "lucide-react";
 
 // --- 1. HARDCODED BATCH DATA (Translated from Dart) ---
@@ -47,8 +49,29 @@ const BATCH_TIMETABLES: any = {
 import { useRouter } from "next/navigation";
 
 export default function TimetablePage() {
+  // --- Modern Pastel Palette for Creative Look ---
+  const TAG_COLORS = [
+    { bg: "#FCE7F3", text: "#9D174D", border: "#FBCFE8" }, // Pink
+    { bg: "#E0E7FF", text: "#3730A3", border: "#C7D2FE" }, // Indigo
+    { bg: "#D1FAE5", text: "#065F46", border: "#A7F3D0" }, // Emerald
+    { bg: "#FEF3C7", text: "#92400E", border: "#FDE68A" }, // Amber
+    { bg: "#FAE8FF", text: "#86198F", border: "#F5D0FE" }, // Fuchsia
+    { bg: "#E0F2FE", text: "#075985", border: "#BAE6FD" }, // Sky
+    { bg: "#FFE4E6", text: "#9F1239", border: "#FECDD3" }, // Rose
+    { bg: "#F3F4F6", text: "#1F2937", border: "#E5E7EB" }, // Gray
+    { bg: "#CCFBF1", text: "#115E59", border: "#99F6E4" }, // Teal
+    { bg: "#EDE9FE", text: "#5B21B6", border: "#DDD6FE" }, // Violet
+    { bg: "#FFEDD5", text: "#9A3412", border: "#FED7AA" }, // Orange
+    { bg: "#ECFCCB", text: "#3F6212", border: "#D9F99D" }, // Lime
+  ];
+
   const router = useRouter();
   const { data } = useAppData();
+  const hiddenTableRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
     if (!data) {
@@ -56,6 +79,15 @@ export default function TimetablePage() {
     }
   }, [data, router]);
 
+  // Handle auto-scaling when preview opens
+  useEffect(() => {
+    if (showPreview && scrollContainerRef.current) {
+      const containerWidth = scrollContainerRef.current.clientWidth - 64; // - padding
+      const tableWidth = 1600;
+      const newScale = Math.min(1, containerWidth / tableWidth);
+      setScale(newScale);
+    }
+  }, [showPreview]);
 
   // State for selected tab (Day 1-5)
   const [selectedDay, setSelectedDay] = useState<number>(1);
@@ -131,10 +163,41 @@ export default function TimetablePage() {
       return results;
     };
 
+    // Helper: Get Full Schedule for Image Generation
+    const getFullSchedule = () => {
+      const allDays = [1, 2, 3, 4, 5];
+      const data = allDays.map(day => {
+        const daySlots = batchData.schedule[`${day}`] || [];
+        return {
+          dayOrder: day,
+          slots: daySlots.map((slotCode: string, index: number) => {
+            if (index >= batchData.time_slots.length) return null;
+            return getCourseForSlot(slotCode);
+          })
+        };
+      });
+      return {
+        timeSlots: batchData.time_slots,
+        days: data
+      };
+    };
+
+    // Generate Color Map for Subjects (Pastel Object)
+    const subjectColors: Record<string, typeof TAG_COLORS[0]> = {};
+    let colorIndex = 0;
+    courses.forEach((c: any) => {
+      if (!subjectColors[c.course_code]) {
+        subjectColors[c.course_code] = TAG_COLORS[colorIndex % TAG_COLORS.length];
+        colorIndex++;
+      }
+    });
+
     return {
       currentDayOrder,
       studentBatch,
-      getClassesForDay
+      getClassesForDay,
+      getFullSchedule,
+      subjectColors
     };
   }, [data]);
 
@@ -145,11 +208,67 @@ export default function TimetablePage() {
     }
   }, [timetableLogic]);
 
+  const handleDownloadImage = async () => {
+    if (!hiddenTableRef.current || !data) return;
+
+    setIsDownloading(true);
+    try {
+      // 1. CLONE THE ELEMENT
+      // We clone the node to isolate it from the modal's scaling context.
+      const originalElement = hiddenTableRef.current;
+      const clone = originalElement.cloneNode(true) as HTMLElement;
+
+      // 2. STYLE THE CLONE
+      // Position it off-screen but in the DOM so it renders correctly
+      clone.style.position = "fixed";
+      clone.style.top = "0";
+      clone.style.left = "0";
+      clone.style.zIndex = "-9999";
+      clone.style.transform = "none"; // Ensure no scaling
+      clone.style.width = "1600px"; // Enforce fixed width
+      clone.style.height = "auto";
+      clone.style.overflow = "visible";
+
+      // Append to body
+      document.body.appendChild(clone);
+
+      // 3. CAPTURE THE CLONE
+      const canvas = await html2canvas(clone, {
+        scale: 2, // High resolution
+        backgroundColor: "#F8FAFC", // Match background
+        logging: false,
+        useCORS: true,
+        windowWidth: 1920, // Pretend we have space
+        windowHeight: 1080
+      });
+
+      // 4. CLEANUP
+      document.body.removeChild(clone);
+
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+
+      const sectionName = data.timetable?.student_info?.batch || "Timetable";
+      const kv = sectionName.replace(/\s+/g, '_');
+
+      link.href = image;
+      link.download = `${kv}_schedule.png`;
+      link.click();
+
+    } catch (error) {
+      console.error("Failed to generate image", error);
+      alert("Failed to generate image. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   if (!data || !timetableLogic) {
     return <div className="p-8 text-center text-pink-400 animate-pulse">Loading Timetable...</div>;
   }
 
   const classes = timetableLogic.getClassesForDay(selectedDay);
+  const fullSchedule = timetableLogic.getFullSchedule();
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in p-1">
@@ -167,11 +286,20 @@ export default function TimetablePage() {
           </p>
         </div>
 
-        <div className="glass-card px-4 py-2 rounded-lg border border-pink-500/30 bg-pink-950/30 flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse shadow-[0_0_8px_rgba(236,72,153,0.6)]" />
-          <span className="text-pink-400 font-mono font-bold">
-            Today is Day Order {timetableLogic.currentDayOrder}
-          </span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowPreview(true)}
+            className="glass-card px-4 py-2 rounded-lg border border-pink-500/30 bg-pink-950/30 flex items-center gap-2 hover:bg-pink-900/40 transition-colors"
+          >
+            <Download className="w-4 h-4 text-pink-400" />
+            <span className="text-pink-400 font-medium text-sm">Download</span>
+          </button>
+          <div className="glass-card px-4 py-2 rounded-lg border border-pink-500/30 bg-pink-950/30 flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse shadow-[0_0_8px_rgba(236,72,153,0.6)]" />
+            <span className="text-pink-400 font-mono font-bold">
+              Today is Day Order {timetableLogic.currentDayOrder}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -271,6 +399,217 @@ export default function TimetablePage() {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* --- PREVIEW MODAL (The Creative One) --- */}
+      <AnimatePresence>
+        {showPreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 overflow-hidden"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowPreview(false)
+            }}
+          >
+            <div className="w-full max-w-[95vw] h-[90vh] flex flex-col">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full"
+              >
+                {/* Modal Header */}
+                <div className="p-4 border-b border-white/10 flex items-center justify-between bg-zinc-900 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-white">Preview</h2>
+                    {/* Zoom Controls */}
+                    <div className="flex items-center gap-1 ml-4 bg-zinc-800 rounded-lg p-1 border border-white/5">
+                      <button
+                        onClick={() => setScale(s => Math.max(0.2, s - 0.1))}
+                        className="p-1 hover:bg-zinc-700 rounded text-gray-400 hover:text-white"
+                        title="Zoom Out"
+                      >
+                        <div className="w-4 h-4 flex items-center justify-center font-bold text-lg leading-none">-</div>
+                      </button>
+                      <span className="text-xs text-gray-500 w-12 text-center font-mono">{Math.round(scale * 100)}%</span>
+                      <button
+                        onClick={() => setScale(s => Math.min(2, s + 0.1))}
+                        className="p-1 hover:bg-zinc-700 rounded text-gray-400 hover:text-white"
+                        title="Zoom In"
+                      >
+                        <div className="w-4 h-4 flex items-center justify-center font-bold text-lg leading-none">+</div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setShowPreview(false)}
+                      className="text-gray-400 hover:text-white text-sm"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={handleDownloadImage}
+                      disabled={isDownloading}
+                      className="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 disabled:opacity-50"
+                    >
+                      {isDownloading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Download className="w-4 h-4" />}
+                      Download Image
+                    </button>
+                  </div>
+                </div>
+
+                {/* Scrollable Content Area */}
+                <div
+                  ref={scrollContainerRef}
+                  className="flex-1 overflow-auto bg-zinc-950 p-8 custom-scrollbar relative flex items-start justify-center"
+                >
+                  {/* This is the Actual Content to Capture - Light Theme */}
+                  {/* Wrapper for Scaling */}
+                  <div
+                    style={{
+                      transform: `scale(${scale})`,
+                      transformOrigin: 'top center',
+                      transition: 'transform 0.2s ease-out'
+                    }}
+                  >
+
+                    {/* --- GENERATED TABLE START --- */}
+                    <div
+                      id="hidden-full-table"
+                      ref={hiddenTableRef}
+                      style={{
+                        width: "1600px",
+                        padding: "60px",
+                        background: "#F8FAFC", // Slate-50: Premium Light Gray Background
+                        color: "#1E293B", // Slate-800
+                        fontFamily: "'Inter', system-ui, sans-serif",
+                        position: 'relative'
+                      }}
+                    >
+                      {/* Background Pattern */}
+                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: "12px", background: "linear-gradient(to right, #EC4899, #8B5CF6)" }}></div>
+
+                      {/* Header Section */}
+                      <div style={{ marginBottom: "40px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+                        <div>
+                          <h1 style={{ fontSize: "48px", fontWeight: "800", color: "#0F172A", marginBottom: "8px", letterSpacing: "-0.02em" }}>Weekly Schedule</h1>
+                          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+                            <p style={{ fontSize: "20px", fontWeight: "500", color: "#64748B" }}>Batch {timetableLogic.studentBatch}</p>
+                            <span style={{ height: "6px", width: "6px", background: "#CBD5E1", borderRadius: "50%" }}></span>
+                            <p style={{ fontSize: "20px", fontWeight: "600", color: "#475569" }}>{data?.timetable?.student_info?.name}</p>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div style={{ textAlign: "right" }}>
+                            <p style={{ fontSize: "14px", fontWeight: "600", color: "#94A3B8", textTransform: 'uppercase', letterSpacing: '0.05em' }}>Powered by</p>
+                            <p style={{ fontSize: "18px", fontWeight: "bold", color: "#334155" }}>Console X Academia</p>
+                          </div>
+                          {/* Logo moved to grid corner */}
+                        </div>
+                      </div>
+
+                      {/* New Creative Grid Layout (No Borders, Just Gaps) */}
+                      <div style={{ display: "grid", gridTemplateColumns: "100px repeat(12, 1fr)", gap: "12px" }}>
+
+                        {/* Time Header Row */}
+                        <div style={{ padding: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <img
+                            src="/assets/logo.jpg"
+                            alt="Logo"
+                            style={{
+                              width: "60px",
+                              height: "60px",
+                              objectFit: "contain",
+                              borderRadius: "8px",
+                              mixBlendMode: "multiply" // Blend with background
+                            }}
+                          />
+                        </div>
+                        {fullSchedule.timeSlots.map((slot: string, i: number) => (
+                          <div key={i} style={{
+                            padding: "0 4px", fontSize: "12px", fontFamily: "monospace", color: "#64748B",
+                            textAlign: "center", display: "flex", alignItems: "end", justifyContent: "center",
+                            fontWeight: "600", height: "40px", borderBottom: "2px solid #E2E8F0", paddingBottom: "8px"
+                          }}>
+                            {slot}
+                          </div>
+                        ))}
+
+                        {/* Days & Classes */}
+                        {fullSchedule.days.map((dayData: any) => (
+                          <React.Fragment key={dayData.dayOrder}>
+                            {/* Day Label */}
+                            <div style={{
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              background: "#FFFFFF", borderRadius: "12px",
+                              boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)",
+                              color: "#334155", fontWeight: "bold", fontSize: "18px"
+                            }}>
+                              Day {dayData.dayOrder}
+                            </div>
+
+                            {/* Slots */}
+                            {dayData.slots.map((slotData: any, i: number) => {
+                              const colors = slotData && slotData.code ? timetableLogic.subjectColors[slotData.code] : null;
+
+                              // Creative Card Style
+                              if (slotData && slotData.found && colors) {
+                                return (
+                                  <div key={i} style={{
+                                    padding: "12px 8px",
+                                    borderRadius: "12px",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    textAlign: "center",
+                                    position: "relative",
+                                    background: colors.bg,
+                                    border: `1px solid ${colors.border}`,
+                                    color: colors.text,
+                                    minHeight: "100px",
+                                    boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
+                                  }}>
+                                    <p style={{ fontSize: "13px", fontWeight: "700", lineHeight: "1.3", marginBottom: "4px", width: "100%" }}>{slotData.title}</p>
+                                    <div style={{ fontSize: "11px", opacity: 0.8, fontWeight: "500", marginTop: "auto" }}>
+                                      {slotData.code}
+                                    </div>
+                                  </div>
+                                );
+                              } else {
+                                // Empty Slot
+                                return (
+                                  <div key={i} style={{
+                                    minHeight: "100px",
+                                    background: "rgba(255,255,255,0.4)",
+                                    borderRadius: "12px",
+                                    border: "1px dashed #E2E8F0"
+                                  }} />
+                                );
+                              }
+                            })}
+                          </React.Fragment>
+                        ))}
+                      </div>
+
+                      <div style={{ marginTop: "40px", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
+                        <div style={{ height: "4px", width: "40px", background: "#E2E8F0", borderRadius: "2px" }}></div>
+                        <p style={{ color: "#94A3B8", fontSize: "14px", fontWeight: "500" }}>Generated on {new Date().toLocaleDateString()}</p>
+                        <div style={{ height: "4px", width: "40px", background: "#E2E8F0", borderRadius: "2px" }}></div>
+                      </div>
+                    </div>
+                    {/* --- GENERATED TABLE END --- */}
+
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
