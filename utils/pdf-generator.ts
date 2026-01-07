@@ -26,7 +26,7 @@ export const generateStandardPDF = async (
     // Apply key patches to ensure background persists on new pages
     const originalAddPage = doc.addPage;
     doc.addPage = function (...args: any[]) {
-      const result = originalAddPage.apply(this, args);
+      const result = originalAddPage.apply(this, args as any);
       drawBackground();
       return result;
     };
