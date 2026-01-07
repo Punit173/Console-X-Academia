@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { collection, getDocs, getFirestore } from "firebase/firestore";
-import { app } from "@/lib/firebase"; // Ensure this is correctly initialized
+import { app } from "@/lib/firebase";
 import { useAppData } from "@/components/AppDataContext";
-import { Calendar, Bell, ShieldAlert, ArrowRight } from "lucide-react";
+import { Calendar, Bell, ShieldAlert, ArrowRight, ExternalLink } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function AnnouncementsPage() {
-    const { data } = useAppData(); // For auth context if needed
+    const { data } = useAppData();
     const [announcements, setAnnouncements] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -53,102 +54,120 @@ export default function AnnouncementsPage() {
     const formatDate = (dateString: string) => {
         try {
             const date = parseDate(dateString);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         } catch (e) {
             return dateString.replace(/_/g, '/');
         }
     };
 
     return (
-        <div className="space-y-6">
-            <header className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">Announcements</h1>
-                    <p className="text-muted-foreground">Stay updated with the latest campus news and events.</p>
+        <div className="space-y-8 animate-fade-in pb-12">
+
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6 relative overflow-hidden">
+                <div className="absolute top-0 right-1/4 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
+                <div className="relative z-10">
+                    <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Announcements</h1>
+                    <p className="text-muted-foreground flex items-center gap-2">
+                        <Bell className="w-4 h-4 text-blue-400" />
+                        Latest updates from campus & administration
+                    </p>
                 </div>
-            </header>
+            </div>
 
             {loading ? (
-                <div className="flex justify-center py-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <div className="flex justify-center py-32">
+                    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
             ) : announcements.length === 0 ? (
-                <div className="text-center py-20 text-muted-foreground">
-                    <Bell className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                    <p>No announcements found.</p>
+                <div className="text-center py-32 text-muted-foreground bg-white/5 rounded-3xl border border-white/5">
+                    <Bell className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                    <p className="text-lg">No announcements found</p>
                 </div>
             ) : (
-                <div className="grid gap-6">
-                    {announcements.map((item) => {
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {announcements.map((item, index) => {
                         const isAdmin = item.type === "admin";
 
                         return (
-                            <div
+                            <motion.div
                                 key={item.id}
-                                className={`relative overflow-hidden rounded-2xl p-6 transition-all duration-300 ${isAdmin
-                                        ? "bg-black border border-white/10 shadow-2xl shadow-primary/5"
-                                        : "bg-white text-black shadow-lg"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: index * 0.1 }}
+                                className={`group relative overflow-hidden rounded-3xl p-6 md:p-8 transition-all duration-500 
+                                    ${isAdmin
+                                        ? "bg-gradient-to-br from-neutral-900 to-black border border-white/10 hover:border-red-500/30"
+                                        : "bg-white/5 border border-white/5 hover:border-blue-500/30 hover:bg-white/10"
                                     }`}
                             >
-                                {/* Admin Badge/Accent */}
-                                {isAdmin && (
-                                    <div className="absolute top-0 right-0 p-4 opacity-50">
-                                        <ShieldAlert className="w-24 h-24 text-white/5 -rotate-12 transform translate-x-8 -translate-y-8" />
-                                    </div>
-                                )}
+                                {/* Decorative Glow */}
+                                <div className={`absolute -right-20 -top-20 w-64 h-64 rounded-full blur-[80px] transition-all duration-700 opacity-0 group-hover:opacity-100 ${isAdmin ? "bg-red-500/10" : "bg-blue-500/10"}`} />
 
-                                <div className="relative z-10">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md ${isAdmin ? "bg-white/10 text-white" : "bg-black/5 text-black/60"
+                                <div className="relative z-10 flex flex-col h-full">
+                                    {/* Meta Header */}
+                                    <div className="flex items-center justify-between gap-4 mb-6">
+                                        <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border ${isAdmin
+                                                ? "bg-red-500/10 text-red-400 border-red-500/20"
+                                                : "bg-blue-500/10 text-blue-400 border-blue-500/20"
                                             }`}>
-                                            {item.type || "Event"}
+                                            {item.type || "Update"}
                                         </span>
-                                        <div className={`flex items-center gap-1.5 text-xs font-medium ${isAdmin ? "text-white/40" : "text-black/40"
-                                            }`}>
+                                        <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
                                             <Calendar className="w-3.5 h-3.5" />
                                             {formatDate(item.date)}
                                         </div>
                                     </div>
 
-                                    <h3 className={`text-2xl font-bold mb-3 ${isAdmin ? "text-white" : "text-gray-900"
-                                        }`}>
-                                        {item.title}
-                                    </h3>
+                                    {/* Content */}
+                                    <div className="flex-1">
+                                        <h3 className="text-2xl font-bold text-white mb-3 leading-tight group-hover:text-blue-200 transition-colors">
+                                            {item.title}
+                                        </h3>
 
-                                    {item.para && (
-                                        <p className={`text-lg font-medium mb-4 ${isAdmin ? "text-white/80" : "text-gray-700"
-                                            }`}>
-                                            {item.para}
-                                        </p>
-                                    )}
+                                        {/* Optional Image */}
+                                        {item.img && (
+                                            <div className="my-5 rounded-2xl overflow-hidden border border-white/10 relative aspect-video group-hover:scale-[1.02] transition-transform duration-500">
+                                                <img
+                                                    src={item.img}
+                                                    alt="Announcement Media"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                                            </div>
+                                        )}
 
-                                    {item.desc && (
-                                        <div className={`text-sm leading-relaxed mb-6 pt-4 border-t ${isAdmin ? "text-white/60 border-white/10" : "text-gray-600 border-gray-100"
-                                            }`}>
-                                            {item.desc}
-                                        </div>
-                                    )}
+                                        {item.para && (
+                                            <p className="text-gray-300 font-medium mb-3 leading-relaxed">
+                                                {item.para}
+                                            </p>
+                                        )}
 
-                                    {/* Image */}
-                                    {item.img && (
-                                        <div className="mt-4 mb-6 rounded-xl overflow-hidden">
-                                            <img src={item.img} alt="Announcement" className="w-full h-auto object-cover max-h-[400px]" />
-                                        </div>
-                                    )}
+                                        {item.desc && (
+                                            <div className="text-sm text-gray-400 leading-relaxed border-l-2 border-white/10 pl-4 py-1">
+                                                {item.desc}
+                                            </div>
+                                        )}
+                                    </div>
 
+                                    {/* Footer Action */}
                                     {item.link && (
-                                        <a
-                                            href={item.link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className={`inline-flex items-center gap-2 font-bold text-sm hover:underline ${isAdmin ? "text-blue-400" : "text-blue-600"
-                                                }`}
-                                        >
-                                            Read More <ArrowRight className="w-4 h-4" />
-                                        </a>
+                                        <div className="mt-6 pt-6 border-t border-white/5">
+                                            <a
+                                                href={item.link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={`inline-flex items-center gap-2 text-sm font-bold transition-all ${isAdmin
+                                                        ? "text-red-400 hover:text-red-300"
+                                                        : "text-blue-400 hover:text-blue-300"
+                                                    }`}
+                                            >
+                                                Visit Link <ExternalLink className="w-4 h-4" />
+                                            </a>
+                                        </div>
                                     )}
                                 </div>
-                            </div>
+                            </motion.div>
                         );
                     })}
                 </div>

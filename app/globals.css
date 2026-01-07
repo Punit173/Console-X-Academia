@@ -24,13 +24,13 @@
   /* Vibrant Orange */
   --primary-foreground: #FFFFFF;
 
-  --background: #050505;
-  /* Deep Black */
+  --background: #0A0A0A;
+  /* Soft Black - Less harsh on iPad/OLED */
   --foreground: #FAFAFA;
   /* Off White */
 
-  --surface: #121212;
-  /* Card Background */
+  --surface: #171717;
+  /* Slightly Lighter Card Background */
   --surface-foreground: #E5E5E5;
 
   --border: #262626;
@@ -40,6 +40,7 @@
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
+
 
 /* Smooth Scrolling & Base Styles */
 html {
@@ -55,29 +56,55 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  /* Grid Background Pattern */
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-attachment: fixed;
+  position: relative;
+}
+
+/* Glow Effect */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 85, 0, 0.15), transparent 60%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Glassmorphism Utilities */
 .glass {
-  background: rgba(18, 18, 18, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 10, 10, 0.4);
+  /* More transparent */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-solid {
-  background: rgba(18, 18, 18, 0.95);
+  background: rgba(18, 18, 18, 0.8);
+  /* Slightly more transparent */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+
 .glass-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  /* Increased opacity for better readability against grid */
+  background: linear-gradient(145deg, rgba(20, 20, 20, 0.9) 0%, rgba(20, 20, 20, 0.4) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
 }
+
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
@@ -141,12 +168,12 @@ body {
 
 
 
-/* Mobile-only navbar solidity */
+/* Mobile-only navbar solidity - REDUCED to be transparent */
 @media (max-width: 768px) {
   .mobile-solid-nav {
-    backdrop-filter: none !important;
-    background: rgba(20, 20, 20, 0.92) !important;
-    /* almost solid dark */
+    backdrop-filter: blur(20px) !important;
+    background: rgba(15, 15, 15, 0.7) !important;
+    /* Transparent on mobile too */
   }
 }
 

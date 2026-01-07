@@ -8,34 +8,34 @@ import { ChevronLeft, ChevronRight, Clock, MapPin, Calendar as CalendarIcon, Inf
 
 // --- BATCH DATA (Kept identical to your source) ---
 const BATCH_TIMETABLES: any = {
-  "1": {
-    time_slots: [
-      "08:00 - 08:50", "08:50 - 09:40", "09:45 - 10:35", "10:40 - 11:30",
-      "11:35 - 12:25", "12:30 - 01:20", "01:25 - 02:15", "02:20 - 03:10",
-      "03:10 - 04:00", "04:00 - 04:50", "04:50 - 05:30", "05:30 - 06:10"
-    ],
-    schedule: {
-      "1": ["A", "A / X", "F / X", "F", "G", "P6", "P7", "P8", "P9", "P10", "L11", "L12"],
-      "2": ["P11", "P12/X", "P13/X", "P14", "P15", "B", "B", "G", "G", "A", "L21", "L22"],
-      "3": ["C", "C / X", "A / X", "D", "B", "P26", "P27", "P28", "P29", "P30", "L31", "L32"],
-      "4": ["P31", "P 32/X", "P33/X", "P34", "P35", "D", "D", "B", "E", "C", "L41", "L42"],
-      "5": ["E", "E / X", "C / X", "F", "D", "P46", "P47", "P48", "P49", "P50", "L51", "L52"]
+    "1": {
+        time_slots: [
+            "08:00 - 08:50", "08:50 - 09:40", "09:45 - 10:35", "10:40 - 11:30",
+            "11:35 - 12:25", "12:30 - 01:20", "01:25 - 02:15", "02:20 - 03:10",
+            "03:10 - 04:00", "04:00 - 04:50", "04:50 - 05:30", "05:30 - 06:10"
+        ],
+        schedule: {
+            "1": ["A", "A / X", "F / X", "F", "G", "P6", "P7", "P8", "P9", "P10", "L11", "L12"],
+            "2": ["P11", "P12/X", "P13/X", "P14", "P15", "B", "B", "G", "G", "A", "L21", "L22"],
+            "3": ["C", "C / X", "A / X", "D", "B", "P26", "P27", "P28", "P29", "P30", "L31", "L32"],
+            "4": ["P31", "P 32/X", "P33/X", "P34", "P35", "D", "D", "B", "E", "C", "L41", "L42"],
+            "5": ["E", "E / X", "C / X", "F", "D", "P46", "P47", "P48", "P49", "P50", "L51", "L52"]
+        }
+    },
+    "2": {
+        time_slots: [
+            "08:00 - 08:50", "08:50 - 09:40", "09:45 - 10:35", "10:40 - 11:30",
+            "11:35 - 12:25", "12:30 - 01:20", "01:25 - 02:15", "02:20 - 03:10",
+            "03:10 - 04:00", "04:00 - 04:50", "04:50 - 05:30", "05:30 - 06:10"
+        ],
+        schedule: {
+            "1": ["P1", "P2/X", "P3/X", "P4", "P5", "A", "A", "F", "F", "G", "L11", "L12"],
+            "2": ["B", "B / X", "G / X", "G", "A", "P16", "P17", "P18", "P19", "P20", "L21", "L22"],
+            "3": ["P21", "P22/X", "P23/X", "P24", "P25", "C", "C", "A", "D", "B", "L31", "L32"],
+            "4": ["D", "D / X", "B / X", "E", "C", "P36", "P37", "P38", "P39", "P40", "L41", "L42"],
+            "5": ["P41", "P42/X", "P43/X", "P44", "P45", "E", "E", "C", "F", "D", "L51", "L52"]
+        }
     }
-  },
-  "2": {
-    time_slots: [
-      "08:00 - 08:50", "08:50 - 09:40", "09:45 - 10:35", "10:40 - 11:30",
-      "11:35 - 12:25", "12:30 - 01:20", "01:25 - 02:15", "02:20 - 03:10",
-      "03:10 - 04:00", "04:00 - 04:50", "04:50 - 05:30", "05:30 - 06:10"
-    ],
-    schedule: {
-      "1": ["P1", "P2/X", "P3/X", "P4", "P5", "A", "A", "F", "F", "G", "L11", "L12"],
-      "2": ["B", "B / X", "G / X", "G", "A", "P16", "P17", "P18", "P19", "P20", "L21", "L22"],
-      "3": ["P21", "P22/X", "P23/X", "P24", "P25", "C", "C", "A", "D", "B", "L31", "L32"],
-      "4": ["D", "D / X", "B / X", "E", "C", "P36", "P37", "P38", "P39", "P40", "L41", "L42"],
-      "5": ["P41", "P42/X", "P43/X", "P44", "P45", "E", "E", "C", "F", "D", "L51", "L52"]
-    }
-  }
 };
 
 export default function CalendarPage() {
@@ -43,7 +43,7 @@ export default function CalendarPage() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [eventsMap, setEventsMap] = useState<Record<string, any>>({});
     const [loading, setLoading] = useState(true);
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
     // Initial Day Order from Login Data
     const initialDayOrder = data?.attendance?.day_order
@@ -229,7 +229,7 @@ export default function CalendarPage() {
 
                                 // Base Styles
                                 const baseClasses = "relative aspect-square rounded-2xl flex flex-col items-center justify-center text-sm font-medium transition-all duration-200 group";
-                                
+
                                 // State Styles
                                 let stateClasses = "hover:bg-white/5 text-gray-300";
                                 if (isToday) stateClasses = "bg-primary text-white shadow-lg shadow-primary/25 border border-primary/50";
@@ -282,7 +282,7 @@ export default function CalendarPage() {
                             <span className="w-3 h-3 rounded-full bg-blue-500/20 border border-blue-500/50"></span>
                             <span className="text-sm text-gray-400">Academic Day</span>
                         </div>
-                         <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <span className="w-3 h-3 rounded-full bg-primary border border-primary/50"></span>
                             <span className="text-sm text-gray-400">Today</span>
                         </div>
@@ -357,7 +357,7 @@ export default function CalendarPage() {
                                             <>
                                                 {getEventsForDate(selectedDate).length > 0 && <div className="h-px bg-white/10 my-4" />}
                                                 <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider sticky top-0 bg-black/0 backdrop-blur-md py-2 z-10">Classes</h4>
-                                                
+
                                                 <div className="space-y-3">
                                                     {getClassesForDayOrder(getDayOrder(selectedDate)).map((cls: any, idx: number) => (
                                                         <div key={idx} className="group flex flex-col gap-2 p-4 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded-xl transition-all">
@@ -368,7 +368,7 @@ export default function CalendarPage() {
                                                                 </div>
                                                                 <span className="text-[10px] font-bold text-white/40 bg-white/5 px-1.5 py-0.5 rounded">{cls.code}</span>
                                                             </div>
-                                                            
+
                                                             <div>
                                                                 <h4 className="font-bold text-white text-base">{cls.title}</h4>
                                                                 <p className="text-sm text-gray-400">{cls.faculty?.split('(')[0]}</p>

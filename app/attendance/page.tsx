@@ -5,7 +5,7 @@ import { useAppData } from "@/components/AppDataContext";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { generateStandardPDF } from "@/utils/pdf-generator";
-import autoTable from "jspdf-autotable";
+import Link from "next/link";
 
 
 export default function AttendancePage() {
@@ -70,15 +70,21 @@ export default function AttendancePage() {
     generateStandardPDF(
       "Attendance Report",
       data,
-      (doc, formatNumber) => {
+      (doc, formatNumber, autoTable) => {
         // Attendance Table
-        const tableRows = Object.entries(courses).map(([code, c]: any) => [
-          `${code} - ${c.course_title || ''}`,
-          `${c.total_hours_conducted}`,
-          `${c.total_hours_absent}`,
-          `${c.attendance_percentage.toFixed(1)}%`,
-          getAttendanceStatus(c.attendance_percentage)
-        ]);
+        const tableRows = Object.entries(courses).map(([code, c]: any) => {
+          // Robustly find title
+          const timetableCourse = data.timetable?.courses?.find((tc: any) => tc.course_code === code);
+          const title = c.course_title || timetableCourse?.course_title || code;
+
+          return [
+            title, // Show Title primarily
+            `${c.total_hours_conducted}`,
+            `${c.total_hours_absent}`,
+            `${c.attendance_percentage.toFixed(1)}%`,
+            getAttendanceStatus(c.attendance_percentage)
+          ];
+        });
 
         autoTable(doc, {
           startY: 65,
@@ -138,6 +144,18 @@ export default function AttendancePage() {
             </svg>
           </button>
 
+          {/* Predict Button */}
+          <Link
+            href="/attendance/predict"
+            className="p-3 rounded-xl border border-blue-800/40 bg-blue-950/20 hover:bg-blue-900/40 hover:border-purple-400/50 transition-all duration-200 group text-purple-300 backdrop-blur-sm flex items-center gap-2"
+            title="Predict Attendance"
+          >
+            <span className="text-sm font-bold hidden md:block">Predict</span>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </Link>
+
           {/* Export PDF Button */}
           <button
             onClick={() => handleExport('download')}
@@ -154,7 +172,8 @@ export default function AttendancePage() {
               <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-            )}
+            )
+            }
           </button>
         </div>
       </div>
@@ -227,56 +246,103 @@ export default function AttendancePage() {
             <p className="text-blue-200/50">No course attendance data available.</p>
           </div>
         ) : (
-          <div className="grid gap-4">
-            {Object.entries(courses).map(([code, c]: any, index) => (
-              <div
-                key={code}
-                className="relative rounded-xl p-5 border border-blue-900/30 bg-slate-950/60 hover:bg-blue-950/30 hover:border-blue-500/40 transition-all duration-300 flex flex-col sm:flex-row sm:items-center gap-6 group overflow-hidden"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                {/* Subtle White/Blue Glow on Hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Object.entries(courses).map(([code, c]: any, index) => {
+              // --- Margin Calculation Logic ---
+              // Threshold: 75%
+              const threshold = 75;
+              const conducted = c.total_hours_conducted || 0;
+              const absent = c.total_hours_absent || 0;
+              const present = conducted - absent;
+              const percentage = c.attendance_percentage || 0;
 
-                {/* Course Info */}
-                <div className="flex-1 min-w-0 relative z-10">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-mono font-bold text-blue-200 bg-blue-950/80 border border-blue-800 px-2 py-0.5 rounded shadow-sm">
-                      {code}
-                    </span>
+              let marginMsg = "";
+              let marginType: "safe" | "danger" | "critical" = "safe";
+              let marginValue = 0;
+
+              if (percentage >= threshold) {
+                // Safe to Bunk
+                // X <= (Present / 0.75) - Conducted
+                const maxTotal = present / (threshold / 100);
+                const safeBunks = Math.floor(maxTotal - conducted);
+                marginValue = safeBunks;
+
+                if (safeBunks > 0) {
+                  marginMsg = `Safe to bunk ${safeBunks} hrs`;
+                  marginType = "safe";
+                } else {
+                  marginMsg = "Don't miss any classes!";
+                  marginType = "critical";
+                }
+              } else {
+                // Required to Attend
+                // Y >= (0.75 * Conducted - Present) / 0.25
+                const targetRatio = threshold / 100;
+                const needed = Math.ceil((targetRatio * conducted - present) / (1 - targetRatio));
+                marginValue = needed;
+                marginMsg = `Must attend ${needed} hrs`;
+                marginType = "danger";
+              }
+
+              return (
+                <div
+                  key={code}
+                  className="relative rounded-xl p-6 border border-blue-900/30 bg-slate-950/60 hover:bg-blue-950/30 hover:border-blue-500/40 transition-all duration-300 flex flex-col justify-between gap-6 group overflow-hidden h-full min-h-[180px]"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  {/* Subtle White/Blue Glow on Hover */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                  {/* Course Info */}
+                  <div className="flex-1 min-w-0 relative z-10">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold text-blue-200 bg-blue-950/80 border border-blue-800 px-2 py-0.5 rounded shadow-sm">
+                          {code}
+                        </span>
+                      </div>
+                      {/* Badge for Margin */}
+                      <div className={`text-[10px] font-bold px-2 py-1 rounded-full border ${marginType === 'safe' ? 'bg-blue-900/30 border-blue-500/30 text-blue-300' :
+                        marginType === 'danger' ? 'bg-red-900/30 border-red-500/30 text-red-300' :
+                          'bg-yellow-900/30 border-yellow-500/30 text-yellow-300'
+                        }`}>
+                        {marginMsg}
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-white text-xl leading-tight group-hover:text-blue-100 transition-colors">
+                      {c.course_title || code}
+                    </h3>
+                    <div className="flex gap-4 mt-4 text-xs text-blue-100/70">
+                      <span className="flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+                        <strong className="text-white">{c.total_hours_conducted}</strong> Conducted
+                      </span>
+                      <span className="flex items-center gap-1">
+                        {/* Absent indicator uses darker blue */}
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
+                        <strong className="text-blue-200">{c.total_hours_absent}</strong> Absent
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-white text-lg truncate group-hover:text-blue-100 transition-colors">
-                    {c.course_title || code}
-                  </h3>
-                  <div className="flex gap-4 mt-2 text-xs text-blue-100/70">
-                    <span className="flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-                      <strong className="text-white">{c.total_hours_conducted}</strong> Conducted
-                    </span>
-                    <span className="flex items-center gap-1">
-                      {/* Absent indicator uses darker blue */}
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
-                      <strong className="text-blue-200">{c.total_hours_absent}</strong> Absent
-                    </span>
+
+                  {/* Percentage & Bar */}
+                  <div className="flex-shrink-0 w-full sm:w-48 flex flex-col items-end relative z-10">
+                    <div className="flex items-baseline gap-1 mb-2">
+                      <span className={`text-2xl font-bold ${getAttendanceColor(c.attendance_percentage)}`}>
+                        {c.attendance_percentage.toFixed(1)}%
+                      </span>
+                      <span className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">{getAttendanceStatus(c.attendance_percentage)}</span>
+                    </div>
+                    <div className="w-full bg-blue-950 rounded-full h-1.5 overflow-hidden shadow-inner border border-white/5">
+                      <div
+                        className={`h-full ${getProgressBarColor(c.attendance_percentage)} transition-all duration-1000`}
+                        style={{ width: `${Math.min(c.attendance_percentage, 100)}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
-
-                {/* Percentage & Bar */}
-                <div className="flex-shrink-0 w-full sm:w-48 flex flex-col items-end relative z-10">
-                  <div className="flex items-baseline gap-1 mb-2">
-                    <span className={`text-2xl font-bold ${getAttendanceColor(c.attendance_percentage)}`}>
-                      {c.attendance_percentage.toFixed(1)}%
-                    </span>
-                    <span className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">{getAttendanceStatus(c.attendance_percentage)}</span>
-                  </div>
-                  <div className="w-full bg-blue-950 rounded-full h-1.5 overflow-hidden shadow-inner border border-white/5">
-                    <div
-                      className={`h-full ${getProgressBarColor(c.attendance_percentage)} transition-all duration-1000`}
-                      style={{ width: `${Math.min(c.attendance_percentage, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

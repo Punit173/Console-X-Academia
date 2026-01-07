@@ -12,6 +12,7 @@ import {
   Cell,
 } from "recharts";
 import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { generateStandardPDF } from "@/utils/pdf-generator";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -19,7 +20,6 @@ import {
   GraduationCap,
   Hash,
   Layers,
-  ArrowRight,
   Calendar,
   MapPin,
   Share2,
@@ -28,11 +28,25 @@ import {
   UserCheck,
   Clock,
   Users,
-  Info
+  Info,
+  RefreshCw,
+  Sparkles,
+  Quote
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getFirestore, collection, getDocs, query, limit } from "firebase/firestore";
 import { app } from "@/lib/firebase";
+
+// --- QUOTES DATA ---
+const QUOTES = [
+  "The only way to do great work is to love what you do.",
+  "Believe you can and you're halfway there.",
+  "Your future is created by what you do today, not tomorrow.",
+  "Education is the passport to the future.",
+  "Don't watch the clock; do what it does. Keep going.",
+  "Success is not final, failure is not fatal.",
+  "The expert in anything was once a beginner."
+];
 
 // --- BATCH DATA (Reused for Dashboard Logic) ---
 const BATCH_TIMETABLES: any = {
@@ -68,18 +82,18 @@ const BATCH_TIMETABLES: any = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { data, fetchError, logout, credentials, isInitialized } = useAppData();
+  const { data, fetchError, logout, credentials, isInitialized, refreshData, isLoading } = useAppData();
 
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [activeSlide, setActiveSlide] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [quote, setQuote] = useState("");
 
-  // useEffect(() => {
-  //   if (!data && !fetchError) {
-  //     router.push("/");
-  //   }
-  // }, [data, fetchError, router]);
+  // Set random quote on mount
+  useEffect(() => {
+    setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+  }, []);
 
   // --- Fetch Announcements ---
   useEffect(() => {
@@ -119,6 +133,14 @@ export default function DashboardPage() {
     return () => clearInterval(timer);
   }, [announcements]);
 
+
+  // --- Helper: Dynamic Greeting ---
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  }, []);
 
   // --- Memoized Data Processing ---
 
@@ -211,12 +233,18 @@ export default function DashboardPage() {
   };
 
   // --- Chart Data Preparation ---
-  const attendanceData = Object.entries(data?.attendance?.attendance?.courses || {}).map(([code, c]: any) => ({
-    name: code.replace(/Theory|Practical/gi, ""),
-    attendance: c.attendance_percentage,
-    conducted: c.total_hours_conducted,
-    attended: c.total_hours_conducted - c.total_hours_absent,
-  }));
+  const attendanceData = Object.entries(data?.attendance?.attendance?.courses || {}).map(([code, c]: any) => {
+    // Lookup title from timetable
+    const courseInfo = data.timetable?.courses?.find((tc: any) => tc.course_code === code);
+    const displayName = courseInfo?.course_title || code.replace(/Theory|Practical/gi, "").trim();
+
+    return {
+      name: displayName,
+      attendance: c.attendance_percentage,
+      conducted: c.total_hours_conducted,
+      attended: c.total_hours_conducted - c.total_hours_absent,
+    };
+  });
 
   const totalMarks = Object.values(data?.attendance?.marks || {}).reduce((acc: any, course: any) => {
     course.tests.forEach((test: any) => {
@@ -247,7 +275,7 @@ export default function DashboardPage() {
   // --- PDF Export Logic ---
   const handleExport = (action: "download" | "share") => {
     setIsGenerating(true);
-    generateStandardPDF("Comprehensive Report", data, (doc, formatNumber) => {
+    generateStandardPDF("Comprehensive Report", data, (doc, formatNumber, autoTable) => {
       // --- 1. Attendance Table ---
       doc.setFontSize(14);
       doc.setTextColor(255, 255, 255);
@@ -259,7 +287,7 @@ export default function DashboardPage() {
         `${s.attended}/${s.conducted}`
       ]);
 
-      (doc as any).autoTable({
+      autoTable(doc, {
         startY: 75,
         head: [["Course", "Percentage", "Classes"]],
         body: attendanceRows,
@@ -300,7 +328,7 @@ export default function DashboardPage() {
         doc.setTextColor(255, 255, 255);
         doc.text("Recent Marks", 14, finalY);
 
-        (doc as any).autoTable({
+        autoTable(doc, {
           startY: finalY + 5,
           head: [["Course", "Assessment", "Score"]],
           body: marksRows,
@@ -326,15 +354,23 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="w-full animate-fade-in space-y-6">
+    <div className="w-full animate-fade-in space-y-8">
 
       {/* 1. Header & Actions */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight mb-1">Dashboard</h1>
-          <p className="text-muted-foreground text-sm">Welcome back, {data.timetable?.student_info?.name?.split(' ')[0] || "Student"}</p>
+          <h1 className="text-4xl font-bold text-white tracking-tight mb-2 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+            {greeting}, {data.timetable?.student_info?.name?.split(' ')[0] || "Student"}!
+          </h1>
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <Quote className="w-3 h-3 text-pink-400" />
+            <span className="italic">"{quote}"</span>
+          </div>
         </div>
         <div className="flex items-center gap-3">
+          <button onClick={() => refreshData()} disabled={isLoading} className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-500/50 transition-all text-blue-400 disabled:opacity-50">
+            {isLoading ? <div className="w-5 h-5 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" /> : <RefreshCw className="w-5 h-5" />}
+          </button>
           <button onClick={() => handleExport("share")} disabled={isGenerating} className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-green-500/50 transition-all text-green-400 disabled:opacity-50"><Share2 className="w-5 h-5" /></button>
           <button onClick={() => handleExport("download")} disabled={isGenerating} className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/50 transition-all text-gray-400 hover:text-primary disabled:opacity-50">
             {isGenerating ? <div className="w-5 h-5 animate-spin rounded-full border-2 border-primary border-t-transparent" /> : <Download className="w-5 h-5" />}
@@ -362,14 +398,6 @@ export default function DashboardPage() {
                     <p className="text-white text-sm font-medium truncate">{credentials?.email || "User"}</p>
                   </div>
                   <div className="p-1 bg-amber-900">
-                    {/* <button
-                      onClick={() => {
-                        logout();
-                      }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-red-500/10 rounded-lg transition-colors"
-                    >
-                      Log Out
-                    </button> */}
                   </div>
                 </motion.div>
               )}
@@ -378,53 +406,22 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Demo Notification */}
-      {data.timetable?.student_info?.registration_number === "RA2111003010001" && (
-        <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 flex items-start gap-4 animate-fade-in mb-6">
-          <div className="bg-blue-500/20 p-2 rounded-full shrink-0">
-            <Info className="w-5 h-5 text-blue-400" />
-          </div>
-          <div>
-            <h4 className="text-blue-400 font-bold text-sm mb-1">Welcome! Academia is busy right now</h4>
-            <p className="text-blue-200/80 text-xs leading-relaxed">
-              You have entered this website for the first time, but Academia is currently unavailable.
-              You can't see your specific marks and attendance right now, but you can still access and collect resources.
-            </p>
-          </div>
-        </div>
-      )}
-
       {fetchError && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 flex items-center gap-3 animate-slide-in">
           <div className="bg-yellow-500/20 p-2 rounded-full">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-yellow-500"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" x2="12" y1="8" y2="12" />
-              <line x1="12" x2="12.01" y1="16" y2="16" />
-            </svg>
+            <Info className="w-4 h-4 text-yellow-500" />
           </div>
           <div>
-            <h4 className="text-yellow-500 font-bold text-sm">Academia is busy now</h4>
+            <h4 className="text-yellow-500 font-bold text-sm">Academia is busy</h4>
             <p className="text-yellow-200/70 text-xs">
-              We couldn't refresh your data, so we're showing the cached version. It might be slightly outdated.
+              Showing cached data. We'll keep trying to update it.
             </p>
           </div>
         </div>
       )}
 
       {/* 2. Hero Widget (Profile / Announcement Carousel) */}
-      <div className="relative w-full h-[220px] rounded-2xl overflow-hidden shadow-2xl group cursor-pointer" onClick={() => setActiveSlide((prev) => (prev + 1) % (1 + announcements.length))}>
+      <div className="relative w-full h-[220px] rounded-3xl overflow-hidden shadow-2xl group cursor-pointer border border-white/5" onClick={() => setActiveSlide((prev) => (prev + 1) % (1 + announcements.length))}>
         <AnimatePresence mode="wait">
           {activeSlide === 0 ? (
             <motion.div
@@ -433,21 +430,25 @@ export default function DashboardPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-400 p-8 flex flex-col justify-center"
+              className="absolute inset-0 bg-gradient-to-tr from-pink-600 via-purple-600 to-indigo-600 p-8 flex flex-col justify-center"
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <User className="w-6 h-6 text-white" />
+              <div className="relative z-10 flex items-center justify-between">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-xs text-white font-medium mb-4 shadow-lg shadow-purple-900/20">
+                    <Sparkles className="w-3 h-3 text-yellow-300" /> Student Profile
                   </div>
-                  <span className="text-orange-100 font-medium tracking-wide text-sm uppercase">Student Profile</span>
+                  <h2 className="text-4xl font-bold text-white mb-2 tracking-tight">{data.timetable?.student_info?.name || "Student"}</h2>
+                  <div className="flex flex-wrap gap-x-6 gap-y-2 text-white/80 text-sm font-medium">
+                    <span className="flex items-center gap-1.5"><Hash className="w-4 h-4 opacity-70" /> {data.timetable?.student_info?.registration_number || "N/A"}</span>
+                    <span className="flex items-center gap-1.5"><Layers className="w-4 h-4 opacity-70" /> Batch {data.timetable?.student_info?.batch || "N/A"}</span>
+                    <span className="flex items-center gap-1.5"><GraduationCap className="w-4 h-4 opacity-70" /> {data.timetable?.student_info?.specialization || "General"}</span>
+                  </div>
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-2">{data.timetable?.student_info?.name || "Student"}</h2>
-                <div className="flex flex-wrap gap-x-6 gap-y-2 text-orange-50 text-sm font-medium">
-                  <span className="flex items-center gap-1.5"><Hash className="w-4 h-4" /> {data.timetable?.student_info?.registration_number || "N/A"}</span>
-                  <span className="flex items-center gap-1.5"><Layers className="w-4 h-4" /> Batch {data.timetable?.student_info?.batch || "N/A"}</span>
-                  <span className="flex items-center gap-1.5"><GraduationCap className="w-4 h-4" /> {data.timetable?.student_info?.specialization || "General"}</span>
+                <div className="hidden sm:block">
+                  <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center border-4 border-white/10 backdrop-blur-md">
+                    <User className="w-10 h-10 text-white" />
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -473,10 +474,10 @@ export default function DashboardPage() {
                       }
                       : undefined
                   }
-                  className={`absolute inset-0 p-8 flex flex-col justify-center relative overflow-hidden rounded-2xl shadow-inner z-0 ${item.img ? "" : isAdmin ? "bg-black" : "bg-white"
+                  className={`absolute inset-0 p-8 flex flex-col justify-center relative overflow-hidden rounded-2xl shadow-inner z-0 ${item.img ? "" : isAdmin ? "bg-neutral-900" : "bg-white"
                     }`}
                 >
-                  {item.img && <div className="absolute inset-0 bg-black/40 pointer-events-none" />}
+                  {item.img && <div className="absolute inset-0 bg-black/50 pointer-events-none" />}
 
                   {isAdmin ? (
                     <div className="absolute top-[-50%] right-[-10%] w-[300px] h-[300px] bg-white/5 rounded-full blur-3xl pointer-events-none" />
@@ -540,30 +541,40 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* 4. Stats Footer (Quick Summary) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Credits', val: data.timetable?.total_credits || 0, color: 'text-white' },
+          { label: 'Avg Attendance', val: `${(data.attendance?.attendance?.overall_attendance || 0).toFixed(1)}%`, color: 'text-emerald-400' },
+          { label: 'Courses', val: (data.timetable?.courses?.length || 0), color: 'text-blue-400' },
+          { label: 'Total Marks', val: `${totalMarks.obtained.toFixed(0)}/${totalMarks.max.toFixed(0)}`, color: 'text-purple-400' }
+        ].map((stat, i) => (
+          <div key={i} className="glass-card p-4 rounded-2xl text-center hover:bg-white/5 transition-colors border-t-2 border-t-white/5 hover:border-t-pink-500/50">
+            <p className="text-xs text-gray-500 uppercase tracking-wider">{stat.label}</p>
+            <p className={`text-2xl font-black mt-1 ${stat.color}`}>{stat.val}</p>
+          </div>
+        ))}
+      </div>
+
       {/* 3. Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* A. Attendance Chart */}
         {!attendanceData || attendanceData.length === 0 ? (
-          <div className="w-full glass-card rounded-xl p-6 flex flex-col items-center justify-center">
-            <div className="w-40 sm:w-56 aspect-square">
-              <iframe
-                src="https://lottie.host/embed/0c5d0441-ffb9-413e-bfa0-71ceff08380f/KVJJRTZNgX.lottie"
-                className="w-full h-full border-0"
-                allowFullScreen
-              />
-            </div>
-            <p className="mt-4 text-sm text-gray-400">
-              No attendance data at this moment
-            </p>
+          <div className="w-full glass-card rounded-2xl p-6 flex flex-col items-center justify-center">
+            {/* ...empty state... */}
+            <p>No Data</p>
           </div>
         ) : (
-          <div className="glass-card rounded-xl p-6">
-            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-              <span className="w-1 h-5 bg-primary rounded-full"></span>
-              Attendance
+          <div className="glass-card rounded-2xl p-6 bg-gradient-to-br from-slate-900/50 to-slate-900/50 relative overflow-hidden group">
+            {/* Decorative Glow */}
+            <div className="absolute top-0 right-0 w-40 h-40 bg-pink-500/5 rounded-full blur-3xl group-hover:bg-pink-500/10 transition-colors" />
+
+            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2 relative z-10">
+              <span className="w-1 h-5 bg-pink-500 rounded-full"></span>
+              Attendance Overview
             </h3>
-            <div className="h-[250px] w-full">
+            <div className="h-[250px] w-full relative z-10">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={attendanceData}
@@ -596,7 +607,7 @@ export default function DashboardPage() {
                     content={<AttendanceTooltip />}
                     cursor={{ fill: "rgba(255,255,255,0.04)" }}
                   />
-                  <Bar dataKey="attendance" radius={[4, 4, 0, 0]} barSize={30}>
+                  <Bar dataKey="attendance" radius={[4, 4, 0, 0]} barSize={20}>
                     {attendanceData.map((entry: any, index: number) => (
                       <Cell
                         key={`cell-${index}`}
@@ -617,8 +628,10 @@ export default function DashboardPage() {
         )}
 
         {/* B. Today's Schedule */}
-        <div className="glass-card rounded-xl p-6 flex flex-col">
-          <div className="flex items-center justify-between mb-6">
+        <div className="glass-card rounded-2xl p-6 flex flex-col bg-gradient-to-br from-slate-900/50 to-slate-900/50 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl group-hover:bg-purple-500/10 transition-colors" />
+
+          <div className="flex items-center justify-between mb-6 relative z-10">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <span className="w-1 h-5 bg-purple-500 rounded-full"></span>
               Today's Schedule
@@ -632,18 +645,18 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar h-[250px]">
+          <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar h-[250px] relative z-10">
             {todaysClasses.length > 0 ? (
               todaysClasses.map((cls: any, idx: number) => (
-                <div key={idx} className="flex gap-3 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                <div key={idx} className="flex gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group/item">
                   <div className="flex flex-col items-center justify-center min-w-[60px] border-r border-white/10 pr-3">
-                    <span className="text-xs text-gray-400 font-mono">{cls.time.split('-')[0]}</span>
+                    <span className="text-xs text-gray-400 font-mono group-hover/item:text-white transition-colors">{cls.time.split('-')[0]}</span>
                     <span className="text-xs text-purple-400 font-bold font-mono">{cls.time.split('-')[1]}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">{cls.title}</p>
+                    <p className="text-white text-sm font-bold truncate">{cls.title}</p>
                     <div className="flex items-center gap-3 mt-1">
-                      <span className="text-[10px] text-gray-500 bg-black/30 px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <span className="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded flex items-center gap-1">
                         <MapPin className="w-3 h-3" /> {cls.venue}
                       </span>
                       <span className="text-[10px] text-gray-500">{cls.code}</span>
@@ -661,54 +674,70 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 4. Stats Footer (Quick Summary) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Credits', val: data.timetable?.total_credits || 0, color: 'text-white' },
-          { label: 'Avg Attendance', val: `${(data.attendance?.attendance?.overall_attendance || 0).toFixed(1)}%`, color: 'text-emerald-400' },
-          { label: 'Courses', val: (data.timetable?.courses?.length || 0), color: 'text-blue-400' },
-          { label: 'Total Marks', val: `${totalMarks.obtained.toFixed(0)}/${totalMarks.max.toFixed(0)}`, color: 'text-purple-400' }
-        ].map((stat, i) => (
-          <div key={i} className="glass-card p-4 rounded-xl text-center hover:bg-white/5 transition-colors">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">{stat.label}</p>
-            <p className={`text-xl font-bold mt-1 ${stat.color}`}>{stat.val}</p>
+      {/* 5. Useful Tools Section */}
+      <div className="glass-card rounded-2xl p-6">
+        <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+          <span className="w-1 h-5 bg-[#62D834] rounded-full"></span>
+          Useful Tools
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          {/* Feedback Filler Card */}
+          <Link href="/feedback-filler" className="group relative bg-[#62D834] rounded-xl p-5 overflow-hidden hover:shadow-[0_0_30px_rgba(98,216,52,0.2)] transition-all transform hover:-translate-y-1">
+            <div className="absolute top-0 right-0 p-10 bg-black/10 rounded-full -mr-10 -mt-10" />
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-2 bg-black/10 rounded-lg text-black">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <span className="px-2 py-1 bg-black/20 text-black text-[10px] font-bold uppercase rounded-md">New</span>
+              </div>
+              <h4 className="text-xl font-black text-black mb-1">Feedback Filler</h4>
+              <p className="text-black/70 font-medium text-sm">Automate course feedback in seconds.</p>
+            </div>
+          </Link>
+
+          {/* Placeholder for future tools */}
+          <div className="bg-white/5 border border-white/5 rounded-xl p-5 flex flex-col justify-center items-center text-center opacity-50">
+            <p className="text-xs font-bold uppercase tracking-wider text-white/40 mb-1">More Coming Soon</p>
+            <p className="text-sm text-white/30">Stay tuned for updates.</p>
           </div>
-        ))}
+        </div>
       </div>
 
       {/* 5. Academic Team (Advisors) */}
-      <div className="glass-card rounded-xl p-6">
+      <div className="glass-card rounded-2xl p-6">
         <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
           <span className="w-1 h-5 bg-blue-500 rounded-full"></span>
-          Academic Advisors
+          Faculty Mentors
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Faculty Advisor */}
-          <div className="bg-white/5 rounded-lg p-4 border border-white/5 hover:border-primary/30 transition-colors">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                <UserCheck className="w-4 h-4" />
-              </div>
-              <p className="text-xs text-muted-foreground font-semibold">Faculty Advisor</p>
+          <div className="bg-white/5 rounded-xl p-4 border border-white/5 hover:border-primary/30 transition-colors flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
+              <UserCheck className="w-5 h-5" />
             </div>
-            <p className="font-semibold text-white text-sm truncate">{advisors.faculty_advisor.name}</p>
-            <a href={`mailto:${advisors.faculty_advisor.email}`} className="text-xs text-primary hover:underline truncate block mt-1">
-              {advisors.faculty_advisor.email}
-            </a>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Faculty Advisor</p>
+              <p className="font-bold text-white text-sm truncate">{advisors.faculty_advisor.name}</p>
+              <a href={`mailto:${advisors.faculty_advisor.email}`} className="text-xs text-primary hover:underline truncate block mt-0.5">
+                {advisors.faculty_advisor.email}
+              </a>
+            </div>
           </div>
 
           {/* Academic Advisor */}
-          <div className="bg-white/5 rounded-lg p-4 border border-white/5 hover:border-primary/30 transition-colors">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-                <BookOpen className="w-4 h-4" />
-              </div>
-              <p className="text-xs text-muted-foreground font-semibold">Academic Advisor</p>
+          <div className="bg-white/5 rounded-xl p-4 border border-white/5 hover:border-blue-500/30 transition-colors flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+              <BookOpen className="w-5 h-5" />
             </div>
-            <p className="font-semibold text-white text-sm truncate">{advisors.academic_advisor.name}</p>
-            <a href={`mailto:${advisors.academic_advisor.email}`} className="text-xs text-primary hover:underline truncate block mt-1">
-              {advisors.academic_advisor.email}
-            </a>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Academic Advisor</p>
+              <p className="font-bold text-white text-sm truncate">{advisors.academic_advisor.name}</p>
+              <a href={`mailto:${advisors.academic_advisor.email}`} className="text-xs text-blue-400 hover:underline truncate block mt-0.5">
+                {advisors.academic_advisor.email}
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -717,10 +746,10 @@ export default function DashboardPage() {
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-            <span className="w-1 h-6 bg-primary rounded-full" />
+            <span className="w-1 h-6 bg-pink-500 rounded-full" />
             Enrolled Courses
           </h2>
-          <span className="text-xs text-muted-foreground bg-white/5 px-2 py-1 rounded-full">
+          <span className="text-xs text-muted-foreground bg-white/5 px-2 py-1 rounded-full border border-white/10">
             {courses.length} Courses
           </span>
         </div>
@@ -731,7 +760,7 @@ export default function DashboardPage() {
             return (
               <div
                 key={c.s_no || index}
-                className="glass-card rounded-xl p-4 sm:p-5 hover:border-primary/30 transition-all duration-300 group"
+                className="glass-card rounded-2xl p-5 hover:border-pink-500/30 transition-all duration-300 group hover:-translate-y-1"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 md:gap-4 mb-4">
@@ -744,14 +773,14 @@ export default function DashboardPage() {
                         {c.course_code}
                       </span>
                     </div>
-                    <h3 className="font-bold text-white text-base sm:text-lg group-hover:text-primary transition-colors break-words">
+                    <h3 className="font-bold text-white text-base sm:text-lg group-hover:text-pink-400 transition-colors break-words">
                       {c.course_title}
                     </h3>
                   </div>
                   <div className="flex items-center justify-start md:justify-end gap-2 flex-shrink-0">
-                    <div className="text-center px-3 sm:px-4 py-2 bg-white/5 rounded-lg border border-white/5">
-                      <p className="text-[10px] text-muted-foreground uppercase">Credits</p>
-                      <p className="text-lg font-bold text-white">{c.credit}</p>
+                    <div className="text-center px-3 sm:px-4 py-2 bg-white/5 rounded-xl border border-white/5">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold text-gray-500">Credits</p>
+                      <p className="text-lg font-black text-white">{c.credit}</p>
                     </div>
                   </div>
                 </div>
@@ -760,7 +789,7 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-white/5">
                   {/* Slot */}
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center text-gray-400 shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 shrink-0">
                       <Clock className="w-4 h-4" />
                     </div>
                     <div>
@@ -771,7 +800,7 @@ export default function DashboardPage() {
 
                   {/* Room */}
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center text-gray-400 shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 shrink-0">
                       <MapPin className="w-4 h-4" />
                     </div>
                     <div>
@@ -782,14 +811,19 @@ export default function DashboardPage() {
 
                   {/* Faculty */}
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center text-gray-400 shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 shrink-0">
                       <Users className="w-4 h-4" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-muted-foreground uppercase font-semibold">Faculty</p>
-                      <p className="text-sm text-white font-medium" title={c.faculty_name}>
-                        {c.faculty_name}
-                      </p>
+
+                      <Link
+                        href={`/staff?q=${c.faculty_name.replace(/Dr\.|Mr\.|Mrs\.|Ms\.|Er\.|Prof\./g, "").trim()}`}
+                        className="text-sm text-white font-medium hover:text-pink-400 hover:underline transition-colors block truncate"
+                        title="Click to find staff details"
+                      >
+                        {c.faculty_name.split('(')[0]}
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -798,7 +832,6 @@ export default function DashboardPage() {
           })}
         </div>
       </div>
-
     </div>
   );
 }

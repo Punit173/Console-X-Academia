@@ -111,6 +111,7 @@ export default function Navbar() {
             label="Campus"
             items={[
               { href: "/announcements", label: "Announcements" },
+              { href: "/staff", label: "Staff Finder" },
               { href: "/resources", label: "Resources" },
               { href: "/links", label: "Important Links" },
             ]}
@@ -143,9 +144,10 @@ export default function Navbar() {
                 href="https://play.google.com/store/apps/details?id=com.akshat.academia"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`px-4 py-2 text-sm font-bold bg-gradient-to-r ${btnClass} text-white rounded-lg transition-all duration-200 flex items-center gap-2 active:scale-95`}
+                className={`px-3 lg:px-4 py-2 text-sm font-bold bg-gradient-to-r ${btnClass} text-white rounded-lg transition-all duration-200 flex items-center gap-2 active:scale-95`}
               >
-                Install on
+                <span className="hidden lg:inline">Install on</span>
+                <span className="lg:hidden">App</span>
                 <img
                   src="https://img.icons8.com/?size=100&id=22982&format=png&color=ffffff"
                   alt="Google Play Icon"
@@ -158,6 +160,7 @@ export default function Navbar() {
           <button
             onClick={handleLogout}
             className="px-3 py-2 text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all duration-200 flex items-center gap-2"
+            title="Logout"
           >
             <svg
               className="w-4 h-4"
@@ -172,7 +175,7 @@ export default function Navbar() {
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
               />
             </svg>
-            <span>Logout</span>
+            <span className="hidden xl:inline">Logout</span>
           </button>
         </div>
 

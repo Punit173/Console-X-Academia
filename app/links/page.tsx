@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
-import { ArrowLeft, ExternalLink, Link as LinkIcon, ShieldCheck } from "lucide-react";
+import React, { useState } from "react";
+import { ArrowLeft, ExternalLink, Link as LinkIcon, ShieldCheck, CheckCircle, Globe } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // Data from Android App's imp_links_data.dart
 const LINKS_DATA = [
@@ -73,58 +74,90 @@ const LINKS_DATA = [
 
 export default function LinksPage() {
     return (
-        <div className="min-h-screen bg-black text-white p-4 pb-24 md:pb-8">
+        <div className="w-full animate-fade-in space-y-8 pb-20 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
             {/* Header */}
-            <div className="max-w-2xl mx-auto flex items-center gap-4 mb-8">
-                <Link
-                    href="/dashboard"
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-                >
-                    <ArrowLeft className="w-5 h-5" />
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-blue-900/30 pb-6 relative">
+                <Link href="/dashboard" className="absolute -top-8 left-0 text-blue-400 hover:text-white flex items-center gap-1 text-sm transition-colors">
+                    <ArrowLeft className="w-4 h-4" /> Back to Dashboard
                 </Link>
-                <div className="flex-1">
-                    <h1 className="text-xl font-bold">Important Links</h1>
-                    <p className="text-xs text-gray-400">Curated resources for students</p>
+
+                <div className="absolute -left-4 top-0 w-20 h-20 bg-blue-900/20 blur-3xl rounded-full pointer-events-none"></div>
+                <div className="relative mt-4">
+                    <h1 className="text-3xl font-bold text-white tracking-tight mb-2 drop-shadow-sm flex items-center gap-2">
+                        Important <span className="text-blue-200">Links</span>
+                        <LinkIcon className="w-6 h-6 text-blue-400 ml-2 opacity-80" />
+                    </h1>
+                    <p className="text-blue-100/70 text-sm font-medium">
+                        Curated collection of official and student-made resources.
+                    </p>
                 </div>
             </div>
 
-            <div className="max-w-2xl mx-auto space-y-4">
+            {/* Grid Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {LINKS_DATA.map((item, index) => (
                     <a
                         key={index}
                         href={item.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block group bg-gray-900/50 hover:bg-gray-900 border border-white/5 hover:border-white/10 rounded-xl p-5 transition-all"
+                        className="relative rounded-xl p-6 border border-blue-900/30 bg-slate-950/60 hover:bg-blue-950/30 hover:border-blue-500/40 transition-all duration-300 flex flex-col justify-between gap-4 group overflow-hidden h-full min-h-[160px]"
+                        style={{ animationDelay: `${index * 50}ms` }}
                     >
-                        <div className="flex items-start justify-between">
-                            <div className="flex-1 mr-4">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">
-                                        {item.title}
-                                    </h3>
-                                    {item.official && (
-                                        <span className="px-1.5 py-0.5 rounded bg-gray-200 text-black text-[10px] font-bold flex items-center gap-1">
-                                            Official
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-sm text-gray-400 leading-relaxed">
-                                    {item.desc}
-                                </p>
+                        {/* Subtle Glow */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                        <div className="flex-1 min-w-0 relative z-10">
+                            <div className="flex items-center justify-between mb-3">
+                                {item.official ? (
+                                    <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-300 bg-blue-950/80 border border-blue-800/50 px-2 py-1 rounded">
+                                        <ShieldCheck className="w-3 h-3" /> Official
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-purple-300 bg-purple-950/80 border border-purple-800/50 px-2 py-1 rounded">
+                                        <Globe className="w-3 h-3" /> External
+                                    </span>
+                                )}
+                                <ExternalLink className="w-4 h-4 text-gray-500 group-hover:text-blue-400 transition-colors" />
                             </div>
-                            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                                <ExternalLink className="w-5 h-5" />
-                            </div>
+
+                            <h3 className="font-bold text-white text-lg leading-tight group-hover:text-blue-100 transition-colors mb-2">
+                                {item.title}
+                            </h3>
+                            <p className="text-sm text-blue-100/60 line-clamp-2 leading-relaxed">
+                                {item.desc}
+                            </p>
                         </div>
 
-                        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-blue-400/80 font-medium">
-                            <span>Access Link</span>
-                            <LinkIcon className="w-3 h-3" />
+                        {/* Bottom Decoration */}
+                        <div className="relative z-10 pt-4 mt-auto border-t border-white/5 flex items-center justify-between text-xs text-gray-500 group-hover:text-blue-300 transition-colors">
+                            <span>Open Resource</span>
+                            <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
                         </div>
                     </a>
                 ))}
             </div>
         </div>
+    );
+}
+
+function ArrowRight(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+        </svg>
     );
 }

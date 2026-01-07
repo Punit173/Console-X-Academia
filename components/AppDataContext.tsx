@@ -70,6 +70,15 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     setIsInitialized(true);
   }, []);
 
+  /* Force Refresh on Init */
+  useEffect(() => {
+    if (isInitialized && credentials && typeof window !== "undefined") {
+      // We only refresh if we have credentials (meaning user logged in)
+      // refreshData() handles the API call.
+      refreshData();
+    }
+  }, [isInitialized]); // Only run once when initialized
+
   const setData = (newData: ApiResponse | null) => {
     setDataState(newData);
     if (typeof window !== "undefined") {

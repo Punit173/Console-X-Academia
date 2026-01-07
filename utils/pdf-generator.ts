@@ -4,7 +4,7 @@ import logo from "../public/assets/logo.jpg";
 export const generateStandardPDF = async (
   title: string,
   data: any,
-  generateContent: (doc: jsPDF, formatNumber: (n: number) => string) => void,
+  generateContent: (doc: jsPDF, formatNumber: (n: number) => string, autoTable: any) => void,
   action: 'download' | 'share' = 'download',
   onComplete: () => void = () => { },
   onError: () => void = () => { }
@@ -18,7 +18,6 @@ export const generateStandardPDF = async (
     const pageHeight = doc.internal.pageSize.height;
 
     // --- 1. Dark Theme Background ---
-    // --- 1. Dark Theme Background ---
     const drawBackground = () => {
       doc.setFillColor(0, 0, 0);
       doc.rect(0, 0, pageWidth, pageHeight, "F");
@@ -26,7 +25,7 @@ export const generateStandardPDF = async (
 
     // Apply key patches to ensure background persists on new pages
     const originalAddPage = doc.addPage;
-    doc.addPage = function (...args) {
+    doc.addPage = function (...args: any[]) {
       const result = originalAddPage.apply(this, args);
       drawBackground();
       return result;
@@ -80,7 +79,7 @@ export const generateStandardPDF = async (
 
     // --- 4. Content Generation ---
     const formatNumber = (value: number) => value.toFixed(2);
-    generateContent(doc, formatNumber);
+    generateContent(doc, formatNumber, autoTable);
 
     // --- 5. Output ---
     if (action === 'share') {

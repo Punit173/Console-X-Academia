@@ -1,0 +1,772 @@
+{
+  "faculties": [
+    {
+      "name": "Dr. Revathi Venkataraman",
+      "link": "https://www.srmist.edu.in/faculty/dr-revathi-venkataraman/",
+      "designation": "Professor and Chairperson (School of Computing)",
+      "specialization": "Wireless Network Security, Trust Computing, Internet of Things, Responsible AI"
+    },
+    {
+      "name": "Dr. Lakshmi M",
+      "link": "https://www.srmist.edu.in/faculty/dr-m-lakshmi/",
+      "designation": "Professor and Head (Networking And Communications)",
+      "specialization": "Machine Learning,"
+    },
+    {
+      "name": "Dr. Annapurani Panaiyappan K",
+      "link": "https://www.srmist.edu.in/faculty/dr-annapurani-panaiyappan-k/",
+      "designation": "Professor",
+      "specialization": "Computer Science and Engineering"
+    },
+    {
+      "name": "Dr. Krishnaraj N",
+      "link": "https://www.srmist.edu.in/faculty/dr-n-krishnaraj/",
+      "designation": "Professor",
+      "specialization": "Biometrics, Artificial Intelligence, Internet of Things , Wireless Sensor Networks"
+    },
+    {
+      "name": "Dr. Malathy C",
+      "link": "https://www.srmist.edu.in/faculty/dr-c-malathy/",
+      "designation": "Professor",
+      "specialization": "Biometrics, Biometrics security, Pattern Recognition"
+    },
+    {
+      "name": "Dr. Mukesh Krishnan M B",
+      "link": "https://www.srmist.edu.in/faculty/m-b-mukeshkrishnan/",
+      "designation": "Professor",
+      "specialization": "Networking and Communication"
+    },
+    {
+      "name": "Dr. Saravanan M",
+      "link": "https://www.srmist.edu.in/faculty/dr-m-saravanan/",
+      "designation": "Professor",
+      "specialization": "Computer Vision & Image Processing, Cloud Computing & Security"
+    },
+    {
+      "name": "Dr. Thenmozhi M",
+      "link": "https://www.srmist.edu.in/faculty/dr-m-thenmozhi/",
+      "designation": "Professor",
+      "specialization": "Data structures, Machine Learning"
+    },
+    {
+      "name": "Dr. Anand L",
+      "link": "https://www.srmist.edu.in/faculty/dr-l-anand/",
+      "designation": "Associate Professor",
+      "specialization": "Deep learning & IoT & DevOps, GIS, GeoWeb Computation and resources ,disaster management"
+    },
+    {
+      "name": "Dr. Arokiaraj Jovith A",
+      "link": "https://www.srmist.edu.in/faculty/mr-a-arokiaraj-jovith/",
+      "designation": "Associate Professor",
+      "specialization": "Information Security and Cloud Computing"
+    },
+    {
+      "name": "Dr. Arun A",
+      "link": "https://www.srmist.edu.in/faculty/dr-arun-a/",
+      "designation": "Associate Professor",
+      "specialization": "Image Processing & Networks."
+    },
+    {
+      "name": "Dr. Balaji Srikaanth P",
+      "link": "https://www.srmist.edu.in/faculty/dr-p-balaji-srikaanth/",
+      "designation": "Associate Professor",
+      "specialization": "Cyber Security"
+    },
+    {
+      "name": "Dr. Balamurugan P",
+      "link": "https://www.srmist.edu.in/faculty/dr-p-balamurugan/",
+      "designation": "Associate Professor",
+      "specialization": "Networking, Internet of Things, Wireless Sensor Networks, Cyber Security, Cloud Computing"
+    },
+    {
+      "name": "Dr. Deepa Thilak K",
+      "link": "https://www.srmist.edu.in/faculty/dr-k-deepa-thilak/",
+      "designation": "Associate Professor",
+      "specialization": "Information Security, VANET, MANET, Optimization Techniques, Cloud Computing, Machine Learning, Deep Learning, IoT"
+    },
+    {
+      "name": "Dr. Elizabeth Jesi V",
+      "link": "https://www.srmist.edu.in/faculty/dr-v-elizabeth-jesi/",
+      "designation": "Associate Professor",
+      "specialization": "Image processing, Data Structures and algorithms"
+    },
+    {
+      "name": "Dr. Gayathri V M",
+      "link": "https://www.srmist.edu.in/faculty/mrs-v-m-gayathri/",
+      "designation": "Associate Professor",
+      "specialization": "Information Technology"
+    },
+    {
+      "name": "Dr. Godwin Ponsam J",
+      "link": "https://www.srmist.edu.in/faculty/j-godwin-ponsam/",
+      "designation": "Associate Professor",
+      "specialization": "Network Security"
+    },
+    {
+      "name": "Dr. Helen Victoria A",
+      "link": "https://www.srmist.edu.in/faculty/ms-a-helen-victoria/",
+      "designation": "Associate Professor",
+      "specialization": "Big Data Analytics,Cloud Computing,Software Engineering"
+    },
+    {
+      "name": "Dr. Hemamalini V",
+      "link": "https://www.srmist.edu.in/faculty/dr-v-hemamalini/",
+      "designation": "Associate Professor",
+      "specialization": "Networking, Ad hoc and Sensor networks, Security, Artificial Intelligence, Web Programming, Operating System"
+    },
+    {
+      "name": "Dr. Kalaiselvi K",
+      "link": "https://www.srmist.edu.in/faculty/dr-k-kalaiselvi/",
+      "designation": "Associate Professor",
+      "specialization": "Wireless Sensor Networks, Machine Learning, IOT"
+    },
+    {
+      "name": "Dr. Kayalvizhi R",
+      "link": "https://www.srmist.edu.in/faculty/dr-r-kayalvizhi/",
+      "designation": "Associate Professor",
+      "specialization": "Cryptography, Wireless Sensor Security, Internet of Things"
+    },
+    {
+      "name": "Dr. Lakshminarayanan R",
+      "link": "https://www.srmist.edu.in/faculty/dr-r-lakshminarayanan/",
+      "designation": "Associate Professor",
+      "specialization": "Wireless Sensor Networks, IoT, Image Processing, Networking, Cloud Computing, Machine Learning, Artificial Intelligence"
+    },
+    {
+      "name": "Dr. Mary Subaja Christo",
+      "link": "https://www.srmist.edu.in/faculty/dr-mary-subaja-christo/",
+      "designation": "Associate Professor",
+      "specialization": "Network Security, Block Chain, IoT, Machine Learning, Cloud Computing."
+    },
+    {
+      "name": "Dr. Metilda Florence S",
+      "link": "https://www.srmist.edu.in/faculty/dr-s-metilda-florence/",
+      "designation": "Associate Professor",
+      "specialization": "Networking, IOT, Image Processing, Video Processing, AI"
+    },
+    {
+      "name": "Dr. Murugaanandam S",
+      "link": "https://www.srmist.edu.in/faculty/dr-s-murugaanandam/",
+      "designation": "Associate Professor",
+      "specialization": "Computer Networks, Information Security, Mobile Ad hoc Networks, Information Assurance and Security, Data Center Administration & Management, Artificial Intelligence, Computer Architecture. Computer Communication, Network Programming and Protocols. Information Assurance and Security, Information Security, Microprocessor."
+    },
+    {
+      "name": "Dr. Naga Malleswari T Y J",
+      "link": "https://www.srmist.edu.in/faculty/dr-tyj-naga-malleswari/",
+      "designation": "Associate Professor",
+      "specialization": "Computer Science and Engineering"
+    },
+    {
+      "name": "Dr. Nimala K",
+      "link": "https://www.srmist.edu.in/faculty/dr-k-nimala/",
+      "designation": "Associate Professor",
+      "specialization": "Data Mining"
+    },
+    {
+      "name": "Dr. Prabakeran S",
+      "link": "https://www.srmist.edu.in/faculty/dr-s-prabakeran/",
+      "designation": "Associate Professor",
+      "specialization": "Network Security/ Information Security, Cloud Computing, WSN, Machine Learning Techniques."
+    },
+    {
+      "name": "Dr. Prasath N",
+      "link": "https://www.srmist.edu.in/faculty/n-prasath/",
+      "designation": "Associate Professor",
+      "specialization": "IoT and Cloud, Sensor Data Fusion, Intelligent Computing."
+    },
+    {
+      "name": "Dr. Radhika R",
+      "link": "https://www.srmist.edu.in/faculty/dr-r-radhika/",
+      "designation": "Associate Professor",
+      "specialization": "Internet of Things ,Cloud Computing , Data Analytics"
+    },
+    {
+      "name": "Dr. Rajaram V",
+      "link": "https://www.srmist.edu.in/faculty/dr-v-rajaram/",
+      "designation": "Associate Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Senthamarai N",
+      "link": "https://www.srmist.edu.in/faculty/dr-n-senthamarai/",
+      "designation": "Associate Professor",
+      "specialization": "Cloud Computing"
+    },
+    {
+      "name": "Dr. Srinivas L N B",
+      "link": "https://www.srmist.edu.in/faculty/dr-l-n-b-srinivas/",
+      "designation": "Associate Professor",
+      "specialization": "Data Mining, Data Analytics"
+    },
+    {
+      "name": "Dr. Supraja P",
+      "link": "https://www.srmist.edu.in/faculty/dr-p-supraja/",
+      "designation": "Associate Professor",
+      "specialization": "Deep Learning, Computer Vision, Machine Learning, Cognitive Computing, Optimization Algorithms, Soft Computing, Cognitive radio"
+    },
+    {
+      "name": "Dr. Suresh A",
+      "link": "https://www.srmist.edu.in/faculty/dr-a-suresh/",
+      "designation": "Associate Professor",
+      "specialization": "IoT / Data Mining, Image Processing, Networking, Distributed Computing, Bigdata and Artificial Intelligence"
+    },
+    {
+      "name": "Dr. Suseela G",
+      "link": "https://www.srmist.edu.in/faculty/dr-g-suseela/",
+      "designation": "Associate Professor",
+      "specialization": "Image Processing, Image Security, Wireless Sensor Networks, Machine Learning, Malware visualization"
+    },
+    {
+      "name": "Dr. Thenmalar S",
+      "link": "https://www.srmist.edu.in/faculty/dr-s-thenmalar/",
+      "designation": "Associate Professor",
+      "specialization": "Natural Language Processing, Data Mining"
+    },
+    {
+      "name": "Dr. Ushasukhanya S",
+      "link": "https://www.srmist.edu.in/faculty/ushasukhanya-s/",
+      "designation": "Associate Professor",
+      "specialization": "Computer Science and Engineering"
+    },
+    {
+      "name": "Dr. Vaishnavi Moorthy",
+      "link": "https://www.srmist.edu.in/faculty/vaishnavi-moorthy/",
+      "designation": "Associate Professor",
+      "specialization": "Artificial Intelligence, Cyber Security, AR/VR/MR technologies, Generative AI"
+    },
+    {
+      "name": "Dr. Venkatesh K",
+      "link": "https://www.srmist.edu.in/faculty/dr-k-venkatesh/",
+      "designation": "Associate Professor",
+      "specialization": "Networking, Cloud Computing, AI & ML, Data Mining"
+    },
+    {
+      "name": "Dr. Vinoth Kumar C N S",
+      "link": "https://www.srmist.edu.in/faculty/dr-c-n-s-vinoth-kumar/",
+      "designation": "Associate Professor",
+      "specialization": "Cyber Security | Forensics | Networks"
+    },
+    {
+      "name": "Dr. Visalakshi P",
+      "link": "https://www.srmist.edu.in/faculty/p-visalakshi/",
+      "designation": "Associate Professor",
+      "specialization": "Computer Networks"
+    },
+    {
+      "name": "Dr. Yamini B",
+      "link": "https://www.srmist.edu.in/faculty/dr-b-yamini/",
+      "designation": "Associate Professor",
+      "specialization": "Cyber Security, Image Processing, Wireless Sensor Networks, System Design, Machine Learning, Network Security"
+    },
+    {
+      "name": "Dr.R.Naresh",
+      "link": "https://www.srmist.edu.in/faculty/dr-r-naresh/",
+      "designation": "Associate Professor",
+      "specialization": "Cloud Computing, Distributed Networks, Group Key Management, Web Security"
+    },
+    {
+      "name": "Dr. Abinaya G",
+      "link": "https://www.srmist.edu.in/faculty/ms-abinaya-g/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Anand M",
+      "link": "https://www.srmist.edu.in/faculty/dr-m-anand/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Angayarkanni S A",
+      "link": "https://www.srmist.edu.in/faculty/dr-s-a-angayarkanni/",
+      "designation": "Assistant Professor",
+      "specialization": "Intelligent Road Transportation System"
+    },
+    {
+      "name": "Dr. Asha Abraham",
+      "link": "https://www.srmist.edu.in/faculty/mrs-asha-abraham/",
+      "designation": "Assistant Professor",
+      "specialization": "Artificial Intelligence"
+    },
+    {
+      "name": "Dr. Ashok Kumar P",
+      "link": "https://www.srmist.edu.in/faculty/dr-ashok-kumar-p/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Avinash Vujji",
+      "link": "https://www.srmist.edu.in/faculty/dr-avinash-vujji/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Balachander T",
+      "link": "https://www.srmist.edu.in/faculty/t-balachander/",
+      "designation": "Assistant Professor",
+      "specialization": "Data Communication and Networking, Cognitive Networks, Wireless Communication, Cybersecurity"
+    },
+    {
+      "name": "Dr. Balakiruthiga B",
+      "link": "https://www.srmist.edu.in/faculty/dr-b-balakrithiga/",
+      "designation": "Assistant Professor",
+      "specialization": "NETWORKING AND COMMUNICATIONS"
+    },
+    {
+      "name": "Dr. Banu Priya P",
+      "link": "https://www.srmist.edu.in/faculty/dr-banu-priya-p/",
+      "designation": "Assistant Professor",
+      "specialization": "Internet of Things, Medical Internet of Things, Biomedical Signal and Image Processing, Deep Learning, Embedded Systems"
+    },
+    {
+      "name": "Dr. Dayana D S",
+      "link": "https://www.srmist.edu.in/faculty/dr-dayana-d-s/",
+      "designation": "Assistant Professor",
+      "specialization": "Blockchain Technology"
+    },
+    {
+      "name": "Dr. Deepa N",
+      "link": "https://www.srmist.edu.in/faculty/dr-n-deepa/",
+      "designation": "Assistant Professor",
+      "specialization": "Network Security"
+    },
+    {
+      "name": "Dr. Deepika D",
+      "link": "https://www.srmist.edu.in/faculty/dr-deepika-d/",
+      "designation": "Assistant Professor",
+      "specialization": "Machine Learning in Healthcare Application"
+    },
+    {
+      "name": "Dr. Fancy C",
+      "link": "https://www.srmist.edu.in/faculty/mrs-c-fancy/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Geetha G",
+      "link": "https://www.srmist.edu.in/faculty/geetha-g/",
+      "designation": "Assistant Professor",
+      "specialization": "IoT, Machine Learning"
+    },
+    {
+      "name": "Dr. Gouthaman P",
+      "link": "https://www.srmist.edu.in/faculty/p-gouthaman/",
+      "designation": "Assistant Professor",
+      "specialization": "Internet of Things, Project management, Communication, Interpersonal skills, Management, Software Engineering"
+    },
+    {
+      "name": "Dr. Jeyaselvi M",
+      "link": "https://www.srmist.edu.in/faculty/dr-m-jeyaselvi/",
+      "designation": "Assistant Professor",
+      "specialization": "Networking and Communications"
+    },
+    {
+      "name": "Dr. Joseph Raymond V",
+      "link": "https://www.srmist.edu.in/faculty/mr-v-joseph-raymond/",
+      "designation": "Assistant Professor",
+      "specialization": "Information Security"
+    },
+    {
+      "name": "Dr. Justina Michael J",
+      "link": "https://www.srmist.edu.in/faculty/justina-michael-j/",
+      "designation": "Assistant Professor",
+      "specialization": "Artificial Intelligence, Machine Learning, Deep Learning, Computer Vision"
+    },
+    {
+      "name": "Dr. Kanmani K",
+      "link": "https://www.srmist.edu.in/faculty/dr-kanmani-k/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Karthikeyan H",
+      "link": "https://www.srmist.edu.in/faculty/h-karthikeyan/",
+      "designation": "Assistant Professor",
+      "specialization": "Network Security"
+    },
+    {
+      "name": "Dr. Koyel Ghosh",
+      "link": "https://www.srmist.edu.in/faculty/dr-koyel-ghosh/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Lakshmi Dhevi B",
+      "link": "https://www.srmist.edu.in/faculty/dr-lakshmi-dhevi/",
+      "designation": "Assistant Professor",
+      "specialization": "Machine Learning, Artificial Intelligence, Computer Networks"
+    },
+    {
+      "name": "Dr. Logeshwari R",
+      "link": "https://www.srmist.edu.in/faculty/dr-logeshwari-r/",
+      "designation": "Assistant Professor",
+      "specialization": "Computer Science and Engineering"
+    },
+    {
+      "name": "Dr. Mahalakshmi M",
+      "link": "https://www.srmist.edu.in/faculty/dr-mahalakshmi-m/",
+      "designation": "Assistant Professor",
+      "specialization": "IoT, Computer Vision and Image Processing"
+    },
+    {
+      "name": "Dr. Mahalakshmi P",
+      "link": "https://www.srmist.edu.in/faculty/mahalakshmi-p/",
+      "designation": "Assistant Professor",
+      "specialization": "Information Retrieval, Machine Learning, Deep Learning, Internet of Things"
+    },
+    {
+      "name": "Dr. Mahendran M",
+      "link": "https://www.srmist.edu.in/faculty/mr-mahendran-m/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Manickam M",
+      "link": "https://www.srmist.edu.in/faculty/dr-manickam-m/",
+      "designation": "Assistant Professor",
+      "specialization": "Computer Network and Cloud Computing"
+    },
+    {
+      "name": "Dr. Maranco M",
+      "link": "https://www.srmist.edu.in/faculty/dr-maranco-m/",
+      "designation": "Assistant Professor",
+      "specialization": "Cyber Security, Digital Forensics, Cyber Physical Systems"
+    },
+    {
+      "name": "Dr. Meena L C",
+      "link": "https://www.srmist.edu.in/faculty/ms-meena-l-c/",
+      "designation": "Assistant Professor",
+      "specialization": "Medical Image Processing, Signal Processing, Machine Learning, Deep Learning, Networking"
+    },
+    {
+      "name": "Dr. Meenakshi K",
+      "link": "https://www.srmist.edu.in/faculty/k-meenakshi/",
+      "designation": "Assistant Professor",
+      "specialization": "Data Mining, Machine Learning, Image Processing"
+    },
+    {
+      "name": "Dr. Mursal Hamdani",
+      "link": "https://www.srmist.edu.in/faculty/dr-mursal-hamdani/",
+      "designation": "Assistant Professor",
+      "specialization": "Cryptography, Quantum Communication, Quantum Optics, Photonic Integrated Circuits."
+    },
+    {
+      "name": "Dr. Nagamani Abirami D",
+      "link": "https://www.srmist.edu.in/faculty/dr-nagamani-abirami-d/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Nallarasan V",
+      "link": "https://www.srmist.edu.in/faculty/mr-v-nallarasan/",
+      "designation": "Assistant Professor",
+      "specialization": "Wireless Networks, Internet of things, Data Security, Bigdata, Machine learning, Edge computing"
+    },
+    {
+      "name": "Dr. Nithya Paranthaman R",
+      "link": "https://www.srmist.edu.in/faculty/dr-nithya-paranthaman-r/",
+      "designation": "Assistant Professor",
+      "specialization": "CYBERSECURITY"
+    },
+    {
+      "name": "Dr. Nivedhitha M",
+      "link": "https://www.srmist.edu.in/faculty/dr-nivedhitha-m/",
+      "designation": "Assistant Professor",
+      "specialization": "Artificial Intelligence, Machine Learning, Deep Learning"
+    },
+    {
+      "name": "Dr. Prabhu Chakkaravarthy A",
+      "link": "https://www.srmist.edu.in/faculty/dr-a-prabhu-chakkaravarthy/",
+      "designation": "Assistant Professor",
+      "specialization": "Medical Image Processing, Machine Learning, Deep Learning, Optimization Techniques,"
+    },
+    {
+      "name": "Dr. Praveena Akki",
+      "link": "https://www.srmist.edu.in/faculty/dr-praveena-akki/",
+      "designation": "Assistant  Professor",
+      "specialization": "Cloud Computing, Networking, Security, Artificial Intelligence, Machine learning."
+    },
+    {
+      "name": "Dr. Preethiya T",
+      "link": "https://www.srmist.edu.in/faculty/dr-preethiya-t/",
+      "designation": "Assistant Professor",
+      "specialization": "Networking"
+    },
+    {
+      "name": "Dr. Priyanga S",
+      "link": "https://www.srmist.edu.in/faculty/priyanga-s/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Priyanka R",
+      "link": "https://www.srmist.edu.in/faculty/dr-priyanka-r/",
+      "designation": "Assistant Professor",
+      "specialization": "Machine Learning & Deep Learning"
+    },
+    {
+      "name": "Dr. Rajalakshmi A",
+      "link": "https://www.srmist.edu.in/faculty/dr-rajalakshmi-a/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Rajeshkumar K",
+      "link": "https://www.srmist.edu.in/faculty/dr-rajeshkumar-k/",
+      "designation": "Assistant Professor",
+      "specialization": "Big Data Analytics"
+    },
+    {
+      "name": "Dr. Ramesh S",
+      "link": "https://www.srmist.edu.in/faculty/dr-ramesh/",
+      "designation": "Assistant Professor",
+      "specialization": "Machine Learning"
+    },
+    {
+      "name": "Dr. Ramya G",
+      "link": "https://www.srmist.edu.in/faculty/dr-g-ramya-2/",
+      "designation": "Assistant Professor",
+      "specialization": "Software Defined Networks, Network Function Virtualization, Blockchain"
+    },
+    {
+      "name": "Dr. Safa M",
+      "link": "https://www.srmist.edu.in/faculty/mrs-m-safa/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Saisanthiya D",
+      "link": "https://www.srmist.edu.in/faculty/mrs-saisanthiya/",
+      "designation": "Assistant Professor",
+      "specialization": "Network Security, Computer Networks, Artificial Intelligence, Machine Learning, Deep Learning"
+    },
+    {
+      "name": "Dr. Saranya G",
+      "link": "https://www.srmist.edu.in/faculty/ms-g-saranya/",
+      "designation": "Assistant Professor",
+      "specialization": "Machine Laerning"
+    },
+    {
+      "name": "Dr. Savaridassan P",
+      "link": "https://www.srmist.edu.in/faculty/savaridassan-p/",
+      "designation": "Assistant Professor",
+      "specialization": "Cloud Computing, Explainable AI, Cyber Security, Deep Learning, Computer Vision, Machine Learning, Computer Networks, , Augmented Reality"
+    },
+    {
+      "name": "Dr. Saveetha.D",
+      "link": "https://www.srmist.edu.in/faculty/mrs-d-saveetha/",
+      "designation": "Assistant Professor",
+      "specialization": "Computer Networks"
+    },
+    {
+      "name": "Dr. Shanmuganathan V",
+      "link": "https://www.srmist.edu.in/faculty/mr-shanmuganathan-v/",
+      "designation": "Assistant Professor",
+      "specialization": "Internet of Things, Network Security, Wireless Sensor Networks and Wireless Networks."
+    },
+    {
+      "name": "Dr. Sivakumar M",
+      "link": "https://www.srmist.edu.in/faculty/dr-sivakumar-m/",
+      "designation": "Assistant Professor",
+      "specialization": "Programming, Machine Learning, Computer Networks, Web Development"
+    },
+    {
+      "name": "Dr. Sivamohan S",
+      "link": "https://www.srmist.edu.in/faculty/dr-sivamohan-s/",
+      "designation": "Assistant Professor",
+      "specialization": "Cyber Security, Deep Learning, Machine Learning, Data Warehousing, Computer Networks, Software Engineering"
+    },
+    {
+      "name": "Dr. Subha K J",
+      "link": "https://www.srmist.edu.in/faculty/dr-subha-k-j/",
+      "designation": "Assistant Professor",
+      "specialization": "Biomedical Image Processing and Deep Learning"
+    },
+    {
+      "name": "Dr. Sujatha G",
+      "link": "https://www.srmist.edu.in/faculty/ms-g-sujatha/",
+      "designation": "Assistant Professor",
+      "specialization": "Information security and cloud storage security"
+    },
+    {
+      "name": "Dr. Sujatha R",
+      "link": "https://www.srmist.edu.in/faculty/mrs-sujatha-r/",
+      "designation": "Assistant Professor",
+      "specialization": "Natural Language Processing, IoT, Deep Learning"
+    },
+    {
+      "name": "Dr. Sundarrajan M",
+      "link": "https://www.srmist.edu.in/faculty/dr-sundarrajan-m/",
+      "designation": "Assistant Professor",
+      "specialization": "Cyber Security"
+    },
+    {
+      "name": "Dr. Swathy R",
+      "link": "https://www.srmist.edu.in/faculty/dr-swathy-r/",
+      "designation": "Assistant Professor",
+      "specialization": "Machine learning , Cloud Computing"
+    },
+    {
+      "name": "Dr. Tamil Selvi S",
+      "link": "https://www.srmist.edu.in/faculty/ms-tamilselvi-s/",
+      "designation": "Assistant Professor",
+      "specialization": "Networking, Cyber Security, Machine Learning, Deep Learning"
+    },
+    {
+      "name": "Dr. Thanga Revathi S",
+      "link": "https://www.srmist.edu.in/faculty/dr-s-thanga-revathi/",
+      "designation": "Associate Professor",
+      "specialization": "Security and Networking"
+    },
+    {
+      "name": "Dr. Vasanth Kumar.CH",
+      "link": "https://www.srmist.edu.in/faculty/mr-vasanth-kumar-ch/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Dr. Vedhavathy T R",
+      "link": "https://www.srmist.edu.in/faculty/dr-t-r-vedhavathy/",
+      "designation": "Assistant Professor",
+      "specialization": "Wireless Networks"
+    },
+    {
+      "name": "Dr. Vijay Vasanth A",
+      "link": "https://www.srmist.edu.in/faculty/dr-a-vijay-vasanth/",
+      "designation": "Assistant Professor",
+      "specialization": "Ad hoc Networks"
+    },
+    {
+      "name": "Dr.S. Benisha",
+      "link": "https://www.srmist.edu.in/faculty/dr-benisha/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Indra Bhooshan Sharma",
+      "link": "https://www.srmist.edu.in/faculty/mr-indra-bhooshan-sharma/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Mr. Manikandan K",
+      "link": "https://www.srmist.edu.in/faculty/mr-k-manikandan/",
+      "designation": "Assistant Professor",
+      "specialization": "Computer Applications"
+    },
+    {
+      "name": "Mr. Prabakaran J",
+      "link": "https://www.srmist.edu.in/faculty/mr-j-prabakaran/",
+      "designation": "Assistant Professor",
+      "specialization": "Computer Networks, Cloud Computing, Cryptography and Network Security"
+    },
+    {
+      "name": "Mr. Rohan Kumar Gupta",
+      "link": "https://www.srmist.edu.in/faculty/mr-rohan-kumar-gupta/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Mr. Saravanan N",
+      "link": "https://www.srmist.edu.in/faculty/mr-saravanan-n/",
+      "designation": "Assistant Professor Jr G",
+      "specialization": ""
+    },
+    {
+      "name": "Mr. Senthil Kumar K",
+      "link": "https://www.srmist.edu.in/faculty/mr-k-senthil-kumar/",
+      "designation": "Assistant Professor",
+      "specialization": "Information Technology"
+    },
+    {
+      "name": "Mr. Vaddi Venkata Narayana",
+      "link": "https://www.srmist.edu.in/faculty/mr-vaddi-venkata-narayana/",
+      "designation": "Assistant Professor",
+      "specialization": ""
+    },
+    {
+      "name": "Mrs. Abirami R",
+      "link": "https://www.srmist.edu.in/faculty/ms-r-abirami/",
+      "designation": "Assistant Professor",
+      "specialization": "Medical Image security, Watermarking, Deep learning"
+    },
+    {
+      "name": "Mrs. Dhwarithaa R",
+      "link": "https://www.srmist.edu.in/faculty/ms-dhwarithaa-r/",
+      "designation": "Assistant Professor",
+      "specialization": "Machine Learning"
+    },
+    {
+      "name": "Mrs. Divya G",
+      "link": "https://www.srmist.edu.in/faculty/ms-g-divya/",
+      "designation": "Assistant Professor",
+      "specialization": "Network Security, Blockchain"
+    },
+    {
+      "name": "Mrs. Lavanya V",
+      "link": "https://www.srmist.edu.in/faculty/v-lavanya/",
+      "designation": "Assistant Professor",
+      "specialization": "Cloud Computing"
+    },
+    {
+      "name": "Mrs. Parimala G",
+      "link": "https://www.srmist.edu.in/faculty/g-parimala/",
+      "designation": "Assistant Professor",
+      "specialization": "Internet of Things,Network Security,Deep Learning"
+    },
+    {
+      "name": "Mrs. Preethi V",
+      "link": "https://www.srmist.edu.in/faculty/mrs-preethi-v/",
+      "designation": "Assistant Professor",
+      "specialization": "Machine learning, Deep Learning, NLP"
+    },
+    {
+      "name": "Mrs. Vijayalakshmi V",
+      "link": "https://www.srmist.edu.in/faculty/ms-v-vijayalakshmi/",
+      "designation": "Assistant Professor",
+      "specialization": "Data Structure, Networking"
+    },
+    {
+      "name": "Ms. Akhila T S",
+      "link": "https://www.srmist.edu.in/faculty/ms-akhila-t-s/",
+      "designation": "Assistant Professor Jr G",
+      "specialization": ""
+    },
+    {
+      "name": "Ms. Carlin Jebakani P",
+      "link": "https://www.srmist.edu.in/faculty/ms-carlin-jebakani-p/",
+      "designation": "Assistant Professor Jr G",
+      "specialization": "Networking and Communications"
+    },
+    {
+      "name": "Ms. Jasmine S",
+      "link": "https://www.srmist.edu.in/faculty/ms-jasmine-s/",
+      "designation": "Assistant Professor",
+      "specialization": "Machine Learning, Deep Learning"
+    },
+    {
+      "name": "Ms. Padmavathy T",
+      "link": "https://www.srmist.edu.in/faculty/ms-padmavathy-t/",
+      "designation": "Assistant Professor Jr G",
+      "specialization": ""
+    },
+    {
+      "name": "Ms. Priyasri G R",
+      "link": "https://www.srmist.edu.in/faculty/ms-priyasri-g-r/",
+      "designation": "Assistant Professor Jr G",
+      "specialization": "Data Structure, Networking."
+    },
+    {
+      "name": "Ms. Vennila R",
+      "link": "https://www.srmist.edu.in/faculty/ms-vennila-r/",
+      "designation": "Assistant Professor Jr G",
+      "specialization": "Generative AI, Image Processing, Computer Vision, Deep Learning"
+    },
+    {
+      "name": "Mr. Pradeshwaran V",
+      "link": "https://www.srmist.edu.in/faculty/mr-pradeshwaran-v/",
+      "designation": "Teaching Assistant",
+      "specialization": ""
+    }
+  ]
+}

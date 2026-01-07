@@ -20,14 +20,36 @@ export default function SubjectResourcePage() {
     useEffect(() => {
         if (!sem || !subjectId) return;
 
+        const CACHE_KEY = `resource_cache_${sem}_${subjectId}`;
+        const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 Hours
+
         const fetchData = async () => {
             try {
+                // 1. Check Cache
+                const cached = localStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    const { timestamp, data: cachedData } = JSON.parse(cached);
+                    if (Date.now() - timestamp < CACHE_DURATION) {
+                        console.log("Using cached resource data");
+                        setData(cachedData);
+                        setLoading(false);
+                        return;
+                    }
+                }
+
+                // 2. Fetch from Firestore
                 const db = getFirestore(app);
                 const docRef = doc(db, "materials", sem as string, "resources", subjectId as string);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    setData({ id: docSnap.id, ...docSnap.data() });
+                    const freshData = { id: docSnap.id, ...docSnap.data() };
+                    setData(freshData);
+                    // 3. Save to Cache
+                    localStorage.setItem(CACHE_KEY, JSON.stringify({
+                        timestamp: Date.now(),
+                        data: freshData
+                    }));
                 } else {
                     console.error("No such document!");
                 }

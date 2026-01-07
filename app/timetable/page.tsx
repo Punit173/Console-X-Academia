@@ -50,19 +50,20 @@ import { useRouter } from "next/navigation";
 
 export default function TimetablePage() {
   // --- Modern Pastel Palette for Creative Look ---
+  // --- Vibrant Palette for Timetable ---
   const TAG_COLORS = [
-    { bg: "#FCE7F3", text: "#9D174D", border: "#FBCFE8" }, // Pink
-    { bg: "#E0E7FF", text: "#3730A3", border: "#C7D2FE" }, // Indigo
-    { bg: "#D1FAE5", text: "#065F46", border: "#A7F3D0" }, // Emerald
-    { bg: "#FEF3C7", text: "#92400E", border: "#FDE68A" }, // Amber
-    { bg: "#FAE8FF", text: "#86198F", border: "#F5D0FE" }, // Fuchsia
-    { bg: "#E0F2FE", text: "#075985", border: "#BAE6FD" }, // Sky
-    { bg: "#FFE4E6", text: "#9F1239", border: "#FECDD3" }, // Rose
-    { bg: "#F3F4F6", text: "#1F2937", border: "#E5E7EB" }, // Gray
-    { bg: "#CCFBF1", text: "#115E59", border: "#99F6E4" }, // Teal
-    { bg: "#EDE9FE", text: "#5B21B6", border: "#DDD6FE" }, // Violet
-    { bg: "#FFEDD5", text: "#9A3412", border: "#FED7AA" }, // Orange
-    { bg: "#ECFCCB", text: "#3F6212", border: "#D9F99D" }, // Lime
+    { bg: "#EF4444", text: "#FFFFFF", border: "#B91C1C" }, // Red
+    { bg: "#F97316", text: "#FFFFFF", border: "#C2410C" }, // Orange
+    { bg: "#F59E0B", text: "#FFFFFF", border: "#B45309" }, // Amber
+    { bg: "#84CC16", text: "#FFFFFF", border: "#4D7C0F" }, // Lime
+    { bg: "#10B981", text: "#FFFFFF", border: "#047857" }, // Emerald
+    { bg: "#06B6D4", text: "#FFFFFF", border: "#0E7490" }, // Cyan
+    { bg: "#3B82F6", text: "#FFFFFF", border: "#1D4ED8" }, // Blue
+    { bg: "#6366F1", text: "#FFFFFF", border: "#4338CA" }, // Indigo
+    { bg: "#8B5CF6", text: "#FFFFFF", border: "#6D28D9" }, // Violet
+    { bg: "#D946EF", text: "#FFFFFF", border: "#A21CAF" }, // Fuchsia
+    { bg: "#EC4899", text: "#FFFFFF", border: "#BE185D" }, // Pink
+    { bg: "#F43F5E", text: "#FFFFFF", border: "#BE123C" }, // Rose
   ];
 
   const router = useRouter();
@@ -263,6 +264,9 @@ export default function TimetablePage() {
     }
   };
 
+  /* State for View Mode */
+  const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
+
   if (!data || !timetableLogic) {
     return <div className="p-8 text-center text-pink-400 animate-pulse">Loading Timetable...</div>;
   }
@@ -270,7 +274,7 @@ export default function TimetablePage() {
   const classes = timetableLogic.getClassesForDay(selectedDay);
   const fullSchedule = timetableLogic.getFullSchedule();
 
-  // --- 3. REUSABLE GRID RENDERER ---
+  /* --- 3. REUSABLE GRID RENDERER (For Image Gen) --- */
   const TimetableGrid = React.forwardRef(({ style, id }: any, ref: any) => (
     <div
       id={id}
@@ -403,7 +407,7 @@ export default function TimetablePage() {
   TimetableGrid.displayName = "TimetableGrid";
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in p-1">
+    <div className="w-full max-w-7xl mx-auto space-y-6 animate-fade-in p-1">
 
       {/* --- HIDDEN MASTER TABLE FOR DOWNLOADS (Always Present) --- */}
       <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
@@ -424,6 +428,22 @@ export default function TimetablePage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* VIEW TOGGLE */}
+          <div className="flex items-center bg-pink-950/30 border border-pink-500/30 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode('day')}
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'day' ? 'bg-pink-500 text-white shadow' : 'text-pink-400 hover:text-white'}`}
+            >
+              Daily
+            </button>
+            <button
+              onClick={() => setViewMode('week')}
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'week' ? 'bg-pink-500 text-white shadow' : 'text-pink-400 hover:text-white'}`}
+            >
+              Weekly
+            </button>
+          </div>
+
           <button
             onClick={() => {
               if (window.innerWidth < 768) {
@@ -437,111 +457,171 @@ export default function TimetablePage() {
             className="glass-card px-4 py-2 rounded-lg border border-pink-500/30 bg-pink-950/30 flex items-center gap-2 hover:bg-pink-900/40 transition-colors"
           >
             <Download className="w-4 h-4 text-pink-400" />
-            <span className="text-pink-400 font-medium text-sm">Download</span>
+            <span className="text-pink-400 font-medium text-sm hidden sm:inline">Download</span>
           </button>
-          <div className="glass-card px-4 py-2 rounded-lg border border-pink-500/30 bg-pink-950/30 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse shadow-[0_0_8px_rgba(236,72,153,0.6)]" />
-            <span className="text-pink-400 font-mono font-bold">
-              Today is Day Order {timetableLogic.currentDayOrder}
-            </span>
-          </div>
         </div>
       </div>
 
-      {/* Day Tabs */}
-      <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
-        {[1, 2, 3, 4, 5].map((day) => {
-          const isCurrent = day === timetableLogic.currentDayOrder;
-          const isSelected = day === selectedDay;
+      {/* Day Tabs (Only in Day Mode) */}
+      {viewMode === 'day' && (
+        <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
+          {[1, 2, 3, 4, 5].map((day) => {
+            const isCurrent = day === timetableLogic.currentDayOrder;
+            const isSelected = day === selectedDay;
 
-          return (
-            <button
-              key={day}
-              onClick={() => setSelectedDay(day)}
-              className={`
+            return (
+              <button
+                key={day}
+                onClick={() => setSelectedDay(day)}
+                className={`
                 relative shrink-0 px-6 py-3 rounded-xl font-medium transition-all duration-300
                 ${isSelected
-                  ? "bg-pink-600 text-white shadow-lg shadow-pink-500/20 scale-105"
-                  : "border border-pink-500/10 hover:bg-pink-900/30 hover:text-pink-200 hover:border-pink-500/30"
-                }
+                    ? "bg-pink-600 text-white shadow-lg shadow-pink-500/20 scale-105"
+                    : "border border-pink-500/10 hover:bg-pink-900/30 hover:text-pink-200 hover:border-pink-500/30"
+                  }
               `}
-            >
-              <div className="flex flex-col items-center gap-1">
-                <span className={`text-xs uppercase tracking-widest ${isSelected ? 'text-pink-100' : 'text-pink-400/50'}`}>Day Order</span>
-                <span className="text-xl font-bold">{day}</span>
-              </div>
+              >
+                <div className="flex flex-col items-center gap-1">
+                  <span className={`text-xs uppercase tracking-widest ${isSelected ? 'text-pink-100' : 'text-pink-400/50'}`}>Day Order</span>
+                  <span className="text-xl font-bold">{day}</span>
+                </div>
 
-              {isCurrent && !isSelected && (
-                <span className="absolute top-2 right-2 w-2 h-2 bg-pink-500 rounded-full shadow-[0_0_5px_rgba(236,72,153,0.8)]" />
-              )}
-            </button>
-          );
-        })}
-      </div>
+                {isCurrent && !isSelected && (
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-pink-500 rounded-full shadow-[0_0_5px_rgba(236,72,153,0.8)]" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Timeline Content */}
       <div className="min-h-[400px]">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedDay}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-4"
-          >
-            {classes.length === 0 ? (
-              // Empty State
-              <div className="flex flex-col items-center justify-center py-20 text-pink-300/50 glass-card rounded-2xl border border-pink-500/10 bg-pink-950/10">
-                <Coffee className="w-12 h-12 mb-4 opacity-50 text-pink-400" />
-                <p>No classes scheduled for Day Order {selectedDay}</p>
-              </div>
-            ) : (
-              // Class List
-              classes.map((item: any, idx: number) => (
-                <div key={idx} className="group relative flex gap-3 md:gap-6">
+          {viewMode === 'day' ? (
+            <motion.div
+              key={selectedDay}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-4"
+            >
+              {classes.length === 0 ? (
+                // Empty State
+                <div className="flex flex-col items-center justify-center py-20 text-pink-300/50 glass-card rounded-2xl border border-pink-500/10 bg-pink-950/10">
+                  <Coffee className="w-12 h-12 mb-4 opacity-50 text-pink-400" />
+                  <p>No classes scheduled for Day Order {selectedDay}</p>
+                </div>
+              ) : (
+                // Class List
+                classes.map((item: any, idx: number) => (
+                  <div key={idx} className="group relative flex gap-3 md:gap-6">
 
-                  {/* Timeline Spine */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-3 h-3 rounded-full bg-pink-900/40 border border-pink-500/30 group-hover:bg-pink-500 group-hover:border-pink-400 group-hover:ring-4 group-hover:ring-pink-500/20 transition-all z-10 mt-6" />
-                    {idx !== classes.length - 1 && (
-                      <div className="w-0.5 h-full bg-pink-500/10 group-hover:bg-pink-500/30 transition-colors -mb-6" />
-                    )}
-                  </div>
+                    {/* Timeline Spine */}
+                    <div className="flex flex-col items-center">
+                      <div className="w-3 h-3 rounded-full bg-pink-900/40 border border-pink-500/30 group-hover:bg-pink-500 group-hover:border-pink-400 group-hover:ring-4 group-hover:ring-pink-500/20 transition-all z-10 mt-6" />
+                      {idx !== classes.length - 1 && (
+                        <div className="w-0.5 h-full bg-pink-500/10 group-hover:bg-pink-500/30 transition-colors -mb-6" />
+                      )}
+                    </div>
 
-                  {/* Card */}
-                  <div className="flex-1 glass-card p-4 md:p-5 rounded-2xl border-l-4 border-l-transparent border border-pink-500/5 bg-pink-950/10 hover:border-l-pink-500 hover:bg-pink-900/20 transition-all mb-2">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 md:gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-xs font-mono text-pink-300 bg-pink-500/10 border border-pink-500/20 px-2 py-1 rounded w-fit mb-2">
-                          <Clock className="w-3 h-3" />
-                          {item.time}
+                    {/* Card */}
+                    <div className="flex-1 glass-card p-4 md:p-5 rounded-2xl border-l-4 border-l-transparent border border-pink-500/5 bg-pink-950/10 hover:border-l-pink-500 hover:bg-pink-900/20 transition-all mb-2">
+                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 md:gap-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-xs font-mono text-pink-300 bg-pink-500/10 border border-pink-500/20 px-2 py-1 rounded w-fit mb-2">
+                            <Clock className="w-3 h-3" />
+                            {item.time}
+                          </div>
+                          <h3 className="text-base md:text-lg font-bold text-white group-hover:text-pink-300 transition-colors">
+                            {item.title}
+                          </h3>
+                          <div className="flex flex-wrap items-center gap-2 text-sm text-pink-200/60">
+                            <span className="bg-pink-500/10 px-1.5 rounded text-xs text-pink-300">{item.code}</span>
+                            <span className="hidden md:inline">•</span>
+                            <span className="text-xs w-full md:w-auto">{item.faculty?.split('(')[0]}</span>
+                          </div>
                         </div>
-                        <h3 className="text-base md:text-lg font-bold text-white group-hover:text-pink-300 transition-colors">
-                          {item.title}
-                        </h3>
-                        <div className="flex flex-wrap items-center gap-2 text-sm text-pink-200/60">
-                          <span className="bg-pink-500/10 px-1.5 rounded text-xs text-pink-300">{item.code}</span>
-                          <span className="hidden md:inline">•</span>
-                          <span className="text-xs w-full md:w-auto">{item.faculty?.split('(')[0]}</span>
-                        </div>
-                      </div>
 
-                      <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-2 mt-2 md:mt-0 border-t border-white/5 md:border-0 pt-3 md:pt-0">
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-pink-500/5 border border-pink-500/10 text-xs font-medium text-pink-100">
-                          <MapPin className="w-3 h-3 text-pink-500" />
-                          {item.venue}
-                        </div>
-                        <div className="text-[10px] text-pink-300/40 font-mono">
-                          Slot: {item.slotCode}
+                        <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-2 mt-2 md:mt-0 border-t border-white/5 md:border-0 pt-3 md:pt-0">
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-pink-500/5 border border-pink-500/10 text-xs font-medium text-pink-100">
+                            <MapPin className="w-3 h-3 text-pink-500" />
+                            {item.venue}
+                          </div>
+                          <div className="text-[10px] text-pink-300/40 font-mono">
+                            Slot: {item.slotCode}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                ))
+              )}
+            </motion.div>
+          ) : (
+            // --- WEEKLY GRID VIEW ---
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="overflow-x-auto pb-6"
+            >
+              <div className="min-w-[1000px] border border-white/10 rounded-xl overflow-hidden bg-black/40 backdrop-blur-xl">
+                {/* Header Row */}
+                <div className="grid grid-cols-[80px_repeat(12,1fr)] bg-white/5 border-b border-white/10">
+                  <div className="p-3 text-xs font-bold text-pink-400 uppercase tracking-wider flex items-center justify-center border-r border-white/10">Day</div>
+                  {fullSchedule.timeSlots.map((slot: string, i: number) => (
+                    <div key={i} className="p-2 text-[10px] font-mono font-bold text-gray-400 flex items-end justify-center text-center border-r border-white/5 last:border-0">
+                      {slot.split(' - ')[0]}<br />{slot.split(' - ')[1]}
+                    </div>
+                  ))}
                 </div>
-              ))
-            )}
-          </motion.div>
+
+                {/* Rows */}
+                {fullSchedule.days.map((dayData: any) => (
+                  <div key={dayData.dayOrder} className="grid grid-cols-[80px_repeat(12,1fr)] border-b border-white/5 bg-white/[0.02] last:border-0">
+                    {/* Day Header */}
+                    <div className={`p-3 text-sm font-bold text-white flex items-center justify-center border-r border-white/10 ${timetableLogic.currentDayOrder === dayData.dayOrder ? 'bg-pink-500/20 text-pink-200' : ''}`}>
+                      DO {dayData.dayOrder}
+                    </div>
+
+                    {/* Slots */}
+                    {dayData.slots.map((slotData: any, i: number) => {
+                      const colors = slotData && slotData.code ? timetableLogic.subjectColors[slotData.code] : null;
+
+                      return (
+                        <div key={i} className="border-r border-white/5 last:border-0 p-1 min-h-[80px]">
+                          {slotData && slotData.found && colors ? (
+                            <div
+                              className="h-full w-full rounded p-1 flex flex-col justify-center text-center shadow-sm"
+                              style={{
+                                backgroundColor: colors.bg,
+                                border: `1px solid ${colors.border}`,
+                                color: colors.text
+                              }}
+                            >
+                              <div className="text-[9px] font-bold line-clamp-2 leading-tight mb-1" title={slotData.title} style={{ color: colors.text }}>
+                                {slotData.title}
+                              </div>
+                              <div className="text-[8px] font-mono rounded px-1 w-fit mx-auto bg-black/10">
+                                {slotData.code}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="h-full w-full" />
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-center text-xs text-gray-500 flex items-center justify-center gap-2">
+                <BookOpen className="w-3 h-3" /> Scroll horizontally to see full schedule
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 
@@ -601,7 +681,7 @@ export default function TimetablePage() {
                       className="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 disabled:opacity-50"
                     >
                       {isDownloading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Download className="w-4 h-4" />}
-                      Download Image
+                      Download Timetable
                     </button>
                   </div>
                 </div>
