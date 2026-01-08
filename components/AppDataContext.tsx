@@ -21,6 +21,7 @@ interface AppDataContextValue {
   logout: () => void;
   isLoading: boolean;
   fetchError: boolean;
+  authError: boolean;
   isInitialized: boolean;
 }
 
@@ -31,6 +32,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   const [credentials, setCredentialsState] = useState<Credentials | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState(false);
+  const [authError, setAuthError] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Helper helper to validate data structure
@@ -92,6 +94,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
 
   const setCredentials = (newCreds: Credentials | null) => {
     setCredentialsState(newCreds);
+    setAuthError(false); // Reset auth error on new credentials
     if (typeof window !== "undefined") {
       if (newCreds) {
         localStorage.setItem("academia-creds", JSON.stringify(newCreds));
@@ -114,6 +117,8 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
 
     setIsLoading(true);
     setFetchError(false);
+    setAuthError(false);
+
     try {
       const res = await fetch("/api/login", {
         method: "POST",
@@ -132,9 +137,18 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
           if (!data) setData(DEMO_DATA);
         }
       } else {
-        console.warn("Refresh failed (Network/Server), using existing or demo data");
-        setFetchError(true);
-        if (!data) setData(DEMO_DATA); // Fallback if empty
+        // Handle 401 specifically
+        if (res.status === 401) {
+          console.warn("Auth Failed: Credentials rejected by server");
+          setAuthError(true);
+          // We do NOT partial fallback here, we want the user to know auth failed
+          // But if they have stale data, they might still see it? 
+          // Better to let them keep stale data but show a persistent warning.
+        } else {
+          console.warn("Refresh failed (Network/Server), using existing or demo data");
+          setFetchError(true);
+          if (!data) setData(DEMO_DATA); // Fallback if empty
+        }
       }
     } catch (error) {
       console.error("Failed to refresh data", error);
@@ -146,10 +160,13 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    setData(null);
+    setCredentials(null);
+    setAuthError(false);
   };
 
   return (
-    <AppDataContext.Provider value={{ data, setData, credentials, setCredentials, refreshData, isLoading, fetchError, logout, isInitialized }}>
+    <AppDataContext.Provider value={{ data, setData, credentials, setCredentials, refreshData, isLoading, fetchError, authError, logout, isInitialized }}>
       {children}
     </AppDataContext.Provider>
   );

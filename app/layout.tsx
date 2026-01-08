@@ -1,9 +1,9 @@
-// app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
 import { AppDataProvider } from "@/components/AppDataContext";
 import { CalendarProvider } from "@/components/CalendarContext";
 import Navbar from "@/components/Navbar";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: "Console X Academia",
@@ -23,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
 
             <Navbar />
+            {/* <WhatsAppButton /> */}
 
             {/* Scrollable Content Wrapper with Mask */}
             {/* Mask ensures content fades out before hitting the transparent navbar */}

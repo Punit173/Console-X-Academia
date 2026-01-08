@@ -255,6 +255,7 @@ export default function Navbar() {
 
             <div className="px-3 text-xs font-bold text-white/40 uppercase mt-2">Campus</div>
             <NavLink href="/announcements" label="Announcements" active={pathname === "/announcements"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
+            <NavLink href="/staff" label="Staff Finder" active={pathname === "/staff"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
             <NavLink href="/resources" label="Resources" active={pathname === "/resources"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
             <NavLink href="/links" label="Important Links" active={pathname === "/links"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
 
