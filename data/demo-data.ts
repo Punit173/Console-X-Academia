@@ -9,7 +9,7 @@ export const DEMO_DATA: ApiResponse = {
       program: "B.Tech",
       department: "Department",
       specialization: "Specialization",
-      semester: "5",
+      semester: "4",
       enrollment_status: "Active",
       enrollment_date: "2021-07-15"
     },

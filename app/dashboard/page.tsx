@@ -14,6 +14,7 @@ import {
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { generateStandardPDF } from "@/utils/pdf-generator";
+import ThreeDVisual from "@/components/ThreeDVisual";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User,
@@ -31,7 +32,8 @@ import {
   Info,
   RefreshCw,
   Sparkles,
-  Quote
+  Quote,
+  Megaphone
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getFirestore, collection, getDocs, query, limit } from "firebase/firestore";
@@ -186,6 +188,38 @@ export default function DashboardPage() {
     return results;
   }, [data]);
 
+  // --- Dynamic Theme Logic ---
+  const currentSem = useMemo(() => {
+    // Try to get semester from data, default to "sem1"
+    // PRIORITY: Check attendance.student_info first (user updated this in demo-data), then timetable
+    const sem = data?.attendance?.student_info?.semester || data?.timetable?.student_info?.semester;
+    if (sem) {
+      // Normalize: "Semester 5" -> "sem5", "5" -> "sem5"
+      const num = sem.toString().replace(/\D/g, '');
+      return `sem${num}`;
+    }
+    return 'sem1'; // Default
+  }, [data]);
+
+  const themeColor = useMemo(() => {
+    const map: any = {
+      'sem1': 'text-red-400 bg-red-500/10 border-red-500/20',
+      'sem2': 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+      'sem3': 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+      'sem4': 'text-green-400 bg-green-500/10 border-green-500/20',
+      'sem5': 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+      'sem6': 'text-pink-400 bg-pink-500/10 border-pink-500/20',
+      'sem7': 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+      'sem8': 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+    };
+    return map[currentSem] || map['sem1'];
+  }, [currentSem]);
+
+  // Extract just the text color class for icons
+  const accentTextColor = themeColor.split(' ')[0];
+  const accentBgColor = themeColor.split(' ')[1];
+  const accentBorderColor = themeColor.split(' ')[2];
+
   // --- Styles Helper for Subjects ---
   const getCourseTypeStyle = (type: string) => {
     if (type === "core")
@@ -210,7 +244,7 @@ export default function DashboardPage() {
   if (!isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-[50vh] animate-fade-in">
-        <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+        <div className={`w-8 h-8 border-2 rounded-full animate-spin ${accentBorderColor} border-t-current ${accentTextColor}`} />
       </div>
     );
   }
@@ -354,22 +388,27 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="w-full animate-fade-in space-y-8">
+    <div className="w-full animate-fade-in space-y-8 relative">
+
+      {/* 3D Visual Background Element */}
+      <div className="absolute top-0 right-0 w-full h-[300px] overflow-hidden -z-10 opacity-60 pointer-events-none md:pointer-events-auto">
+        <ThreeDVisual />
+      </div>
 
       {/* 1. Header & Actions */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 relative z-10">
         <div>
           <h1 className="text-4xl font-bold text-white tracking-tight mb-2 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
             {greeting}, {data.timetable?.student_info?.name?.split(' ')[0] || "Student"}!
           </h1>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Quote className="w-3 h-3 text-pink-400" />
+            <Quote className={`w-3 h-3 ${accentTextColor}`} />
             <span className="italic">"{quote}"</span>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => refreshData()} disabled={isLoading} className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-500/50 transition-all text-blue-400 disabled:opacity-50">
-            {isLoading ? <div className="w-5 h-5 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" /> : <RefreshCw className="w-5 h-5" />}
+          <button onClick={() => refreshData()} disabled={isLoading} className={`p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all ${accentTextColor} disabled:opacity-50`}>
+            {isLoading ? <div className={`w-5 h-5 animate-spin rounded-full border-2 ${accentBorderColor} border-t-transparent`} /> : <RefreshCw className="w-5 h-5" />}
           </button>
           <button onClick={() => handleExport("share")} disabled={isGenerating} className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-green-500/50 transition-all text-green-400 disabled:opacity-50"><Share2 className="w-5 h-5" /></button>
           <button onClick={() => handleExport("download")} disabled={isGenerating} className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/50 transition-all text-gray-400 hover:text-primary disabled:opacity-50">
@@ -380,7 +419,7 @@ export default function DashboardPage() {
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="hidden md:flex lg:flex p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-orange-500/50 transition-all text-orange-400"
+              className={`hidden md:flex lg:flex p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all ${accentTextColor}`}
             >
               <User className="w-5 h-5" />
             </button>
@@ -391,13 +430,42 @@ export default function DashboardPage() {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute right-0 top-full mt-2 w-64 glass-card rounded-xl border border-white/10 shadow-2xl z-50 overflow-hidden"
+                  className="absolute right-0 top-full mt-2 w-80 glass-card rounded-xl border border-white/10 shadow-2xl z-50 overflow-hidden"
                 >
-                  <div className="p-4 border-b border-white/10 bg-amber-500">
-                    <p className="text-xs text-black uppercase font-bold tracking-wider mb-1">Signed in as</p>
-                    <p className="text-white text-sm font-medium truncate">{credentials?.email || "User"}</p>
+                  <div className={`p-4 border-b border-white/10 ${accentBgColor}`}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-12 h-12 rounded-full bg-black/20 flex items-center justify-center ${accentTextColor} shrink-0`}>
+                        <User className="w-6 h-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-white font-bold truncate">{data.timetable?.student_info?.name}</p>
+                        <p className="text-xs text-white/70 truncate">{credentials?.email}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-white/5 p-2 rounded border border-white/5">
+                        <p className="text-white/60 mb-1">Reg No</p>
+                        <p className="text-white font-mono">{data.timetable?.student_info?.registration_number}</p>
+                      </div>
+                      <div className="bg-white/5 p-2 rounded border border-white/5">
+                        <p className="text-white/60 mb-1">Batch</p>
+                        <p className="text-white font-mono">{data.timetable?.student_info?.batch}</p>
+                      </div>
+                      {/* ADDED SEMESTER HERE */}
+                      <div className="bg-white/5 p-2 rounded border border-white/5">
+                        <p className="text-white/60 mb-1">Semester</p>
+                        <p className="text-white font-mono">{currentSem.replace('sem', '')}</p>
+                      </div>
+                      <div className="bg-white/5 p-2 rounded border border-white/5">
+                        <p className="text-white/60 mb-1">Specialization</p>
+                        <p className="text-white truncate">{data.timetable?.student_info?.specialization?.split(' ')[0]}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-1 bg-amber-900">
+                  <div className="p-1 bg-neutral-900/50">
+                    <button onClick={() => logout()} className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 rounded-lg transition-colors">
+                      Sign Out
+                    </button>
                   </div>
                 </motion.div>
               )}
@@ -406,138 +474,63 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {fetchError && (
-        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 flex items-center gap-3 animate-slide-in">
-          <div className="bg-yellow-500/20 p-2 rounded-full">
-            <Info className="w-4 h-4 text-yellow-500" />
+      {
+        fetchError && (
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 flex items-center gap-3 animate-slide-in">
+            <div className="bg-yellow-500/20 p-2 rounded-full">
+              <Info className="w-4 h-4 text-yellow-500" />
+            </div>
+            <div>
+              <h4 className="text-yellow-500 font-bold text-sm">Academia is busy</h4>
+              <p className="text-yellow-200/70 text-xs">
+                Showing cached data. We'll keep trying to update it.
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="text-yellow-500 font-bold text-sm">Academia is busy</h4>
-            <p className="text-yellow-200/70 text-xs">
-              Showing cached data. We'll keep trying to update it.
-            </p>
-          </div>
+        )
+      }
+
+      {/* 2. Announcement Ticker (Moving Train) - Clickable */}
+      <div
+        onClick={() => router.push('/announcements')}
+        className="w-full glass-card rounded-xl p-3 flex items-center gap-4 overflow-hidden border border-white/5 bg-white/5 cursor-pointer hover:bg-white/10 transition-colors group"
+      >
+        <div className={`flex items-center gap-2 px-2 py-1 rounded-lg shrink-0 ${accentBgColor}`}>
+          <Megaphone className={`w-4 h-4 animate-pulse ${accentTextColor}`} />
+          <span className={`text-xs font-bold uppercase tracking-wider hidden sm:block ${accentTextColor}`}>Updates</span>
         </div>
-      )}
 
-      {/* 2. Hero Widget (Profile / Announcement Carousel) */}
-      <div className="relative w-full h-[220px] rounded-3xl overflow-hidden shadow-2xl group cursor-pointer border border-white/5" onClick={() => setActiveSlide((prev) => (prev + 1) % (1 + announcements.length))}>
-        <AnimatePresence mode="wait">
-          {activeSlide === 0 ? (
-            <motion.div
-              key="profile"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="absolute inset-0 bg-gradient-to-tr from-pink-600 via-purple-600 to-indigo-600 p-8 flex flex-col justify-center"
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-              <div className="relative z-10 flex items-center justify-between">
-                <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-xs text-white font-medium mb-4 shadow-lg shadow-purple-900/20">
-                    <Sparkles className="w-3 h-3 text-yellow-300" /> Student Profile
-                  </div>
-                  <h2 className="text-4xl font-bold text-white mb-2 tracking-tight">{data.timetable?.student_info?.name || "Student"}</h2>
-                  <div className="flex flex-wrap gap-x-6 gap-y-2 text-white/80 text-sm font-medium">
-                    <span className="flex items-center gap-1.5"><Hash className="w-4 h-4 opacity-70" /> {data.timetable?.student_info?.registration_number || "N/A"}</span>
-                    <span className="flex items-center gap-1.5"><Layers className="w-4 h-4 opacity-70" /> Batch {data.timetable?.student_info?.batch || "N/A"}</span>
-                    <span className="flex items-center gap-1.5"><GraduationCap className="w-4 h-4 opacity-70" /> {data.timetable?.student_info?.specialization || "General"}</span>
-                  </div>
-                </div>
-                <div className="hidden sm:block">
-                  <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center border-4 border-white/10 backdrop-blur-md">
-                    <User className="w-10 h-10 text-white" />
-                  </div>
-                </div>
+        <div className="flex-1 overflow-hidden relative h-6 mask-linear-fade">
+          {/* Mask for fade effect on edges */}
+          <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10" />
+          <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10" />
+
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: "-100%" }}
+            transition={{
+              repeat: Infinity,
+              duration: Math.max(20, announcements.length * 5),
+              ease: "linear"
+            }}
+            className="absolute flex items-center gap-8 whitespace-nowrap h-full will-change-transform"
+          >
+            {announcements.length > 0 ? announcements.map((item, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <span className={`${accentTextColor} text-lg`}>•</span>
+                <span className="text-white/90 text-sm font-medium group-hover:text-white transition-colors">
+                  {item.title}
+                </span>
+                {item.date && (
+                  <span className="text-xs text-white/50 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                    {item.date}
+                  </span>
+                )}
               </div>
-            </motion.div>
-          ) : (
-            (() => {
-              const item = announcements[activeSlide - 1];
-              if (!item) return null; // Fallback
-              const isAdmin = item.type === "admin";
-
-              return (
-                <motion.div
-                  key={`announcement-${item.id}`}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
-                  style={
-                    item.img
-                      ? {
-                        backgroundImage: `url(${item.img})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }
-                      : undefined
-                  }
-                  className={`absolute inset-0 p-8 flex flex-col justify-center relative overflow-hidden rounded-2xl shadow-inner z-0 ${item.img ? "" : isAdmin ? "bg-neutral-900" : "bg-white"
-                    }`}
-                >
-                  {item.img && <div className="absolute inset-0 bg-black/50 pointer-events-none" />}
-
-                  {isAdmin ? (
-                    <div className="absolute top-[-50%] right-[-10%] w-[300px] h-[300px] bg-white/5 rounded-full blur-3xl pointer-events-none" />
-                  ) : (
-                    <div className="absolute top-[-50%] right-[-10%] w-[300px] h-[300px] bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-                  )}
-
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg backdrop-blur-sm ${isAdmin ? "bg-white/20" : "bg-orange-100"}`}>
-                          <Calendar className={`w-5 h-5 ${isAdmin ? "text-white" : "text-orange-600"}`} />
-                        </div>
-                        <span className={`font-medium tracking-wide text-sm uppercase ${isAdmin ? "text-white/60" : "text-gray-500"}`}>
-                          {item.type || "Announcement"}
-                        </span>
-                      </div>
-                      <span className={`text-xs font-bold px-2 py-1 rounded ${isAdmin ? "bg-white/10 text-white" : "bg-black/5 text-gray-600"}`}>
-                        {item.date ? item.date.replace(/_/g, "/") : ""}
-                      </span>
-                    </div>
-
-                    <h2 className={`text-2xl font-bold mb-2 line-clamp-2 ${isAdmin ? "text-white" : item.img ? "text-white" : "text-gray-900"}`}>
-                      {item.title}
-                    </h2>
-
-                    <p className={`text-sm font-medium line-clamp-2 ${isAdmin ? "text-white/70" : item.img ? "text-white/80" : "text-gray-600"}`}>
-                      {item.desc || item.para || "No description available."}
-                    </p>
-
-                    {/* 🔗 LINK BUTTON (only appears if item.link exists) */}
-                    {item.link && (
-                      <a
-                        href={item.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-white/20 
-                            hover:bg-white/30 transition text-white text-sm font-medium backdrop-blur-sm"
-                      >
-                        Visit
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 3h7v7m0 0L10 21l-7-7L21 10z" />
-                        </svg>
-                      </a>
-                    )}
-                  </div>
-                </motion.div>
-              );
-
-
-            })()
-          )}
-        </AnimatePresence>
-
-        {/* Pagination Dots */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-          <div className={`w-1.5 h-1.5 rounded-full transition-all ${activeSlide === 0 ? "bg-white w-4" : "bg-white/30"}`} />
-          {announcements.map((_, i) => (
-            <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${activeSlide === i + 1 ? "bg-white w-4" : "bg-white/30"}`} />
-          ))}
+            )) : (
+              <span className="text-white/50 text-sm italic">No new announcements at this time.</span>
+            )}
+          </motion.div>
         </div>
       </div>
 
@@ -832,6 +825,6 @@ export default function DashboardPage() {
           })}
         </div>
       </div>
-    </div>
+    </div >
   );
 }
