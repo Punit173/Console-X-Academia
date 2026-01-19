@@ -7,7 +7,7 @@ import { useAppData } from "@/components/AppDataContext";
 import type { ApiResponse } from "@/types/academia";
 import Image from "next/image";
 import logo from "../public/assets/logo.jpg";
-import { Lock, User, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Lock, User, ArrowRight, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { DEMO_DATA } from "@/data/demo-data";
 
 export default function LoginPage() {
@@ -28,9 +28,7 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const normalizedEmail = email.includes("@")
-      ? email.trim()
-      : `${email.trim()}@srmist.edu.in`;
+    const normalizedEmail = email.trim();
 
     try {
       const res = await fetch("/api/login", {
@@ -39,7 +37,10 @@ export default function LoginPage() {
         body: JSON.stringify({ email: normalizedEmail, password }),
       });
 
-      if (!res.ok) throw new Error("API error");
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.details || errData.error || "Login failed");
+      }
 
       const json = (await res.json()) as ApiResponse;
 
@@ -48,11 +49,9 @@ export default function LoginPage() {
       setData(json);
       setCredentials({ email: normalizedEmail, password });
       router.push("/dashboard");
-    } catch {
-      setData(DEMO_DATA);
-      setCredentials({ email: "demo@srmist.edu.in", password: "demo" });
-      // router.push("/dashboard");
-      setError("Invalid email or password. Please try again.");
+    } catch (err: any) {
+      console.error("Login failed", err);
+      setError(err.message || "Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -62,7 +61,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center bg-[#090A0F] relative overflow-hidden">
-      
+
       {/* Blob Animation */}
       <style jsx>{`
         @keyframes blob {
@@ -138,12 +137,12 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <InputField
-                label="Email"
+                label="NetID / Email"
                 icon={<User className="w-5 h-5" />}
-                type="email"
+                type="text"
                 value={email}
                 onChange={setEmail}
-                placeholder="xy1234@srmist.edu.in"
+                placeholder="gn1189 or netid@srmist.edu.in"
               />
 
               <InputField
@@ -207,6 +206,9 @@ function InputField({
   onChange: (v: string) => void;
   placeholder: string;
 }) {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === "password";
+
   return (
     <div className="space-y-1">
       <label className="text-xs uppercase text-gray-500 font-semibold">
@@ -215,13 +217,26 @@ function InputField({
       <div className="relative flex items-center">
         <div className="absolute left-0 text-gray-500">{icon}</div>
         <input
-          type={type}
+          type={isPassword ? (showPassword ? "text" : "password") : type}
           value={value}
           required
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-transparent border-b border-gray-700 pl-8 py-3 text-white focus:outline-none focus:border-orange-500"
+          className="w-full bg-transparent border-b border-gray-700 pl-8 pr-8 py-3 text-white focus:outline-none focus:border-orange-500"
         />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-0 text-gray-500 hover:text-gray-300 focus:outline-none"
+          >
+            {showPassword ? (
+              <EyeOff className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

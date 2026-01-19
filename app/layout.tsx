@@ -4,10 +4,12 @@ import { AppDataProvider } from "@/components/AppDataContext";
 import { CalendarProvider } from "@/components/CalendarContext";
 import Navbar from "@/components/Navbar";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import IOSInstallPrompt from "@/components/IOSInstallPrompt";
 
 export const metadata: Metadata = {
   title: "Console X Academia",
   description: "Advanced Academic Dashboard",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -23,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
 
             <Navbar />
+            <IOSInstallPrompt />
             {/* <WhatsAppButton /> */}
 
             {/* Scrollable Content Wrapper with Mask */}

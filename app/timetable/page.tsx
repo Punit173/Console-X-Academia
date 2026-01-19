@@ -380,6 +380,11 @@ export default function TimetablePage() {
                     <div style={{ fontSize: "11px", opacity: 0.8, fontWeight: "500", marginTop: "auto" }}>
                       {slotData.code}
                     </div>
+                    {slotData.venue && slotData.venue !== "TBA" && (
+                      <div style={{ fontSize: "10px", fontWeight: "700", marginTop: "4px", opacity: 0.9 }}>
+                        {slotData.venue}
+                      </div>
+                    )}
                   </div>
                 );
               } else {
@@ -607,6 +612,11 @@ export default function TimetablePage() {
                               <div className="text-[8px] font-mono rounded px-1 w-fit mx-auto bg-black/10">
                                 {slotData.code}
                               </div>
+                              {slotData.venue && slotData.venue !== "TBA" && (
+                                <div className="text-[7px] font-bold mt-1 text-center opacity-80">
+                                  {slotData.venue}
+                                </div>
+                              )}
                             </div>
                           ) : (
                             <div className="h-full w-full" />
