@@ -1,25 +1,35 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, ArrowLeft, GraduationCap, Calculator, ChevronDown, Sparkles, Download, X, Loader2, RefreshCw, BarChart3, FileSpreadsheet, BookOpen } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, GraduationCap, Calculator, ChevronDown, Sparkles, Download, X, Loader2, RefreshCw, BarChart3, FileSpreadsheet, BookOpen, Check } from "lucide-react";
 import Link from "next/link";
 import { useAppData } from "@/components/AppDataContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Grade to grade point mapping
 const GRADE_POINTS: Record<string, number> = {
-    "O": 10.0,
-    "A+": 9.0,
-    "A": 8.0,
-    "B+": 7.0,
-    "B": 6.0,
-    "C": 5.5,
-    "Fail/Det/Abs": 0.0,
-    "F": 0.0,
-    "Ab": 0.0,
-    "I": 0.0,
-    "W": 0.0,
-    "*": 0.0
+    "O": 10,
+    "A+": 9,
+    "A": 8,
+    "B+": 7,
+    "B": 6,
+    "C": 5,
+    "U": 0, "W": 0, "Ab": 0, "I": 0, "*": 0
+};
+
+const GRADE_COLORS: Record<string, string> = {
+    "O": "text-green-500",      // Pure Green for Outstanding
+    "A+": "text-teal-400",      // Teal/Cyan for A+
+    "A": "text-cyan-400",       // Cyan/Blue for A
+    "B+": "text-blue-400",      // Blue for B+
+    "B": "text-indigo-400",     // Indigo for B
+    "C": "text-yellow-400",     // Yellow for C
+    "P": "text-orange-300",
+    "F": "text-red-500",
+    "Ab": "text-red-600",
+    "I": "text-red-600",
+    "W": "text-gray-500",
+    "U": "text-red-500"
 };
 
 const LOADING_MESSAGES = [
@@ -105,11 +115,8 @@ export default function CGPACalculatorPage() {
     useEffect(() => {
         const loadData = () => {
             try {
-                // Load Predictor Data
-                const storedPredictor = localStorage.getItem("cgpa-predictor-courses");
-                if (storedPredictor) {
-                    setPredictorCourses(JSON.parse(storedPredictor));
-                } else if (data?.timetable?.courses) {
+                // Load Predictor Data - Always from timetable (Android parity)
+                if (data?.timetable?.courses) {
                     // Default predictor population from timetable
                     const initial: CourseGrade[] = data.timetable.courses
                         .filter((c: any) => c.credit > 0)
@@ -117,7 +124,7 @@ export default function CGPACalculatorPage() {
                             title: c.course_title || "Course",
                             credit: c.credit || 3,
                             grade: "O",
-                            semester: "Prediction"
+                            semester: c.semester ? `Semester ${c.semester}` : "Current"
                         }));
                     setPredictorCourses(initial);
                 }
@@ -153,9 +160,7 @@ export default function CGPACalculatorPage() {
         const stats = calculateStats(predictorCourses);
         setPredictorCGPA(stats.gpa);
         setPredictorCredits(stats.credits);
-        if (predictorCourses.length > 0) {
-            localStorage.setItem("cgpa-predictor-courses", JSON.stringify(predictorCourses));
-        }
+        // Removed localStorage save to match Android behavior (reset on load)
     }, [predictorCourses]);
 
     useEffect(() => {
@@ -479,30 +484,66 @@ export default function CGPACalculatorPage() {
                             <button onClick={addPredictorCourse} className="bg-white text-black font-bold px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center gap-2 text-sm"><Plus className="w-4 h-4" /> Add Prediction Course</button>
                         </div>
 
-                        {/* Predictor List */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                            {(() => {
-                                const { grouped, sortedKeys } = groupCourses(predictorCourses);
-                                return sortedKeys.map(key => {
-                                    const stats = calculateStats(grouped[key]);
-                                    return (
-                                        <div key={key} className="glass-card rounded-2xl border-white/5 overflow-hidden flex flex-col">
-                                            <div className="px-4 py-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
-                                                <h3 className="text-sm font-bold text-white flex items-center gap-2"><div className="w-1.5 h-1.5 bg-yellow-500/50 rounded-full" /> {key}</h3>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-bold text-gray-400 bg-white/5 px-2 py-0.5 rounded-full">{stats.credits} Cr</span>
-                                                    <span className="text-[10px] font-bold text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-full border border-yellow-500/20">SGPA {(stats.gpa || 0).toFixed(3)}</span>
+                        {/* Predictor List - Flat List (Android Style) */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {predictorCourses.length === 0 ? (
+                                <div className="text-center py-12 text-gray-500">
+                                    <p className="text-xl font-bold">No courses found</p>
+                                    <p className="text-sm">Add courses to calculate CGPA</p>
+                                </div>
+                            ) : (
+                                predictorCourses.map((course, i) => (
+                                    <div key={i} className="glass-card rounded-2xl border border-white/5 p-4 bg-[#111] relative hover:z-50 transition-all">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className="flex-1 pr-2">
+                                                <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">{course.semester || "Current"}</div>
+                                                <h3 className="text-base font-medium text-white line-clamp-2">{course.title || `Course ${i + 1}`}</h3>
+                                            </div>
+                                            <button onClick={() => removeCourse(true, course)} className="text-gray-600 hover:text-red-400 p-1"><Trash2 className="w-5 h-5" /></button>
+                                        </div>
+
+                                        <div className="flex gap-4">
+                                            <div className="flex-1 space-y-1">
+                                                <label className="text-xs text-gray-500">Credits</label>
+                                                <div className="h-12 bg-black rounded-lg px-3 flex items-center">
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        max="20"
+                                                        value={course.credit}
+                                                        onChange={e => updateCourse(true, course, "credit", Number(e.target.value) || 0)}
+                                                        className="w-full bg-transparent border-none p-0 text-white font-mono focus:ring-0"
+                                                    />
                                                 </div>
                                             </div>
-                                            <div className="p-2 space-y-1">
-                                                {grouped[key].map((course, i) => (
-                                                    <CourseRow key={i} course={course} onRemove={() => removeCourse(true, course)} onUpdate={(field, val) => updateCourse(true, course, field, val)} />
-                                                ))}
+                                            <div className="flex-[1.5] space-y-1">
+                                                <label className="text-xs text-gray-500">Grade</label>
+                                                <div className="relative group h-12 bg-black rounded-lg w-full">
+                                                    {/* Trigger */}
+                                                    <div className="absolute inset-0 px-3 flex items-center justify-between cursor-pointer">
+                                                        <span className="text-white font-bold">{course.grade}</span>
+                                                        <ChevronDown className="w-4 h-4 text-gray-500 group-hover:rotate-180 transition-transform" />
+                                                    </div>
+
+                                                    {/* Custom Dropdown Menu */}
+                                                    <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-900 border border-white/20 rounded-lg shadow-2xl overflow-hidden hidden group-hover:block z-50 max-h-48 overflow-y-auto">
+                                                        {Object.keys(GRADE_POINTS).map(g => (
+                                                            <div
+                                                                key={g}
+                                                                onClick={() => updateCourse(true, course, "grade", g)}
+                                                                className="px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer flex items-center justify-between transition-colors"
+                                                            >
+                                                                {g}
+                                                                {course.grade === g && <Check className="w-3 h-3 text-orange-500" />}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    );
-                                });
-                            })()}
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </motion.div>
                 )}
@@ -599,7 +640,7 @@ export default function CGPACalculatorPage() {
                                                                 <span className="text-[10px] font-bold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">SGPA {(stats.gpa || 0).toFixed(3)}</span>
                                                             </div>
                                                         </div>
-                                                        <div className="p-2 space-y-1">
+                                                        <div className="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
                                                             {grouped[key].map((course, i) => (
                                                                 <CourseRow key={i} course={course} onRemove={() => removeCourse(false, course)} onUpdate={(field, val) => updateCourse(false, course, field, val)} />
                                                             ))}
@@ -713,7 +754,10 @@ function CourseRow({ course, onRemove, onUpdate }: { course: CourseGrade, onRemo
                 <select
                     value={course.grade}
                     onChange={e => onUpdate("grade", e.target.value)}
-                    className={`w-full bg-transparent text-xs font-bold text-center focus:ring-0 cursor-pointer appearance-none ${course.originalGrade !== undefined && course.grade !== course.originalGrade ? 'text-orange-400' : 'text-white'}`}
+                    className={`w-full bg-transparent text-xs font-bold text-center focus:ring-0 cursor-pointer appearance-none ${course.originalGrade !== undefined && course.grade !== course.originalGrade
+                        ? 'text-orange-400'
+                        : (GRADE_COLORS[course.grade] || 'text-white')
+                        }`}
                 >
                     {Object.keys(GRADE_POINTS).map(g => <option key={g} value={g} className="bg-neutral-900 text-white">{g}</option>)}
                 </select>
