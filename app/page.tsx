@@ -175,6 +175,13 @@ export default function LoginPage() {
             <p className="text-center text-[10px] text-gray-600">
               Console v1.0
             </p>
+
+            <div className="pt-4 border-t border-white/10 text-center">
+              <a href="/calculator" className="text-sm font-bold text-orange-500 hover:text-orange-400 transition-colors flex items-center justify-center gap-2">
+                <span className="bg-orange-500/10 p-2 rounded-lg">Use CGPA Calculator</span>
+              </a>
+              <p className="text-[10px] text-gray-500 mt-2">No login required</p>
+            </div>
           </div>
         </div>
       </div>
