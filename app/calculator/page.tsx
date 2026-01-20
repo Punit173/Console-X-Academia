@@ -44,7 +44,7 @@ interface CourseGrade {
 export default function CGPACalculatorPage() {
     const { data } = useAppData();
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [activeTab, setActiveTab] = useState<'predictor' | 'results'>('predictor');
+    const [activeTab, setActiveTab] = useState<'predictor' | 'results'>('results');
 
     // --- State: Predictor ---
     const [predictorCourses, setPredictorCourses] = useState<CourseGrade[]>([]);
