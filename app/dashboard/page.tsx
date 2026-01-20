@@ -256,6 +256,12 @@ export default function DashboardPage() {
           <span className="text-4xl">🔐</span>
         </div>
         <h2 className="text-xl font-bold text-white mb-2">Authentication Required</h2>
+        <Link
+          href="/"
+          className="mt-4 px-6 py-2 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20"
+        >
+          Login
+        </Link>
       </div>
     );
   }

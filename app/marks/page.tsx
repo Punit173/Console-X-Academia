@@ -12,6 +12,7 @@ import {
   YAxis
 } from "recharts";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Calculator, AlertTriangle, ArrowLeft } from "lucide-react";
 
 // --- Predictor Types & Constants ---
@@ -93,9 +94,15 @@ export default function MarksPage() {
         <h2 className="text-2xl font-semibold text-white mb-3">
           Authentication Required
         </h2>
-        <p className="text-white/40 text-center max-w-md">
+        <p className="text-white/40 text-center max-w-md mb-6">
           Please login from the home page to view your marks.
         </p>
+        <Link
+          href="/"
+          className="px-8 py-3 bg-[#62D834] hover:bg-[#50b328] text-black font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(98,216,52,0.3)] hover:shadow-[0_0_30px_rgba(98,216,52,0.5)] active:scale-95"
+        >
+          Login to Continue
+        </Link>
       </div>
     );
   }
@@ -404,8 +411,8 @@ export default function MarksPage() {
                               key={g}
                               onClick={() => updateCourse(course.id, 'targetGrade', g)}
                               className={`text-[10px] sm:text-xs py-2 rounded-lg transition-all font-bold ${course.targetGrade === g
-                                  ? "bg-[#62D834] text-black shadow-lg shadow-green-900/20"
-                                  : "bg-zinc-900 text-white/40 hover:bg-zinc-800 hover:text-white"
+                                ? "bg-[#62D834] text-black shadow-lg shadow-green-900/20"
+                                : "bg-zinc-900 text-white/40 hover:bg-zinc-800 hover:text-white"
                                 }`}
                             >
                               {g}

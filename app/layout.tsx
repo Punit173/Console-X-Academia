@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   title: "Console X Academia",
   description: "Advanced Academic Dashboard",
   manifest: "/manifest.json",
+  icons: {
+    apple: "/assets/logo.jpg",
+    icon: "/assets/logo.jpg"
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

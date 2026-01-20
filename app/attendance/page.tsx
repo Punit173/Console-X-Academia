@@ -56,7 +56,13 @@ export default function AttendancePage() {
           <span className="text-4xl text-white">🔐</span>
         </div>
         <h2 className="text-xl font-bold text-white mb-2">Authentication Required</h2>
-        <p className="text-blue-300/60 text-sm">Please login from the home page to view your attendance.</p>
+        <p className="text-blue-300/60 text-sm mb-6">Please login from the home page to view your attendance.</p>
+        <Link
+          href="/"
+          className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+        >
+          Login Now
+        </Link>
       </div>
     );
   }
