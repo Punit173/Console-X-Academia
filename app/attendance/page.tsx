@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { generateStandardPDF } from "@/utils/pdf-generator";
 import Link from "next/link";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { Share2, Download, ArrowUpRight, Clock, UserCheck, BarChart2 as BarChartIcon } from "lucide-react";
 import {
   BarChart,
@@ -78,57 +80,117 @@ export default function AttendancePage() {
 
 
   const handleExport = (action: 'download' | 'share') => {
+    if (!data || !attendance) return;
     setIsGenerating(true);
-    generateStandardPDF(
-      "Attendance Report",
-      data,
-      (doc, formatNumber, autoTable) => {
-        // Attendance Table
-        const tableRows = Object.entries(courses).map(([code, c]: any) => {
-          // Robustly find title using fuzzy matching
-          const matchedCourse = data.timetable?.courses?.find((tc: any) => {
-            const tCode = (tc.course_code || "").toLowerCase().trim();
-            const aCode = code.toLowerCase().trim();
-            if (!tCode) return false;
-            return aCode === tCode || aCode.startsWith(tCode) || aCode.includes(tCode) || tCode.includes(aCode);
-          });
-          const title = matchedCourse?.course_title || c.course_title || code.replace(/Regular|Arrear|Theory|Practical/gi, "").trim();
 
-          return [
-            title, // Show Title primarily
-            `${c.total_hours_conducted}`,
-            `${c.total_hours_absent}`,
-            `${c.attendance_percentage.toFixed(1)}%`,
-            getAttendanceStatus(c.attendance_percentage)
-          ];
-        });
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
 
-        autoTable(doc, {
-          startY: 65,
-          head: [['Course', 'Conducted', 'Absent', 'Percentage', 'Status']],
-          body: tableRows,
-          theme: 'grid',
-          styles: {
-            fillColor: [2, 6, 23], // Slate 950 (Black-ish)
-            textColor: [255, 255, 255],
-            lineColor: [30, 58, 138], // Blue 800
-            lineWidth: 0.1,
-          },
-          headStyles: {
-            fillColor: [23, 37, 84], // Blue 950
-            textColor: [147, 197, 253], // Blue 300
-            fontStyle: 'bold',
-            lineColor: [30, 58, 138],
-          },
-          alternateRowStyles: {
-            fillColor: [15, 23, 42], // Slate 900
-          },
-        });
+    // 1. Dark Background
+    doc.setFillColor(2, 6, 23); // Slate 950 (Deep Dark)
+    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+    // 2. Grid Pattern (Simulate CSS grid)
+    doc.setDrawColor(30, 41, 59); // Slate 800 lines
+    const step = 10;
+    for (let x = 0; x <= pageWidth; x += step) {
+      doc.line(x, 0, x, pageHeight);
+    }
+    for (let y = 0; y <= pageHeight; y += step) {
+      doc.line(0, y, pageWidth, y);
+    }
+
+    // 3. Title & Metadata
+    doc.setFontSize(22);
+    doc.setTextColor(20, 184, 166); // Teal 500
+    doc.text('CONSOLE X ACADEMIA', 14, 20);
+
+    doc.setFontSize(16);
+    doc.setTextColor(255, 255, 255);
+    doc.text('Attendance Report', 14, 35);
+
+    doc.setFontSize(10);
+    doc.setTextColor(148, 163, 184); // Slate 400
+    const studentInfo = (data as any).student_info || {};
+    doc.text(`Name: ${studentInfo.student_name || 'Student'}`, 14, 45);
+    doc.text(`Reg No: ${studentInfo.register_number || 'N/A'}`, 14, 50);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 55);
+
+    // 4. Overall Stats
+    doc.setFontSize(12);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`Overall Attendance: ${attendance.overall_attendance.toFixed(1)}%`, 14, 70);
+
+    // 5. Transform Data
+    const tableRows = Object.entries(courses).map(([code, c]: any) => {
+      // Robust Course Title Match
+      const matchedCourse = data.timetable?.courses?.find((tc: any) => {
+        const tCode = (tc.course_code || "").toLowerCase().trim();
+        const aCode = c.course_code?.toLowerCase().trim() || code.toLowerCase().trim();
+        if (!tCode) return false;
+        return aCode === tCode || aCode.startsWith(tCode) || tCode.includes(aCode);
+      });
+      const title = matchedCourse?.course_title || c.course_title || code;
+
+      // Robust Data Access (Fix undefined issue)
+      const conducted = c.hours_conducted || c.total_hours_conducted || 0;
+      const absent = c.hours_absent || c.total_hours_absent || 0;
+      const present = conducted - absent;
+      const percentage = c.attendance_percentage || 0;
+
+      // Margin Logic
+      const threshold = 75;
+      let marginText = "";
+      if (percentage >= threshold) {
+        const maxTotal = present / (threshold / 100);
+        const safeBunks = Math.floor(maxTotal - conducted);
+        marginText = safeBunks > 0 ? `Margin: ${safeBunks} hrs` : "No Margin";
+      } else {
+        const targetRatio = threshold / 100;
+        const needed = Math.ceil((targetRatio * conducted - present) / (1 - targetRatio));
+        marginText = `Required: ${needed} hrs`;
+      }
+
+      return [
+        title,
+        `${conducted}`,
+        `${absent}`,
+        `${percentage.toFixed(1)}%`,
+        marginText,
+        getAttendanceStatus(percentage)
+      ];
+    });
+
+    // 6. Generate Table
+    autoTable(doc, {
+      startY: 80,
+      head: [['Course', 'Conducted', 'Absent', 'Percentage', 'Margin', 'Status']],
+      body: tableRows,
+      theme: 'grid',
+      styles: {
+        fillColor: [2, 6, 23], // Slate 950
+        textColor: [226, 232, 240], // Slate 200
+        lineColor: [30, 41, 59], // Slate 800
+        lineWidth: 0.1,
       },
-      action,
-      () => setIsGenerating(false),
-      () => setIsGenerating(false)
-    );
+      headStyles: {
+        fillColor: [15, 23, 42], // Slate 900
+        textColor: [45, 212, 191], // Teal 400
+        fontStyle: 'bold',
+        lineColor: [30, 41, 59],
+      },
+      alternateRowStyles: {
+        fillColor: [2, 6, 23], // Keep dark
+      },
+    });
+
+    if (action === 'download') {
+      doc.save('Attendance_Report.pdf');
+      setIsGenerating(false);
+    } else {
+      setIsGenerating(false);
+    }
   };
 
   return (

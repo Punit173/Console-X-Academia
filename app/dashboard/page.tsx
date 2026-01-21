@@ -676,7 +676,7 @@ export default function DashboardPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-bold truncate">{cls.title}</p>
                     <div className="flex items-center gap-3 mt-1">
-                      <span className="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <span className="text-[10px] text-teal-300 font-bold bg-teal-500/20 border border-teal-500/30 px-2 py-0.5 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(20,184,166,0.3)]">
                         <MapPin className="w-3 h-3" /> {cls.venue}
                       </span>
                       <span className="text-[10px] text-gray-500">{cls.code}</span>
