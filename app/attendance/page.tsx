@@ -6,6 +6,17 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { generateStandardPDF } from "@/utils/pdf-generator";
 import Link from "next/link";
+import { Share2, Download, ArrowUpRight, Clock, UserCheck, BarChart2 as BarChartIcon } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from "recharts";
 
 
 export default function AttendancePage() {
@@ -24,29 +35,24 @@ export default function AttendancePage() {
 
   // --- Theme Helpers: Strict Blue/White/Black Palette ---
 
+  // --- Theme Helpers: "Comfortable" Palette (Teal / Amber / Rose) ---
   const getAttendanceColor = (percentage: number) => {
-    // High: Pure White (Glowing)
-    if (percentage >= 80) return "text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]";
-    // Mid: Light Blue
-    if (percentage >= 75) return "text-blue-300 drop-shadow-[0_0_8px_rgba(147,197,253,0.3)]";
-    // Low: Mid/Dark Blue (Dimmed)
-    return "text-blue-600";
+    if (percentage >= 75) return "text-teal-400"; // Calming Teal
+    if (percentage >= 65) return "text-amber-400"; // Warm Amber (Warning)
+    return "text-rose-400"; // Softer Rose (Critical)
   };
 
   const getProgressBarColor = (percentage: number) => {
-    // High: White Bar
-    if (percentage >= 80) return "bg-white shadow-[0_0_10px_rgba(255,255,255,0.4)]";
-    // Mid: Light Blue Bar
-    if (percentage >= 75) return "bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.3)]";
-    // Low: Navy Blue Bar
-    return "bg-blue-800";
+    if (percentage >= 75) return "bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,0.4)]";
+    if (percentage >= 65) return "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]";
+    return "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]";
   };
 
   const getAttendanceStatus = (percentage: number) => {
-    if (percentage >= 80) return "Excellent";
+    if (percentage >= 80) return "Great";
     if (percentage >= 75) return "Good";
-    if (percentage >= 70) return "Average";
-    return "Low";
+    if (percentage >= 65) return "Warning";
+    return "Action Needed";
   };
 
   if (!data) {
@@ -79,9 +85,14 @@ export default function AttendancePage() {
       (doc, formatNumber, autoTable) => {
         // Attendance Table
         const tableRows = Object.entries(courses).map(([code, c]: any) => {
-          // Robustly find title
-          const timetableCourse = data.timetable?.courses?.find((tc: any) => tc.course_code === code);
-          const title = c.course_title || timetableCourse?.course_title || code;
+          // Robustly find title using fuzzy matching
+          const matchedCourse = data.timetable?.courses?.find((tc: any) => {
+            const tCode = (tc.course_code || "").toLowerCase().trim();
+            const aCode = code.toLowerCase().trim();
+            if (!tCode) return false;
+            return aCode === tCode || aCode.startsWith(tCode) || aCode.includes(tCode) || tCode.includes(aCode);
+          });
+          const title = matchedCourse?.course_title || c.course_title || code.replace(/Regular|Arrear|Theory|Practical/gi, "").trim();
 
           return [
             title, // Show Title primarily
@@ -137,49 +148,35 @@ export default function AttendancePage() {
         </div>
 
         {/* Actions */}
+        {/* Actions - Combined or Simplified if needed, currently kept minimal or removed as per request to match clean UI */}
         <div className="flex items-center gap-3">
-          {/* Share Button */}
+          {/* Buttons removed to match the reference 'clean' look if desired, or keep them if functionality is needed. 
+                 User said "attendance dashboar ui is not good", implying they want the NEW look. 
+                 The new look in screenshot DOES have buttons for Share, Predict, Download. 
+                 Wait, the screenshot HAS them: Share (icon), Predict (Button), Download (Icon).
+                 I should aligning them to look exactly like the screenshot. 
+             */}
           <button
             onClick={() => handleExport('share')}
             disabled={isGenerating}
-            className="p-3 rounded-xl border border-blue-800/40 bg-blue-950/20 hover:bg-blue-900/40 hover:border-blue-400/50 transition-all duration-200 group text-blue-300 disabled:opacity-50 backdrop-blur-sm"
-            title="Share PDF"
+            className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all text-blue-400"
           >
-            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
+            <Share2 className="w-5 h-5" />
           </button>
 
-          {/* Predict Button */}
           <Link
             href="/attendance/predict"
-            className="p-3 rounded-xl border border-blue-800/40 bg-blue-950/20 hover:bg-blue-900/40 hover:border-purple-400/50 transition-all duration-200 group text-purple-300 backdrop-blur-sm flex items-center gap-2"
-            title="Predict Attendance"
+            className="px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all text-white font-semibold flex items-center gap-2"
           >
-            <span className="text-sm font-bold hidden md:block">Predict</span>
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-            </svg>
+            Predict <ArrowUpRight className="w-4 h-4" />
           </Link>
 
-          {/* Export PDF Button */}
           <button
             onClick={() => handleExport('download')}
             disabled={isGenerating}
-            className="p-3 rounded-xl border border-blue-800/40 bg-blue-950/20 hover:bg-blue-900/40 hover:border-white/50 transition-all duration-200 group text-white disabled:opacity-50 backdrop-blur-sm"
-            title="Download PDF"
+            className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all text-white"
           >
-            {isGenerating ? (
-              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : (
-              <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-            )
-            }
+            <Download className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -188,55 +185,106 @@ export default function AttendancePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {/* Overall Attendance */}
-        <div className="relative overflow-hidden rounded-2xl border border-blue-900/40 bg-blue-500 p-6 group hover:border-blue-500/30 transition-colors duration-300 shadow-lg shadow-black/40">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity text-white">
-            <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg>
+        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
+          <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${getAttendanceColor(attendance.overall_attendance)}`}>
+            <BarChartIcon className="w-24 h-24" />
           </div>
-          <p className="text-xs font-semibold text-blue-100 uppercase tracking-widest mb-4">Overall Attendance</p>
-          <div className="flex items-baseline gap-2">
-            <span className={`text-5xl font-bold ${getAttendanceColor(attendance.overall_attendance)}`}>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Overall Attendance</p>
+          <div className="flex items-baseline gap-2 relative z-10">
+            <span className={`text-5xl font-black ${getAttendanceColor(attendance.overall_attendance)}`}>
               {attendance.overall_attendance.toFixed(1)}
             </span>
-            <span className="text-xl text-blue-100/80">%</span>
+            <span className="text-xl text-gray-400">%</span>
           </div>
-          {/* Progress Bar Container: Dark Navy */}
-          <div className="mt-4 w-full bg-blue-950 rounded-full h-2 overflow-hidden shadow-inner border border-blue-900/30">
+          {/* Progress Bar Container */}
+          <div className="mt-4 w-full bg-slate-800/50 rounded-full h-2 overflow-hidden shadow-inner border border-white/5 relative z-10">
             <div
               className={`h-full ${getProgressBarColor(attendance.overall_attendance)} transition-all duration-1000 relative`}
               style={{ width: `${Math.min(attendance.overall_attendance, 100)}%` }}
             >
               {/* Subtle Shine */}
-              <div className="absolute top-0 right-0 bottom-0 w-full bg-gradient-to-l from-white/10 to-transparent"></div>
+              <div className="absolute top-0 right-0 bottom-0 w-full bg-gradient-to-l from-white/20 to-transparent"></div>
             </div>
           </div>
-          <p className="mt-2 text-xs text-blue-100/70">
-            Status: <span className="text-white font-medium tracking-wide">{getAttendanceStatus(attendance.overall_attendance)}</span>
+          <p className="mt-2 text-xs text-gray-400">
+            Status: <span className={`font-bold tracking-wide ${getAttendanceColor(attendance.overall_attendance)}`}>{getAttendanceStatus(attendance.overall_attendance)}</span>
           </p>
         </div>
 
         {/* Total Hours Conducted */}
-        <div className="relative overflow-hidden rounded-2xl border border-blue-900/40 bg-blue-500 backdrop-blur-md p-6 group hover:border-blue-500/30 transition-colors duration-300 shadow-lg shadow-black/40">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity text-blue-300">
-            <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
+        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-blue-400">
+            <Clock className="w-24 h-24" />
           </div>
-          <p className="text-xs font-semibold text-blue-100 uppercase tracking-widest mb-4">Hours Conducted</p>
-          <p className="text-5xl font-bold text-white">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Hours Conducted</p>
+          <p className="text-5xl font-black text-white relative z-10">
             {attendance.total_hours_conducted}
           </p>
-          <p className="mt-4 text-xs text-blue-100/70">Total academic hours scheduled so far.</p>
+          <p className="mt-4 text-xs text-gray-400 relative z-10">Total academic hours scheduled so far.</p>
         </div>
 
         {/* Total Hours Absent */}
-        <div className="relative overflow-hidden rounded-2xl border border-blue-900/40 bg-blue-500 backdrop-blur-md p-6 group hover:border-blue-400/30 transition-colors duration-300 shadow-lg shadow-black/40">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity text-blue-500">
-            <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-red-400">
+            <UserCheck className="w-24 h-24" />
           </div>
-          <p className="text-xs font-semibold text-blue-100 uppercase tracking-widest mb-4">Hours Absent</p>
-          {/* Changed from Red to Blue-300 to match strict palette */}
-          <p className="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(147,197,253,0.3)]">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Hours Absent</p>
+          <p className="text-5xl font-black text-white relative z-10">
             {attendance.total_hours_absent}
           </p>
-          <p className="mt-4 text-xs text-blue-100/70">Total hours missed across all subjects.</p>
+          <p className="mt-4 text-xs text-gray-400 relative z-10">Total hours missed across all subjects.</p>
+        </div>
+      </div>
+
+      {/* Chart Section */}
+      <div className="mt-8 mb-8">
+        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+          <span className="w-1 h-6 bg-teal-500 rounded-full"></span>
+          Subject Performance
+        </h2>
+        <div className="h-[400px] w-full glass-card rounded-2xl p-6 bg-slate-950/60 backdrop-blur-md border border-white/5 shadow-lg shadow-black/40">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={Object.entries(courses).map(([code, c]: any) => {
+                const matchedCourse = data.timetable?.courses?.find((tc: any) => {
+                  const tCode = (tc.course_code || "").toLowerCase().trim();
+                  const aCode = code.toLowerCase().trim();
+                  return aCode === tCode || aCode.startsWith(tCode) || aCode.includes(tCode);
+                });
+                const name = matchedCourse?.course_title || c.course_title || code.replace(/Regular|Arrear/gi, "").trim();
+                const conducted = c.hours_conducted || c.total_hours_conducted || 0;
+                const absent = c.hours_absent || c.total_hours_absent || 0;
+                return {
+                  name,
+                  Present: conducted - absent,
+                  Absent: absent,
+                };
+              })}
+              margin={{ top: 20, right: 30, left: 0, bottom: 80 }} // Bottom margin for labels
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+              <XAxis
+                dataKey="name"
+                angle={-45}
+                textAnchor="end"
+                height={80}
+                stroke="#94a3b8"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                itemStyle={{ fontSize: '12px' }}
+                labelStyle={{ color: '#94a3b8', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}
+                cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+              />
+              <Legend wrapperStyle={{ paddingTop: '20px' }} />
+              <Bar dataKey="Present" stackId="a" fill="#14b8a6" radius={[0, 0, 4, 4]} barSize={30} />
+              <Bar dataKey="Absent" stackId="a" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={30} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
@@ -252,103 +300,107 @@ export default function AttendancePage() {
             <p className="text-blue-200/50">No course attendance data available.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.entries(courses).map(([code, c]: any, index) => {
-              // --- Margin Calculation Logic ---
-              // Threshold: 75%
-              const threshold = 75;
-              const conducted = c.total_hours_conducted || 0;
-              const absent = c.total_hours_absent || 0;
-              const present = conducted - absent;
-              const percentage = c.attendance_percentage || 0;
+          <div className="rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md overflow-hidden shadow-lg shadow-black/40">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="hidden md:table-header-group">
+                  <tr className="border-b border-white/5 bg-white/5">
+                    <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Course</th>
+                    <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Attendance</th>
+                    <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Hours</th>
+                    <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 md:divide-none">
+                  {Object.entries(courses).map(([code, c]: any, index) => {
+                    // --- Robust Title Matching ---
+                    const matchedCourse = data.timetable?.courses?.find((tc: any) => {
+                      const tCode = (tc.course_code || "").toLowerCase().trim();
+                      const aCode = code.toLowerCase().trim();
+                      if (!tCode) return false;
+                      return aCode === tCode || aCode.startsWith(tCode) || aCode.includes(tCode) || tCode.includes(aCode);
+                    });
+                    const displayName = matchedCourse?.course_title || c.course_title || code.replace(/Regular|Arrear|Theory|Practical/gi, "").trim();
 
-              let marginMsg = "";
-              let marginType: "safe" | "danger" | "critical" = "safe";
-              let marginValue = 0;
+                    // --- Margin Calculation Logic ---
+                    const threshold = 75;
+                    const conducted = c.hours_conducted || c.total_hours_conducted || 0;
+                    const absent = c.hours_absent || c.total_hours_absent || 0;
+                    const present = conducted - absent;
+                    const percentage = c.attendance_percentage || 0;
 
-              if (percentage >= threshold) {
-                // Safe to Bunk
-                // X <= (Present / 0.75) - Conducted
-                const maxTotal = present / (threshold / 100);
-                const safeBunks = Math.floor(maxTotal - conducted);
-                marginValue = safeBunks;
+                    let marginMsg = "";
+                    let marginType: "safe" | "warning" | "danger" = "safe";
 
-                if (safeBunks > 0) {
-                  marginMsg = `Safe to bunk ${safeBunks} hrs`;
-                  marginType = "safe";
-                } else {
-                  marginMsg = "Don't miss any classes!";
-                  marginType = "critical";
-                }
-              } else {
-                // Required to Attend
-                // Y >= (0.75 * Conducted - Present) / 0.25
-                const targetRatio = threshold / 100;
-                const needed = Math.ceil((targetRatio * conducted - present) / (1 - targetRatio));
-                marginValue = needed;
-                marginMsg = `Must attend ${needed} hrs`;
-                marginType = "danger";
-              }
+                    if (percentage >= threshold) {
+                      const maxTotal = present / (threshold / 100);
+                      const safeBunks = Math.floor(maxTotal - conducted);
+                      if (safeBunks > 0) {
+                        marginMsg = `Margin: ${safeBunks} hrs`;
+                        marginType = "safe";
+                      } else {
+                        marginMsg = "No Margin";
+                        marginType = "warning";
+                      }
+                    } else {
+                      const targetRatio = threshold / 100;
+                      const needed = Math.ceil((targetRatio * conducted - present) / (1 - targetRatio));
+                      marginMsg = `Required: ${needed} hrs`;
+                      marginType = "danger";
+                    }
 
-              return (
-                <div
-                  key={code}
-                  className="relative rounded-xl p-6 border border-blue-900/30 bg-slate-950/60 hover:bg-blue-950/30 hover:border-blue-500/40 transition-all duration-300 flex flex-col justify-between gap-6 group overflow-hidden h-full min-h-[180px]"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  {/* Subtle White/Blue Glow on Hover */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                    return (
+                      <tr
+                        key={code}
+                        className="group transition-colors border-b md:border-b border-white/5 last:border-0 grid grid-cols-2 gap-4 md:table-row bg-white/5 md:bg-transparent rounded-xl md:rounded-none p-4 md:p-0 mb-4 md:mb-0"
+                      >
+                        <td className="col-span-2 md:col-auto md:table-cell p-0 md:p-4">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-gray-200 text-base mb-1 group-hover:text-white transition-colors">{displayName}</span>
+                            <span className="text-[10px] font-mono text-gray-600 group-hover:text-gray-500 bg-black/20 px-1.5 py-0.5 rounded w-fit capitalize transition-colors">
+                              {code.replace(/Regular|Arrear/gi, "").toLowerCase()}
+                            </span>
+                          </div>
+                        </td>
 
-                  {/* Course Info */}
-                  <div className="flex-1 min-w-0 relative z-10">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono font-bold text-blue-200 bg-blue-950/80 border border-blue-800 px-2 py-0.5 rounded shadow-sm">
-                          {code}
-                        </span>
-                      </div>
-                      {/* Badge for Margin */}
-                      <div className={`text-[10px] font-bold px-2 py-1 rounded-full border ${marginType === 'safe' ? 'bg-blue-900/30 border-blue-500/30 text-blue-300' :
-                        marginType === 'danger' ? 'bg-red-900/30 border-red-500/30 text-red-300' :
-                          'bg-yellow-900/30 border-yellow-500/30 text-yellow-300'
-                        }`}>
-                        {marginMsg}
-                      </div>
-                    </div>
-                    <h3 className="font-bold text-white text-xl leading-tight group-hover:text-blue-100 transition-colors">
-                      {c.course_title || code}
-                    </h3>
-                    <div className="flex gap-4 mt-4 text-xs text-blue-100/70">
-                      <span className="flex items-center gap-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-                        <strong className="text-white">{c.total_hours_conducted}</strong> Conducted
-                      </span>
-                      <span className="flex items-center gap-1">
-                        {/* Absent indicator uses darker blue */}
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
-                        <strong className="text-blue-200">{c.total_hours_absent}</strong> Absent
-                      </span>
-                    </div>
-                  </div>
+                        <td className="md:table-cell p-0 md:p-4 text-center">
+                          <div className="flex flex-col items-center justify-center h-full">
+                            <span className={`text-xl font-bold ${getAttendanceColor(percentage)}`}>
+                              {percentage.toFixed(1)}%
+                            </span>
+                            <span className="text-[9px] font-medium text-gray-500 uppercase tracking-widest mt-0.5">
+                              {getAttendanceStatus(percentage)}
+                            </span>
+                          </div>
+                        </td>
 
-                  {/* Percentage & Bar */}
-                  <div className="flex-shrink-0 w-full sm:w-48 flex flex-col items-end relative z-10">
-                    <div className="flex items-baseline gap-1 mb-2">
-                      <span className={`text-2xl font-bold ${getAttendanceColor(c.attendance_percentage)}`}>
-                        {c.attendance_percentage.toFixed(1)}%
-                      </span>
-                      <span className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">{getAttendanceStatus(c.attendance_percentage)}</span>
-                    </div>
-                    <div className="w-full bg-blue-950 rounded-full h-1.5 overflow-hidden shadow-inner border border-white/5">
-                      <div
-                        className={`h-full ${getProgressBarColor(c.attendance_percentage)} transition-all duration-1000`}
-                        style={{ width: `${Math.min(c.attendance_percentage, 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                        <td className="md:table-cell p-0 md:p-4 text-center">
+                          <div className="flex flex-col gap-1 items-center justify-center h-full">
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-gray-500 w-8 text-right">Done</span>
+                              <span className="text-gray-300 font-medium">{conducted}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-gray-500 w-8 text-right">Missed</span>
+                              <span className="text-gray-300 font-medium">{absent}</span>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="col-span-2 md:col-auto md:table-cell p-0 md:p-4 text-center md:text-right flex items-center justify-center md:block">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${marginType === 'safe' ? 'bg-teal-500/10 border-teal-500/20 text-teal-300' :
+                            marginType === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' :
+                              'bg-rose-500/10 border-rose-500/20 text-rose-300'
+                            }`}>
+                            {marginMsg}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

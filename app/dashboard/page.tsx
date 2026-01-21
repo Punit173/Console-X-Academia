@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  ReferenceLine,
 } from "recharts";
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
@@ -274,15 +275,33 @@ export default function DashboardPage() {
 
   // --- Chart Data Preparation ---
   const attendanceData = Object.entries(data?.attendance?.attendance?.courses || {}).map(([code, c]: any) => {
-    // Lookup title from timetable
-    const courseInfo = data.timetable?.courses?.find((tc: any) => tc.course_code === code);
-    const displayName = courseInfo?.course_title || code.replace(/Theory|Practical/gi, "").trim();
+    let displayName = code;
+
+    // 1. Try to find a matching course in timetable using fuzzy matching
+    // We check if the attendance code includes the timetable code or vice versa
+    const matchedCourse = data.timetable?.courses?.find((tc: any) => {
+      const tCode = (tc.course_code || "").toLowerCase().trim();
+      const aCode = code.toLowerCase().trim();
+      // Skip empty codes
+      if (!tCode) return false;
+
+      // Exact or prefix/suffix match
+      // e.g. "21IPE314T" in "21IPE314TRegular"
+      return aCode === tCode || aCode.startsWith(tCode) || aCode.includes(tCode) || tCode.includes(aCode);
+    });
+
+    if (matchedCourse?.course_title) {
+      displayName = matchedCourse.course_title;
+    } else {
+      // Fallback: Manually clean up the code if no timetable match found
+      displayName = code.replace(/Regular|Arrear|Theory|Practical|Lab/gi, "").trim();
+    }
 
     return {
       name: displayName,
       attendance: c.attendance_percentage,
-      conducted: c.total_hours_conducted,
-      attended: c.total_hours_conducted - c.total_hours_absent,
+      conducted: c.hours_conducted || c.total_hours_conducted,
+      attended: (c.hours_conducted || c.total_hours_conducted) - (c.hours_absent || c.total_hours_absent),
     };
   });
 
@@ -571,13 +590,13 @@ export default function DashboardPage() {
 
             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2 relative z-10">
               <span className="w-1 h-5 bg-pink-500 rounded-full"></span>
-              Attendance Overview
+              Subject Attendance
             </h3>
-            <div className="h-[250px] w-full relative z-10">
+            <div className="h-[350px] w-full relative z-10">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={attendanceData}
-                  margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
+                  margin={{ top: 10, right: 0, left: -20, bottom: 120 }}
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
@@ -587,10 +606,11 @@ export default function DashboardPage() {
                   <XAxis
                     dataKey="name"
                     stroke="#718096"
-                    tick={{ fill: "#718096", fontSize: 10 }}
-                    tickFormatter={(val) =>
-                      val.length > 5 ? val.substring(0, 5) + ".." : val
-                    }
+                    tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 500 }}
+                    angle={-90}
+                    textAnchor="end"
+                    interval={0}
+                    height={120}
                     axisLine={false}
                     tickLine={false}
                   />
@@ -606,16 +626,17 @@ export default function DashboardPage() {
                     content={<AttendanceTooltip />}
                     cursor={{ fill: "rgba(255,255,255,0.04)" }}
                   />
-                  <Bar dataKey="attendance" radius={[4, 4, 0, 0]} barSize={20}>
+                  <ReferenceLine y={75} stroke="#ef4444" strokeDasharray="3 3" label={{ value: "75%", position: "right", fill: "#ef4444", fontSize: 10 }} />
+                  <Bar dataKey="attendance" radius={[6, 6, 0, 0]} barSize={24} animationDuration={1500}>
                     {attendanceData.map((entry: any, index: number) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={
                           entry.attendance >= 75
-                            ? "#10B981"
+                            ? "#2dd4bf" // Teal-400
                             : entry.attendance >= 65
-                              ? "#F59E0B"
-                              : "#EF4444"
+                              ? "#fbbf24" // Amber-400
+                              : "#fb7185" // Rose-400
                         }
                       />
                     ))}
@@ -644,7 +665,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar h-[250px] relative z-10">
+          <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar h-[350px] relative z-10">
             {todaysClasses.length > 0 ? (
               todaysClasses.map((cls: any, idx: number) => (
                 <div key={idx} className="flex gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group/item">
