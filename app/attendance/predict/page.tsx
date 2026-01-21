@@ -60,13 +60,17 @@ export default function AttendancePredictPage() {
                 return false;
             });
 
+            // Robustly get hours (handled inconsistent API keys)
+            const conducted = val.hours_conducted || val.total_hours_conducted || 0;
+            const absent = val.hours_absent || val.total_hours_absent || 0;
+
             if (timetableEntry) {
                 enriched.push({
                     title: courseTitle,
                     category: category,
                     slot: timetableEntry.slot || '',
-                    conducted: val.total_hours_conducted || 0,
-                    absent: val.total_hours_absent || 0,
+                    conducted: conducted,
+                    absent: absent,
                     percentage: val.attendance_percentage || 0,
                 });
             } else {
@@ -74,8 +78,8 @@ export default function AttendancePredictPage() {
                     title: courseTitle,
                     category: category,
                     slot: '',
-                    conducted: val.total_hours_conducted || 0,
-                    absent: val.total_hours_absent || 0,
+                    conducted: conducted,
+                    absent: absent,
                     percentage: val.attendance_percentage || 0,
                 });
             }
@@ -226,7 +230,7 @@ export default function AttendancePredictPage() {
             // --- Margin Calculation ---
             const threshold = 75;
             let marginMsg = "";
-            let marginType: "safe" | "danger" | "critical" = "safe";
+            let marginType: "safe" | "warning" | "danger" = "safe";
             let marginValue = 0;
 
             if (newPct >= threshold) {
@@ -235,17 +239,17 @@ export default function AttendancePredictPage() {
                 marginValue = safeBunks;
 
                 if (safeBunks > 0) {
-                    marginMsg = `Safe: ${safeBunks} hrs`;
+                    marginMsg = `Margin: ${safeBunks} hrs`;
                     marginType = "safe";
                 } else {
-                    marginMsg = "Edge";
-                    marginType = "critical";
+                    marginMsg = "No Margin";
+                    marginType = "warning";
                 }
             } else {
                 const targetRatio = threshold / 100;
                 const needed = Math.ceil((targetRatio * newConducted - newPresent) / (1 - targetRatio));
                 marginValue = needed;
-                marginMsg = `Need: ${needed} hrs`;
+                marginMsg = `Required: ${needed} hrs`;
                 marginType = "danger";
             }
 
@@ -268,24 +272,24 @@ export default function AttendancePredictPage() {
         setIsCalculating(false);
     };
 
-    // Theme Helpers (Copied from Attendance Page)
+    // Theme Helpers (Comfortable Palette)
     const getAttendanceColor = (percentage: number) => {
-        if (percentage >= 80) return "text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]";
-        if (percentage >= 75) return "text-blue-300 drop-shadow-[0_0_8px_rgba(147,197,253,0.3)]";
-        return "text-blue-600";
+        if (percentage >= 75) return "text-teal-400";
+        if (percentage >= 65) return "text-amber-400";
+        return "text-rose-400";
     };
 
     const getProgressBarColor = (percentage: number) => {
-        if (percentage >= 80) return "bg-white shadow-[0_0_10px_rgba(255,255,255,0.4)]";
-        if (percentage >= 75) return "bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.3)]";
-        return "bg-blue-800";
+        if (percentage >= 75) return "bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,0.4)]";
+        if (percentage >= 65) return "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]";
+        return "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]";
     };
 
     const getAttendanceStatus = (percentage: number) => {
-        if (percentage >= 80) return "Excellent";
+        if (percentage >= 80) return "Great";
         if (percentage >= 75) return "Good";
-        if (percentage >= 70) return "Average";
-        return "Low";
+        if (percentage >= 65) return "Warning";
+        return "Action Needed";
     };
 
 
@@ -295,52 +299,54 @@ export default function AttendancePredictPage() {
         <div className="w-full animate-fade-in space-y-8 pb-10 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-blue-900/30 pb-6 relative">
-                <Link href="/attendance" className="absolute -top-8 left-0 text-blue-400 hover:text-white flex items-center gap-1 text-sm transition-colors">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-6 relative">
+                <Link href="/attendance" className="absolute -top-8 left-0 text-gray-400 hover:text-white flex items-center gap-1 text-sm transition-colors">
                     <ArrowLeft className="w-4 h-4" /> Back to Attendance
                 </Link>
 
-                <div className="absolute -left-4 top-0 w-20 h-20 bg-blue-900/20 blur-3xl rounded-full pointer-events-none"></div>
+                <div className="absolute -left-4 top-0 w-20 h-20 bg-teal-900/10 blur-3xl rounded-full pointer-events-none"></div>
                 <div className="relative mt-4">
                     <h1 className="text-3xl font-bold text-white tracking-tight mb-2 drop-shadow-sm">
-                        Predict <span className="text-blue-200">Attendance</span>
+                        Predict <span className="text-teal-400">Attendance</span>
                     </h1>
-                    <p className="text-blue-100/70 text-sm font-medium">
+                    <p className="text-gray-400 text-sm font-medium">
                         Select a range to forecast your attendance if you take leave.
                     </p>
                 </div>
             </div>
 
             {/* Input Card */}
-            <div className="relative overflow-hidden rounded-2xl border border-blue-900/40 bg-blue-500/10 backdrop-blur-md p-6 shadow-lg shadow-black/40">
+            <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 shadow-lg shadow-black/40">
                 <div className="flex flex-col md:flex-row gap-6 items-end">
                     <div className="flex-1 w-full space-y-2">
-                        <label className="text-xs uppercase text-blue-300 font-bold ml-1 flex items-center gap-2">
+                        <label className="text-xs uppercase text-gray-400 font-bold ml-1 flex items-center gap-2">
                             <Calendar className="w-3 h-3" /> Start Date
                         </label>
                         <input
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full bg-slate-950/50 border border-blue-800/30 rounded-xl p-3 text-white focus:border-blue-400 focus:bg-blue-950/30 outline-none transition-all"
+                            onClick={(e) => e.currentTarget.showPicker()}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white focus:border-teal-500/50 focus:bg-teal-950/10 outline-none transition-all color-scheme-dark cursor-pointer"
                         />
                     </div>
                     <div className="flex-1 w-full space-y-2">
-                        <label className="text-xs uppercase text-blue-300 font-bold ml-1 flex items-center gap-2">
+                        <label className="text-xs uppercase text-gray-400 font-bold ml-1 flex items-center gap-2">
                             <Calendar className="w-3 h-3" /> End Date
                         </label>
                         <input
                             type="date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className="w-full bg-slate-950/50 border border-blue-800/30 rounded-xl p-3 text-white focus:border-blue-400 focus:bg-blue-950/30 outline-none transition-all"
+                            onClick={(e) => e.currentTarget.showPicker()}
+                            className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white focus:border-teal-500/50 focus:bg-teal-950/10 outline-none transition-all color-scheme-dark cursor-pointer"
                         />
                     </div>
 
                     <button
                         onClick={calculate}
                         disabled={!startDate || !endDate || isCalculating}
-                        className="w-full md:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20"
+                        className="w-full md:w-auto px-8 py-3.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-teal-900/20"
                     >
                         {isCalculating ? <Loader2 className="w-5 h-5 animate-spin" /> : "Predict"}
                     </button>
@@ -352,10 +358,10 @@ export default function AttendancePredictPage() {
                 <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="flex items-center justify-between pb-2">
                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                            <span className="w-1.5 h-6 bg-purple-500 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></span>
+                            <span className="w-1.5 h-6 bg-teal-500 rounded-full shadow-[0_0_10px_rgba(20,184,166,0.6)]"></span>
                             Prediction Results
                         </h3>
-                        <span className="text-sm text-blue-300/70 bg-blue-950/40 px-3 py-1 rounded-full border border-blue-900/30">
+                        <span className="text-sm text-teal-200/70 bg-teal-950/40 px-3 py-1 rounded-full border border-teal-900/30">
                             {dayOrdersInRange.length} Working Days
                         </span>
                     </div>
@@ -364,46 +370,52 @@ export default function AttendancePredictPage() {
                         {predictions.map((p, i) => (
                             <div
                                 key={i}
-                                className="relative rounded-xl p-6 border border-blue-900/30 bg-slate-950/60 hover:bg-blue-950/30 hover:border-blue-500/40 transition-all duration-300 flex flex-col justify-between gap-6 group overflow-hidden h-full min-h-[180px]"
+                                className="relative rounded-xl p-6 border border-white/5 bg-slate-950/60 hover:bg-white/5 transition-all duration-300 flex flex-col justify-between gap-6 group overflow-hidden h-full min-h-[180px]"
                                 style={{ animationDelay: `${i * 50}ms` }}
                             >
                                 {/* Subtle Glow */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-teal-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
                                 <div className="flex-1 min-w-0 relative z-10">
                                     {/* Header Badge Row */}
                                     <div className="flex items-center justify-between mb-3">
-                                        <span className="text-[10px] font-mono font-bold text-blue-200 bg-blue-950/80 border border-blue-800 px-2 py-0.5 rounded shadow-sm opacity-70">
+                                        <span className="text-[10px] font-mono font-bold text-gray-400 bg-white/5 border border-white/5 px-2 py-0.5 rounded shadow-sm">
                                             {p.slot || 'N/A'}
                                         </span>
 
                                         {/* Margin Badge */}
-                                        <div className={`text-[10px] font-bold px-2 py-1 rounded-full border flex items-center gap-1 ${p.marginType === 'safe' ? 'bg-blue-900/30 border-blue-500/30 text-blue-300' :
-                                            p.marginType === 'danger' ? 'bg-red-900/30 border-red-500/30 text-red-300' :
-                                                'bg-yellow-900/30 border-yellow-500/30 text-yellow-300'
+                                        <div className={`text-[10px] font-bold px-2 py-1 rounded-full border flex items-center gap-1 ${p.marginType === 'safe' ? 'bg-teal-950/30 border-teal-500/30 text-teal-300' :
+                                            p.marginType === 'danger' ? 'bg-red-950/30 border-red-500/30 text-red-300' :
+                                                'bg-yellow-950/30 border-yellow-500/30 text-yellow-300'
                                             }`}>
                                             {p.marginType === 'safe' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                                             {p.marginMsg}
                                         </div>
                                     </div>
 
-                                    <h4 className="font-bold text-white text-lg leading-tight group-hover:text-blue-100 transition-colors">
+                                    <h4 className="font-bold text-gray-200 text-lg leading-tight group-hover:text-white transition-colors">
                                         {p.title}
                                     </h4>
 
                                     <div className="mt-4 pt-4 border-t border-white/5 space-y-1">
-                                        <div className="text-xs text-gray-400 flex justify-between">
-                                            <span>Current:</span>
-                                            <span className="font-mono text-white">{p.percentage.toFixed(1)}%</span>
+
+                                        {/* Transition Section */}
+                                        <div className="flex items-center justify-between text-xs mb-3 bg-black/20 p-2 rounded-lg border border-white/5">
+                                            <span className="text-gray-500 font-medium">Transition</span>
+                                            <div className="flex items-center gap-3 font-mono">
+                                                <span className="text-gray-400">{p.percentage.toFixed(1)}%</span>
+                                                <ArrowRight className="w-3 h-3 text-gray-600" />
+                                                <span className={`font-bold ${getAttendanceColor(p.predictedPercentage)}`}>{p.predictedPercentage.toFixed(1)}%</span>
+                                            </div>
                                         </div>
 
                                         {p.additionalClasses > 0 ? (
-                                            <div className="text-xs text-orange-300 flex items-center gap-1.5 mt-2 bg-orange-950/20 p-1.5 rounded-lg border border-orange-900/30">
+                                            <div className="text-xs text-amber-300 flex items-center gap-1.5 mt-2 bg-amber-950/20 p-1.5 rounded-lg border border-amber-900/30">
                                                 <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
                                                 <span>Miss <strong>{p.additionalClasses}</strong> classes ({p.predictedConducted} total)</span>
                                             </div>
                                         ) : (
-                                            <div className="text-xs text-green-300 flex items-center gap-1.5 mt-2 bg-green-950/20 p-1.5 rounded-lg border border-green-900/30">
+                                            <div className="text-xs text-teal-300 flex items-center gap-1.5 mt-2 bg-teal-950/20 p-1.5 rounded-lg border border-teal-900/30">
                                                 <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
                                                 <span>No classes scheduled</span>
                                             </div>
@@ -417,9 +429,9 @@ export default function AttendancePredictPage() {
                                         <span className={`text-3xl font-bold ${getAttendanceColor(p.predictedPercentage)}`}>
                                             {p.predictedPercentage.toFixed(1)}%
                                         </span>
-                                        <span className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">Predicted</span>
+                                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Predicted</span>
                                     </div>
-                                    <div className="w-full bg-blue-950 rounded-full h-1.5 overflow-hidden shadow-inner border border-white/5">
+                                    <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden shadow-inner border border-white/5">
                                         <div
                                             className={`h-full ${getProgressBarColor(p.predictedPercentage)} transition-all duration-1000`}
                                             style={{ width: `${Math.min(p.predictedPercentage, 100)}%` }}
@@ -427,7 +439,7 @@ export default function AttendancePredictPage() {
                                     </div>
 
                                     {p.percentageDrop > 0.1 && (
-                                        <p className="text-[10px] text-red-400 mt-1 font-mono">
+                                        <p className="text-[10px] text-rose-400 mt-1 font-mono">
                                             ▼ Drops by {p.percentageDrop.toFixed(1)}%
                                         </p>
                                     )}
