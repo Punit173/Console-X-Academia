@@ -4,8 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Adjust this to your exact endpoint
 // Adjust this to your exact endpoint
-const REMOTE_API_URL = process.env.ACADEMIA_SCRAPPER_URL || "";
-const LOCAL_API_URL = "http://127.0.0.1:8000/scrape";
+const ACADEMIA_SCRAPPER_URL = process.env.ACADEMIA_SCRAPPER_URL || "";
 
 async function fetchFromApi(url: string, payload: any) {
   const controller = new AbortController();
@@ -40,20 +39,13 @@ export async function POST(req: NextRequest) {
     let apiRes: Response | null = null;
     let usedSource = "LOCAL";
 
-    // 1. Try Local API
-    try {
-      console.log(`Attempting Local API: ${LOCAL_API_URL} for ${email}`);
-      apiRes = await fetchFromApi(LOCAL_API_URL, payload);
-    } catch (e) {
-      console.warn("Local API unreachable or timed out:", e);
-      // 2. Fallback to Remote API
-      if (REMOTE_API_URL) {
-        console.log(`Attempting Remote API: ${REMOTE_API_URL} for ${email}`);
-        usedSource = "REMOTE";
-        apiRes = await fetchFromApi(REMOTE_API_URL, payload);
-      } else {
-        throw new Error("Local API failed and no Remote API configured.");
-      }
+    // 1. Try Configured API
+    if (ACADEMIA_SCRAPPER_URL) {
+      console.log(`Attempting API: ${ACADEMIA_SCRAPPER_URL} for ${email}`);
+      apiRes = await fetchFromApi(ACADEMIA_SCRAPPER_URL, payload);
+    } else {
+      // Fallback or Error if no env var is set
+      throw new Error("ACADEMIA_SCRAPPER_URL not configured.");
     }
 
     if (!apiRes) {

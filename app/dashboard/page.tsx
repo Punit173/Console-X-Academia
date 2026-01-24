@@ -12,20 +12,14 @@ import {
   Cell,
   ReferenceLine,
 } from "recharts";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { generateStandardPDF } from "@/utils/pdf-generator";
 import ThreeDVisual from "@/components/ThreeDVisual";
+import LeetCodeChart from "@/components/LeetCodeChart";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  User,
-  GraduationCap,
-  Hash,
-  Layers,
-  Calendar,
   MapPin,
-  Share2,
-  Download,
   BookOpen,
   UserCheck,
   Clock,
@@ -33,8 +27,11 @@ import {
   Info,
   RefreshCw,
   Sparkles,
-  Quote,
-  Megaphone
+  Megaphone,
+  Utensils,
+  Code,
+  Trophy,
+  Target
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getFirestore, collection, getDocs, query, limit } from "firebase/firestore";
@@ -85,20 +82,75 @@ const BATCH_TIMETABLES: any = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { data, fetchError, logout, credentials, isInitialized, refreshData, isLoading } = useAppData();
+  const { data, fetchError, logout, credentials, isInitialized, refreshData, isLoading, lastUpdated } = useAppData();
 
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [activeSlide, setActiveSlide] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [quote, setQuote] = useState("");
 
-  // Set random quote on mount
+
+  // --- LeetCode State ---
+  const [leetcodeUser, setLeetCodeUser] = useState("");
+  const [leetcodeData, setLeetCodeData] = useState<any>(null);
+  const [leetcodeLoading, setLeetCodeLoading] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
-  // --- Fetch Announcements ---
+  // Load LeetCode data
+  useEffect(() => {
+    const savedUser = localStorage.getItem("leetcode_username");
+    if (savedUser) {
+      setLeetCodeUser(savedUser);
+      fetchLeetCodeStats(savedUser);
+    }
+  }, []);
+
+  const fetchLeetCodeStats = async (username: string) => {
+    setLeetCodeLoading(true);
+    try {
+      const res = await fetch(`/api/leetcode?username=${username}`);
+      const json = await res.json();
+      if (res.ok) {
+        setLeetCodeData(json);
+        localStorage.setItem("leetcode_username", username);
+      }
+    } catch (e) {
+      console.error("Failed to fetch LeetCode", e);
+    } finally {
+      setLeetCodeLoading(false);
+    }
+  };
+
+  const [inputUser, setInputUser] = useState("");
+
+  const handleLeetCodeConnect = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (inputUser.trim()) {
+      setLeetCodeUser(inputUser);
+      fetchLeetCodeStats(inputUser);
+    }
+  };
+
+  const getLeetCodeStat = (difficulty: string) => {
+    if (!leetcodeData) return { count: 0, total: 0 };
+    const solved = leetcodeData.matchedUser.submitStats.acSubmissionNum.find((s: any) => s.difficulty === difficulty)?.count || 0;
+    const total = leetcodeData.allQuestionsCount.find((s: any) => s.difficulty === difficulty)?.count || 0;
+    return { count: solved, total };
+  };
+
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
@@ -423,80 +475,12 @@ export default function DashboardPage() {
       {/* 1. Header & Actions */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 relative z-10">
         <div>
-          <h1 className="text-4xl font-bold text-white tracking-tight mb-2 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+          {/* <h1 className="text-4xl font-bold text-white tracking-tight mb-2 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
             {greeting}, {data.timetable?.student_info?.name?.split(' ')[0] || "Student"}!
-          </h1>
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Quote className={`w-3 h-3 ${accentTextColor}`} />
-            <span className="italic">"{quote}"</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <button onClick={() => refreshData()} disabled={isLoading} className={`p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all ${accentTextColor} disabled:opacity-50`}>
-            {isLoading ? <div className={`w-5 h-5 animate-spin rounded-full border-2 ${accentBorderColor} border-t-transparent`} /> : <RefreshCw className="w-5 h-5" />}
-          </button>
-          <button onClick={() => handleExport("share")} disabled={isGenerating} className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-green-500/50 transition-all text-green-400 disabled:opacity-50"><Share2 className="w-5 h-5" /></button>
-          <button onClick={() => handleExport("download")} disabled={isGenerating} className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/50 transition-all text-gray-400 hover:text-primary disabled:opacity-50">
-            {isGenerating ? <div className="w-5 h-5 animate-spin rounded-full border-2 border-primary border-t-transparent" /> : <Download className="w-5 h-5" />}
-          </button>
+          </h1> */}
 
-          {/* Profile Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className={`hidden md:flex lg:flex p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all ${accentTextColor}`}
-            >
-              <User className="w-5 h-5" />
-            </button>
-
-            <AnimatePresence>
-              {isProfileOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute right-0 top-full mt-2 w-80 glass-card rounded-xl border border-white/10 shadow-2xl z-50 overflow-hidden"
-                >
-                  <div className={`p-4 border-b border-white/10 ${accentBgColor}`}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-12 h-12 rounded-full bg-black/20 flex items-center justify-center ${accentTextColor} shrink-0`}>
-                        <User className="w-6 h-6" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-white font-bold truncate">{data.timetable?.student_info?.name}</p>
-                        <p className="text-xs text-white/70 truncate">{credentials?.email}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-white/5 p-2 rounded border border-white/5">
-                        <p className="text-white/60 mb-1">Reg No</p>
-                        <p className="text-white font-mono">{data.timetable?.student_info?.registration_number}</p>
-                      </div>
-                      <div className="bg-white/5 p-2 rounded border border-white/5">
-                        <p className="text-white/60 mb-1">Batch</p>
-                        <p className="text-white font-mono">{data.timetable?.student_info?.batch}</p>
-                      </div>
-                      {/* ADDED SEMESTER HERE */}
-                      <div className="bg-white/5 p-2 rounded border border-white/5">
-                        <p className="text-white/60 mb-1">Semester</p>
-                        <p className="text-white font-mono">{currentSem.replace('sem', '')}</p>
-                      </div>
-                      <div className="bg-white/5 p-2 rounded border border-white/5">
-                        <p className="text-white/60 mb-1">Specialization</p>
-                        <p className="text-white truncate">{data.timetable?.student_info?.specialization?.split(' ')[0]}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-1 bg-neutral-900/50">
-                    <button onClick={() => logout()} className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 rounded-lg transition-colors">
-                      Sign Out
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </div>
+
       </div>
 
       {
@@ -559,19 +543,130 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 4. Stats Footer (Quick Summary) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Credits', val: data.timetable?.total_credits || 0, color: 'text-white' },
-          { label: 'Avg Attendance', val: `${(data.attendance?.attendance?.overall_attendance || 0).toFixed(1)}%`, color: 'text-emerald-400' },
-          { label: 'Courses', val: (data.timetable?.courses?.length || 0), color: 'text-blue-400' },
-          { label: 'Total Marks', val: `${totalMarks.obtained.toFixed(0)}/${totalMarks.max.toFixed(0)}`, color: 'text-purple-400' }
-        ].map((stat, i) => (
-          <div key={i} className="glass-card p-4 rounded-2xl text-center hover:bg-white/5 transition-colors border-t-2 border-t-white/5 hover:border-t-pink-500/50">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">{stat.label}</p>
-            <p className={`text-2xl font-black mt-1 ${stat.color}`}>{stat.val}</p>
+
+
+      {/* 2.5. Split: LeetCode & Profile */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* left: Student Profile Section */}
+        <div className="glass-card rounded-2xl p-6 relative overflow-hidden group h-full">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <span className="w-1 h-5 bg-blue-500 rounded-full"></span>
+              Student Profile
+            </h3>
+            <div className="flex items-center gap-3">
+              {lastUpdated && (
+                <span className="text-xs text-gray-500 font-medium">
+                  Last updated: {lastUpdated}
+                </span>
+              )}
+              <button onClick={() => refreshData()} disabled={isLoading} className={`p-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-all ${accentTextColor} disabled:opacity-50`} title="Refresh Data">
+                {isLoading ? <div className={`w-4 h-4 animate-spin rounded-full border-2 ${accentBorderColor} border-t-transparent`} /> : <RefreshCw className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
-        ))}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors">
+              <p className="text-xs text-white/50 uppercase tracking-widest mb-1.5 font-bold">Name</p>
+              <p className="text-white font-bold text-sm truncate">{data.timetable?.student_info?.name || "Student"}</p>
+            </div>
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors">
+              <p className="text-xs text-white/50 uppercase tracking-widest mb-1.5 font-bold">Register No</p>
+              <p className="text-white font-mono font-bold text-sm truncate">{data.timetable?.student_info?.registration_number || "N/A"}</p>
+            </div>
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors">
+              <p className="text-xs text-white/50 uppercase tracking-widest mb-1.5 font-bold">Batch</p>
+              <p className="text-white font-mono font-bold text-sm truncate">{data.timetable?.student_info?.batch || "N/A"}</p>
+            </div>
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors">
+              <p className="text-xs text-white/50 uppercase tracking-widest mb-1.5 font-bold">Current Sem</p>
+              <p className="text-white font-bold text-sm truncate capitalize">{currentSem.replace('sem', 'Semester ')}</p>
+            </div>
+            <div className="col-span-2 p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors">
+              <p className="text-xs text-white/50 uppercase tracking-widest mb-1.5 font-bold">Program</p>
+              <p className="text-white font-bold text-sm truncate">{data.timetable?.student_info?.program || "Program Info"}</p>
+            </div>
+          </div>
+        </div>
+        {/* right: LeetCode Section */}
+        <div className="glass-card rounded-2xl p-6 relative overflow-hidden group h-full">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFA116]/5 rounded-full blur-3xl group-hover:bg-[#FFA116]/10 transition-colors pointer-events-none" />
+          <div className="flex items-center justify-between mb-2 relative z-10">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-bold text-white">
+                DSA Progress
+              </h3>
+              {leetcodeUser && (
+                <span className="text-xs text-green-400 font-mono bg-green-400/10 px-2 py-0.5 rounded border border-green-400/20">
+                  @{leetcodeUser}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center bg-black/40 rounded-full p-1 border border-white/10">
+              <button className="px-3 py-1 rounded-full text-xs font-medium text-gray-500 cursor-not-allowed hover:text-gray-400 transition-colors">
+                ✔️
+              </button>
+              <button className="px-3 py-1 rounded-full text-xs font-bold text-white bg-[#FFA116]/20 border border-[#FFA116]/20 shadow-[0_0_10px_rgba(255,161,22,0.2)]">
+                LeetCode
+              </button>
+            </div>
+          </div>
+
+          {!leetcodeUser || (!leetcodeData && !leetcodeLoading) ? (
+            <div className="flex flex-col items-center justify-center gap-6 h-full py-2">
+              <div className="w-16 h-16 rounded-2xl bg-[#FFA116]/10 flex items-center justify-center shadow-[0_0_30px_rgba(255,161,22,0.1)] mb-2">
+                <Code className="w-8 h-8 text-[#FFA116]" />
+              </div>
+
+              <div className="text-center space-y-2 max-w-md mx-auto">
+                <h4 className="text-white font-bold text-xl">Connect LeetCode</h4>
+                <p className="text-gray-400 text-sm">
+                  Link your account to track daily progress, solve counts, and global ranking directly from your dashboard.
+                </p>
+              </div>
+
+              <form onSubmit={handleLeetCodeConnect} className="flex flex-col sm:flex-row gap-2 w-full max-w-md mx-auto mt-2">
+                <input
+                  type="text"
+                  placeholder="LeetCode Username (e.g. neal_wu)"
+                  value={inputUser}
+                  onChange={(e) => setInputUser(e.target.value)}
+                  className="bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#FFA116]/50 transition-colors w-full placeholder:text-white/20"
+                />
+                <button
+                  type="submit"
+                  disabled={leetcodeLoading}
+                  className="bg-[#FFA116] hover:bg-[#ffb13d] text-black font-bold px-6 py-3 rounded-xl transition-all disabled:opacity-50 whitespace-nowrap shadow-lg shadow-[#FFA116]/20 hover:shadow-[#FFA116]/40 hover:-translate-y-0.5 active:translate-y-0"
+                >
+                  {leetcodeLoading ? "..." : "Connect"}
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div className="w-full relative z-10 flex flex-col items-center justify-center pt-2">
+              <LeetCodeChart
+                easy={getLeetCodeStat("Easy").count}
+                medium={getLeetCodeStat("Medium").count}
+                hard={getLeetCodeStat("Hard").count}
+                total={getLeetCodeStat("All").count}
+                totalQuestions={leetcodeData?.allQuestionsCount?.[0]?.count || 3300}
+              />
+
+              <div className="absolute top-0 right-0">
+                <button
+                  onClick={() => { localStorage.removeItem("leetcode_username"); setLeetCodeUser(""); setLeetCodeData(null); }}
+                  className="text-[10px] text-white/20 hover:text-red-400 transition-colors"
+                >
+                  Unlink
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+
+
       </div>
 
       {/* 3. Main Grid */}
@@ -694,6 +789,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
+
+
       {/* 5. Useful Tools Section */}
       <div className="glass-card rounded-2xl p-6">
         <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
@@ -717,11 +814,20 @@ export default function DashboardPage() {
             </div>
           </Link>
 
-          {/* Placeholder for future tools */}
-          <div className="bg-white/5 border border-white/5 rounded-xl p-5 flex flex-col justify-center items-center text-center opacity-50">
-            <p className="text-xs font-bold uppercase tracking-wider text-white/40 mb-1">More Coming Soon</p>
-            <p className="text-sm text-white/30">Stay tuned for updates.</p>
-          </div>
+          {/* Mess Menu Card */}
+          <Link href="/mess-menu" className="group relative bg-orange-500 rounded-xl p-5 overflow-hidden hover:shadow-[0_0_30px_rgba(249,115,22,0.2)] transition-all transform hover:-translate-y-1">
+            <div className="absolute top-0 right-0 p-10 bg-black/10 rounded-full -mr-10 -mt-10" />
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-2 bg-black/10 rounded-lg text-black">
+                  <Utensils className="w-6 h-6" />
+                </div>
+                <span className="px-2 py-1 bg-black/20 text-black text-[10px] font-bold uppercase rounded-md">Hot</span>
+              </div>
+              <h4 className="text-xl font-black text-black mb-1">Mess Menu</h4>
+              <p className="text-black/70 font-medium text-sm">Check what's cooking today.</p>
+            </div>
+          </Link>
         </div>
       </div>
 

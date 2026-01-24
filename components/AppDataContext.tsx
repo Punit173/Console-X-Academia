@@ -23,6 +23,7 @@ interface AppDataContextValue {
   fetchError: boolean;
   authError: boolean;
   isInitialized: boolean;
+  lastUpdated: string | null;
 }
 
 const AppDataContext = createContext<AppDataContextValue | undefined>(undefined);
@@ -34,6 +35,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   const [fetchError, setFetchError] = useState(false);
   const [authError, setAuthError] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   // Helper helper to validate data structure
   const isValidData = (d: any): d is ApiResponse => {
@@ -45,6 +47,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window !== "undefined") {
       const storedData = localStorage.getItem("academia-data");
       const storedCreds = localStorage.getItem("academia-creds");
+      const storedTime = localStorage.getItem("academia-last-updated");
 
       if (storedData) {
         try {
@@ -67,6 +70,10 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
             setCredentialsState(parsedCreds);
           }
         } catch { }
+      }
+
+      if (storedTime) {
+        setLastUpdated(storedTime);
       }
     }
     setIsInitialized(true);
@@ -131,6 +138,11 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
         // Validate structure before setting
         if (json.status === "success" && isValidData(json)) {
           setData(json);
+          const now = new Date().toLocaleString();
+          setLastUpdated(now);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("academia-last-updated", now);
+          }
         } else {
           console.warn("Refresh failed (Invalid Data Structure), using existing or demo data");
           setFetchError(true);
@@ -163,10 +175,14 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     setData(null);
     setCredentials(null);
     setAuthError(false);
+    setLastUpdated(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("academia-last-updated");
+    }
   };
 
   return (
-    <AppDataContext.Provider value={{ data, setData, credentials, setCredentials, refreshData, isLoading, fetchError, authError, logout, isInitialized }}>
+    <AppDataContext.Provider value={{ data, setData, credentials, setCredentials, refreshData, isLoading, fetchError, authError, logout, isInitialized, lastUpdated }}>
       {children}
     </AppDataContext.Provider>
   );

@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   YAxis
 } from "recharts";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Calculator, AlertTriangle, ArrowLeft } from "lucide-react";
 
@@ -31,6 +31,25 @@ const GRADES = Object.keys(GRADE_THRESHOLDS) as Grade[];
 
 export default function MarksPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const highlightCode = searchParams.get('highlight');
+
+  // Scroll to highlighted element
+  useEffect(() => {
+    if (highlightCode) {
+      const element = document.getElementById(highlightCode);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.classList.add('ring-2', 'ring-[#62D834]', 'ring-offset-2', 'ring-offset-black');
+          setTimeout(() => {
+            element.classList.remove('ring-2', 'ring-[#62D834]', 'ring-offset-2', 'ring-offset-black');
+          }, 2000);
+        }, 500);
+      }
+    }
+  }, [highlightCode, isLoading]); // Re-run when loading finishes
+
   const { data, refreshData, isLoading } = useAppData();
 
   // --- Main Page State ---
@@ -561,7 +580,8 @@ export default function MarksPage() {
             return (
               <div
                 key={courseCode}
-                className="bg-zinc-950 rounded-2xl border border-zinc-800 overflow-hidden hover:border-[#62D834]/30 transition-all duration-300"
+                id={courseCode}
+                className="bg-zinc-950 rounded-2xl border border-zinc-800 overflow-hidden hover:border-[#62D834]/30 transition-all duration-300 scroll-mt-24"
               >
                 <div className="p-6 border-b border-zinc-800">
                   <div className="flex justify-between items-start gap-4 mb-4">

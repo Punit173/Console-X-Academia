@@ -197,7 +197,7 @@ export default function AttendancePage() {
     <div className="w-full animate-fade-in space-y-8 pb-10">
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-blue-900/30 pb-6 relative">
+      <div className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-blue-900/30 pb-6 pt-4 -mt-4 relative transition-all">
         {/* Glow effect - restricted to navy/blue */}
         <div className="absolute -left-4 top-0 w-20 h-20 bg-blue-900/20 blur-3xl rounded-full pointer-events-none"></div>
         <div className="relative">
@@ -414,7 +414,8 @@ export default function AttendancePage() {
                     return (
                       <tr
                         key={code}
-                        className="group transition-colors border-b md:border-b border-white/5 last:border-0 grid grid-cols-2 gap-4 md:table-row bg-white/5 md:bg-transparent rounded-xl md:rounded-none p-4 md:p-0 mb-4 md:mb-0"
+                        onClick={() => router.push(`/marks?highlight=${code}`)}
+                        className="group transition-colors border-b md:border-b border-white/5 last:border-0 grid grid-cols-2 gap-4 md:table-row bg-white/5 md:bg-transparent rounded-xl md:rounded-none p-4 md:p-0 mb-4 md:mb-0 cursor-pointer hover:bg-white/5 relative"
                       >
                         <td className="col-span-2 md:col-auto md:table-cell p-0 md:p-4">
                           <div className="flex flex-col">
