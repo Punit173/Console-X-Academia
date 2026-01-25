@@ -5,10 +5,44 @@ import { CalendarProvider } from "@/components/CalendarContext";
 import Navbar from "@/components/Navbar";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import IOSInstallPrompt from "@/components/IOSInstallPrompt";
+import LiveChatWidget from "@/components/LiveChatWidget";
 
 export const metadata: Metadata = {
-  title: "Console X Academia",
-  description: "Advanced Academic Dashboard",
+  metadataBase: new URL('https://console-x-academia.vercel.app'),
+  title: {
+    default: "Console X Academia | Advanced Student Dashboard",
+    template: "%s | Console X Academia"
+  },
+  description: "All-in-one academic dashboard for SRM students. Track attendance, calculate CGPA, view timetable, and access study resources in real-time.",
+  keywords: ["SRM", "Academia", "Console X", "Student Dashboard", "CGPA Calculator", "Attendance Tracker", "SRMIST"],
+  authors: [{ name: "Console X Team" }],
+  creator: "Console X Team",
+  publisher: "Console X Academia",
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://console-x-academia.vercel.app",
+    title: "Console X Academia | Advanced Student Dashboard",
+    description: "All-in-one academic dashboard: Attendance, CGPA, Timetable & more.",
+    siteName: "Console X Academia",
+    images: [{
+      url: "/assets/logo.jpg",
+      width: 1200,
+      height: 630,
+      alt: "Console X Academia Dashboard"
+    }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Console X Academia",
+    description: "All-in-one academic dashboard for SRM students.",
+    images: ["/assets/logo.jpg"],
+    creator: "@ConsoleXAcademia"
+  },
   manifest: "/manifest.json",
   icons: {
     apple: "/assets/logo.jpg",
@@ -16,9 +50,34 @@ export const metadata: Metadata = {
   }
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Console X Academia",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Web, Android",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  },
+  "description": "Advanced academic management system for students to track attendance and grades.",
+  "url": "https://console-x-academia.vercel.app",
+  "author": {
+    "@type": "Organization",
+    "name": "Console X Team"
+  }
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="bg-background text-foreground h-screen flex flex-col selection:bg-primary selection:text-white overflow-hidden">
         <AppDataProvider>
           <CalendarProvider>
@@ -30,10 +89,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
             <Navbar />
             <IOSInstallPrompt />
+            <LiveChatWidget />
             {/* <WhatsAppButton /> */}
 
             {/* Scrollable Content Wrapper with Mask */}
-            {/* Mask ensures content fades out before hitting the transparent navbar */}
             <div
               className="flex-1 w-full overflow-y-auto overflow-x-hidden"
               style={{
@@ -83,7 +142,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </CalendarProvider>
         </AppDataProvider>
       </body>
-
     </html>
   );
 }

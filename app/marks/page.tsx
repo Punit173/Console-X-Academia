@@ -29,10 +29,14 @@ const GRADE_THRESHOLDS: Record<Grade, number> = {
 
 const GRADES = Object.keys(GRADE_THRESHOLDS) as Grade[];
 
-export default function MarksPage() {
+import { Suspense } from "react";
+
+function MarksContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const highlightCode = searchParams.get('highlight');
+
+  const { data, refreshData, isLoading } = useAppData();
 
   // Scroll to highlighted element
   useEffect(() => {
@@ -49,8 +53,6 @@ export default function MarksPage() {
       }
     }
   }, [highlightCode, isLoading]); // Re-run when loading finishes
-
-  const { data, refreshData, isLoading } = useAppData();
 
   // --- Main Page State ---
   const [isGenerating, setIsGenerating] = useState(false);
@@ -665,5 +667,13 @@ export default function MarksPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function MarksPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center"><div className="w-8 h-8 border-t-2 border-[#62D834] rounded-full animate-spin"></div></div>}>
+      <MarksContent />
+    </Suspense>
   );
 }

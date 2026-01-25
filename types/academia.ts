@@ -10,6 +10,7 @@ export interface StudentInfo {
   enrollment_date?: string;
   batch?: string;
   mobile?: string;
+  email?: string;
 }
 
 export interface Test {

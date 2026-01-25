@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { generateStandardPDF } from "@/utils/pdf-generator";
 import ThreeDVisual from "@/components/ThreeDVisual";
 import LeetCodeChart from "@/components/LeetCodeChart";
@@ -31,7 +32,8 @@ import {
   Utensils,
   Code,
   Trophy,
-  Target
+  Target,
+  Calendar
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getFirestore, collection, getDocs, query, limit } from "firebase/firestore";
@@ -88,6 +90,13 @@ export default function DashboardPage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update time every minute to refresh active class
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // 1 min
+    return () => clearInterval(timer);
+  }, []);
 
 
   // --- LeetCode State ---
@@ -549,7 +558,18 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* left: Student Profile Section */}
         <div className="glass-card rounded-2xl p-6 relative overflow-hidden group h-full">
-          <div className="flex items-center justify-between mb-6">
+          {/* Background Logo */}
+          {/* Background Logo */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none grayscale">
+            <Image
+              src="/assets/logo.jpg"
+              alt="Background Logo"
+              fill
+              className="object-contain p-4"
+            />
+          </div>
+
+          <div className="flex items-center justify-between mb-6 relative z-10">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <span className="w-1 h-5 bg-blue-500 rounded-full"></span>
               Student Profile
@@ -582,15 +602,81 @@ export default function DashboardPage() {
               <p className="text-xs text-white/50 uppercase tracking-widest mb-1.5 font-bold">Current Sem</p>
               <p className="text-white font-bold text-sm truncate capitalize">{currentSem.replace('sem', 'Semester ')}</p>
             </div>
-            <div className="col-span-2 p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors">
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors">
               <p className="text-xs text-white/50 uppercase tracking-widest mb-1.5 font-bold">Program</p>
               <p className="text-white font-bold text-sm truncate">{data.timetable?.student_info?.program || "Program Info"}</p>
+            </div>
+
+            {/* LeetCode Link */}
+            {leetcodeUser ? (
+              <a
+                href={`https://leetcode.com/u/${leetcodeUser}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/lc p-4 bg-[#FFA116]/10 rounded-2xl border border-[#FFA116]/20 hover:bg-[#FFA116]/20 transition-all cursor-pointer block"
+              >
+                <div className="flex flex-col h-full justify-center">
+                  <p className="text-xs text-[#FFA116]/70 uppercase tracking-widest mb-1.5 font-bold flex items-center gap-1 group-hover/lc:text-[#FFA116] transition-colors">
+                    LeetCode <Code className="w-3 h-3" />
+                  </p>
+                  <p className="text-white font-bold text-sm truncate flex items-center gap-2 group-hover/lc:underline decoration-[#FFA116]">
+                    @{leetcodeUser}
+                  </p>
+                </div>
+              </a>
+            ) : (
+              // Placeholder if no leetcode user to keep layout consistent
+              <div className="p-4 bg-white/5 rounded-2xl border border-white/5 opacity-50">
+                <p className="text-xs text-white/50 uppercase tracking-widest mb-1.5 font-bold">LeetCode</p>
+                <p className="text-white/30 text-xs italic">Not Connected</p>
+              </div>
+            )}
+
+            {/* Advisors Section (Moved) */}
+            <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 pt-4 border-t border-white/10">
+              <div className="bg-white/5 rounded-xl p-3 border border-white/5 hover:border-primary/30 transition-colors flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                  <UserCheck className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Faculty Advisor</p>
+                  <p className="font-bold text-white text-xs truncate">{advisors.faculty_advisor.name}</p>
+                  <a href={`mailto:${advisors.faculty_advisor.email}`} className="text-[10px] text-primary hover:underline truncate block">
+                    {advisors.faculty_advisor.email}
+                  </a>
+                </div>
+              </div>
+
+              <div className="bg-white/5 rounded-xl p-3 border border-white/5 hover:border-blue-500/30 transition-colors flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Academic Advisor</p>
+                  <p className="font-bold text-white text-xs truncate">{advisors.academic_advisor.name}</p>
+                  <a href={`mailto:${advisors.academic_advisor.email}`} className="text-[10px] text-blue-400 hover:underline truncate block">
+                    {advisors.academic_advisor.email}
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
         {/* right: LeetCode Section */}
         <div className="glass-card rounded-2xl p-6 relative overflow-hidden group h-full">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFA116]/5 rounded-full blur-3xl group-hover:bg-[#FFA116]/10 transition-colors pointer-events-none" />
+
+          {/* Background Decoration Image */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 opacity-20 pointer-events-none overflow-hidden">
+            <Image
+              src="/assets/OIP.webp"
+              alt="Code Decoration"
+              fill
+              className="object-cover opacity-50 contrast-125"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          </div>
+
           <div className="flex items-center justify-between mb-2 relative z-10">
             <div className="flex items-center gap-3">
               <h3 className="text-lg font-bold text-white">
@@ -762,23 +848,75 @@ export default function DashboardPage() {
 
           <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar h-[350px] relative z-10">
             {todaysClasses.length > 0 ? (
-              todaysClasses.map((cls: any, idx: number) => (
-                <div key={idx} className="flex gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group/item">
-                  <div className="flex flex-col items-center justify-center min-w-[60px] border-r border-white/10 pr-3">
-                    <span className="text-xs text-gray-400 font-mono group-hover/item:text-white transition-colors">{cls.time.split('-')[0]}</span>
-                    <span className="text-xs text-purple-400 font-bold font-mono">{cls.time.split('-')[1]}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-bold truncate">{cls.title}</p>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="text-[10px] text-teal-300 font-bold bg-teal-500/20 border border-teal-500/30 px-2 py-0.5 rounded flex items-center gap-1 shadow-[0_0_8px_rgba(20,184,166,0.3)]">
-                        <MapPin className="w-3 h-3" /> {cls.venue}
+              todaysClasses.map((cls: any, idx: number) => {
+                // Parse Time and Check Active
+                // Format: "08:00 - 08:50"
+                const [startStr, endStr] = cls.time.split('-').map((s: string) => s.trim());
+
+                const now = new Date();
+                const [startH, startM] = startStr.split(':').map(Number);
+                const [endH, endM] = endStr.split(':').map(Number);
+
+                const startTime = new Date();
+                startTime.setHours(startH, startM, 0);
+
+                const endTime = new Date();
+                // Handle PM cases implicitly? No, schedule is 24h or AM/PM? 
+                // Looking at BATCH_DATA, it's mixed "01:25", "03:10". Assumed 24h or handled logic.
+                // Converting logic for 12h->24h if needed? 
+                // Let's assume the schedule strings are properly comparable or we fix them.
+                // Actually BATCH_DATA uses "01:25", "02:20". These are likely PM. 
+                // Simple logic: If hour < 8, add 12? (Since classes are day time).
+
+                const fixHour = (h: number) => (h < 8 ? h + 12 : h);
+                startTime.setHours(fixHour(startH), startM, 0);
+
+                endTime.setHours(fixHour(endH), endM, 0);
+
+                const isActive = now >= startTime && now < endTime;
+
+                return (
+                  <div
+                    key={idx}
+                    className={`flex gap-3 p-3 rounded-xl border transition-all duration-500 group/item relative overflow-hidden ${isActive
+                      ? "bg-[#62D834]/10 border-[#62D834]/50 shadow-[0_0_15px_rgba(98,216,52,0.2)]"
+                      : "bg-white/5 border-white/5 hover:bg-white/10"
+                      }`}
+                  >
+                    {isActive && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#62D834] animate-pulse" />
+                    )}
+
+                    <div className="flex flex-col items-center justify-center min-w-[60px] border-r border-white/10 pr-3">
+                      <span className={`text-xs font-mono transition-colors ${isActive ? "text-[#62D834] font-bold" : "text-gray-400 group-hover/item:text-white"}`}>
+                        {cls.time.split('-')[0]}
                       </span>
-                      <span className="text-[10px] text-gray-500">{cls.code}</span>
+                      <span className={`text-xs font-bold font-mono ${isActive ? "text-[#62D834]" : "text-purple-400"}`}>
+                        {cls.time.split('-')[1]}
+                      </span>
+                      {isActive && (
+                        <span className="text-[9px] bg-[#62D834] text-black font-bold px-1.5 py-0.5 rounded mt-1 animate-pulse">
+                          NOW
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-bold truncate transition-colors ${isActive ? "text-white" : "text-white"}`}>
+                        {cls.title}
+                      </p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 border ${isActive
+                          ? "text-[#62D834] bg-[#62D834]/20 border-[#62D834]/30"
+                          : "text-teal-300 bg-teal-500/20 border-teal-500/30"
+                          }`}>
+                          <MapPin className="w-3 h-3" /> {cls.venue}
+                        </span>
+                        <span className="text-[10px] text-gray-500">{cls.code}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-gray-500">
                 <Calendar className="w-10 h-10 mb-2 opacity-20" />
@@ -831,42 +969,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 5. Academic Team (Advisors) */}
-      <div className="glass-card rounded-2xl p-6">
-        <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-          <span className="w-1 h-5 bg-blue-500 rounded-full"></span>
-          Faculty Mentors
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Faculty Advisor */}
-          <div className="bg-white/5 rounded-xl p-4 border border-white/5 hover:border-primary/30 transition-colors flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
-              <UserCheck className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Faculty Advisor</p>
-              <p className="font-bold text-white text-sm truncate">{advisors.faculty_advisor.name}</p>
-              <a href={`mailto:${advisors.faculty_advisor.email}`} className="text-xs text-primary hover:underline truncate block mt-0.5">
-                {advisors.faculty_advisor.email}
-              </a>
-            </div>
-          </div>
 
-          {/* Academic Advisor */}
-          <div className="bg-white/5 rounded-xl p-4 border border-white/5 hover:border-blue-500/30 transition-colors flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Academic Advisor</p>
-              <p className="font-bold text-white text-sm truncate">{advisors.academic_advisor.name}</p>
-              <a href={`mailto:${advisors.academic_advisor.email}`} className="text-xs text-blue-400 hover:underline truncate block mt-0.5">
-                {advisors.academic_advisor.email}
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* 6. Enrolled Courses List */}
       <div className="space-y-4">
