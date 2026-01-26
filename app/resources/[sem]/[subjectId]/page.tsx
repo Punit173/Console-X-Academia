@@ -9,9 +9,16 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 export default function SubjectResourcePage() {
-    const params = useParams();
+    // const params = useParams();
     const router = useRouter();
-    const { sem, subjectId } = params;
+    const params = useParams();
+
+    const sem =
+    typeof params?.sem === "string" ? params.sem : undefined;
+
+    const subjectId =
+    typeof params?.subjectId === "string" ? params.subjectId : undefined;
+
 
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
