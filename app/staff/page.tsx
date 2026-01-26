@@ -49,7 +49,7 @@ function StaffContent() {
 
     // Initialize search from URL
     useEffect(() => {
-        const q = params.get("q");
+        const q = params?.get("q");
         if (q) {
             const cleanQ = q.replace(/\(\d+\)/, "").trim();
             setSearchQuery(cleanQ);
