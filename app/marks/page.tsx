@@ -34,7 +34,8 @@ import { Suspense } from "react";
 function MarksContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const highlightCode = searchParams.get('highlight');
+  const highlightCode = searchParams ? searchParams.get('highlight') : null;
+
 
   const { data, refreshData, isLoading } = useAppData();
 
