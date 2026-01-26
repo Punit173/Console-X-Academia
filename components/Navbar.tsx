@@ -10,7 +10,7 @@ import { ChevronDown } from "lucide-react";
 
 export default function Navbar() {
   const { data, setData, setCredentials } = useAppData();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
