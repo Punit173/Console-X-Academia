@@ -1,6 +1,6 @@
 {
     "name": "Console X Academia - Student Dashboard",
-    "short_name": "Console X",
+    "short_name": "Console X Academia",
     "description": "All-in-one academic dashboard for SRM students. Track attendance, calculate CGPA, view timetable, and access study resources.",
     "scope": "/",
     "start_url": "/dashboard",
@@ -12,7 +12,7 @@
     "screenshots": [
         {
             "src": "/assets/logo.jpg",
-            "sizes": "540x720",
+            "sizes": "192x192",
             "form_factor": "narrow"
         }
     ],
