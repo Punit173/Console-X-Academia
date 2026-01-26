@@ -6,6 +6,7 @@ import { CalendarProvider } from "@/components/CalendarContext";
 import Navbar from "@/components/Navbar";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import IOSInstallPrompt from "@/components/IOSInstallPrompt";
+import InstallButton from "@/components/InstallButton";
 import LiveChatWidget from "@/components/LiveChatWidget";
 
 export const metadata: Metadata = {
@@ -90,7 +91,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
             <Navbar />
             <IOSInstallPrompt />
-            <LiveChatWidget />
+            <InstallButton />
             <Analytics/>
             {/* <WhatsAppButton /> */}
 
