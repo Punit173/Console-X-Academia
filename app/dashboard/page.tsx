@@ -575,11 +575,6 @@ export default function DashboardPage() {
               Student Profile
             </h3>
             <div className="flex items-center gap-3">
-              {lastUpdated && (
-                <span className="text-xs text-gray-500 font-medium">
-                  Last updated: {lastUpdated}
-                </span>
-              )}
               <button onClick={() => refreshData()} disabled={isLoading} className={`p-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-all ${accentTextColor} disabled:opacity-50`} title="Refresh Data">
                 {isLoading ? <div className={`w-4 h-4 animate-spin rounded-full border-2 ${accentBorderColor} border-t-transparent`} /> : <RefreshCw className="w-4 h-4" />}
               </button>

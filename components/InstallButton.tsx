@@ -100,7 +100,7 @@ export default function InstallButton() {
                                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                                         <Download className="w-6 h-6 text-white" />
                                     </div>
-                                    <h3 className="text-xl font-bold">Install Console X</h3>
+                                    <h3 className="text-lg font-bold">Install ConsoleXAcademia</h3>
                                 </div>
                                 <button
                                     onClick={() => setShowPrompt(false)}
