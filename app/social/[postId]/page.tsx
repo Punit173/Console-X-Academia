@@ -16,7 +16,7 @@ export default function SinglePostPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const postId = params.postId as string;
+    const postId = params?.postId as string;
 
     useEffect(() => {
         if (!postId) return;
