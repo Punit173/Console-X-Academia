@@ -38,6 +38,9 @@ import {
 import { useRouter } from "next/navigation";
 import { getFirestore, collection, getDocs, query, limit } from "firebase/firestore";
 import { app } from "@/lib/firebase";
+import { SocialService } from "@/lib/socialService";
+import { Post } from "@/types/social";
+import { Newspaper, ExternalLink } from "lucide-react";
 
 // --- QUOTES DATA ---
 const QUOTES = [
@@ -196,6 +199,25 @@ export default function DashboardPage() {
     }, 6000);
     return () => clearInterval(timer);
   }, [announcements]);
+
+
+  // --- Recent Posts State ---
+  const [recentPosts, setRecentPosts] = useState<Post[]>([]);
+  const [recentPostsLoading, setRecentPostsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecentPosts = async () => {
+      try {
+        const res = await SocialService.getPosts(0, 5);
+        setRecentPosts(res.posts);
+      } catch (e) {
+        console.error("Failed to fetch recent posts", e);
+      } finally {
+        setRecentPostsLoading(false);
+      }
+    };
+    fetchRecentPosts();
+  }, []);
 
 
   // --- Helper: Dynamic Greeting ---
@@ -657,93 +679,159 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-        {/* right: LeetCode Section */}
-        <div className="glass-card rounded-2xl p-6 relative overflow-hidden group h-full">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFA116]/5 rounded-full blur-3xl group-hover:bg-[#FFA116]/10 transition-colors pointer-events-none" />
+        {/* right: LeetCode Section & Recent Club Posts */}
+        <div className="flex flex-col gap-6 h-full">
 
-          {/* Background Decoration Image */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 opacity-20 pointer-events-none overflow-hidden">
-            <Image
-              src="/assets/OIP.webp"
-              alt="Code Decoration"
-              fill
-              className="object-cover opacity-50 contrast-125"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-          </div>
+          {/* LeetCode Card */}
+          <div className="glass-card rounded-2xl p-6 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFA116]/5 rounded-full blur-3xl group-hover:bg-[#FFA116]/10 transition-colors pointer-events-none" />
 
-          <div className="flex items-center justify-between mb-2 relative z-10">
-            <div className="flex items-center gap-3">
-              <h3 className="text-lg font-bold text-white">
-                DSA Progress
-              </h3>
-              {leetcodeUser && (
-                <span className="text-xs text-green-400 font-mono bg-green-400/10 px-2 py-0.5 rounded border border-green-400/20">
-                  @{leetcodeUser}
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center bg-black/40 rounded-full p-1 border border-white/10">
-              <button className="px-3 py-1 rounded-full text-xs font-medium text-gray-500 cursor-not-allowed hover:text-gray-400 transition-colors">
-                ✔️
-              </button>
-              <button className="px-3 py-1 rounded-full text-xs font-bold text-white bg-[#FFA116]/20 border border-[#FFA116]/20 shadow-[0_0_10px_rgba(255,161,22,0.2)]">
-                LeetCode
-              </button>
-            </div>
-          </div>
-
-          {!leetcodeUser || (!leetcodeData && !leetcodeLoading) ? (
-            <div className="flex flex-col items-center justify-center gap-6 h-full py-2">
-              <div className="w-16 h-16 rounded-2xl bg-[#FFA116]/10 flex items-center justify-center shadow-[0_0_30px_rgba(255,161,22,0.1)] mb-2">
-                <Code className="w-8 h-8 text-[#FFA116]" />
-              </div>
-
-              <div className="text-center space-y-2 max-w-md mx-auto">
-                <h4 className="text-white font-bold text-xl">Connect LeetCode</h4>
-                <p className="text-gray-400 text-sm">
-                  Link your account to track daily progress, solve counts, and global ranking directly from your dashboard.
-                </p>
-              </div>
-
-              <form onSubmit={handleLeetCodeConnect} className="flex flex-col sm:flex-row gap-2 w-full max-w-md mx-auto mt-2">
-                <input
-                  type="text"
-                  placeholder="LeetCode Username (e.g. neal_wu)"
-                  value={inputUser}
-                  onChange={(e) => setInputUser(e.target.value)}
-                  className="bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#FFA116]/50 transition-colors w-full placeholder:text-white/20"
-                />
-                <button
-                  type="submit"
-                  disabled={leetcodeLoading}
-                  className="bg-[#FFA116] hover:bg-[#ffb13d] text-black font-bold px-6 py-3 rounded-xl transition-all disabled:opacity-50 whitespace-nowrap shadow-lg shadow-[#FFA116]/20 hover:shadow-[#FFA116]/40 hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  {leetcodeLoading ? "..." : "Connect"}
-                </button>
-              </form>
-            </div>
-          ) : (
-            <div className="w-full relative z-10 flex flex-col items-center justify-center pt-2">
-              <LeetCodeChart
-                easy={getLeetCodeStat("Easy").count}
-                medium={getLeetCodeStat("Medium").count}
-                hard={getLeetCodeStat("Hard").count}
-                total={getLeetCodeStat("All").count}
-                totalQuestions={leetcodeData?.allQuestionsCount?.[0]?.count || 3300}
+            {/* Background Decoration Image */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 opacity-20 pointer-events-none overflow-hidden">
+              <Image
+                src="/assets/OIP.webp"
+                alt="Code Decoration"
+                fill
+                className="object-cover opacity-50 contrast-125"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            </div>
 
-              <div className="absolute top-0 right-0">
-                <button
-                  onClick={() => { localStorage.removeItem("leetcode_username"); setLeetCodeUser(""); setLeetCodeData(null); }}
-                  className="text-[10px] text-white/20 hover:text-red-400 transition-colors"
-                >
-                  Unlink
+            <div className="flex items-center justify-between mb-2 relative z-10">
+              <div className="flex items-center gap-3">
+                <h3 className="text-lg font-bold text-white">
+                  DSA Progress
+                </h3>
+                {leetcodeUser && (
+                  <span className="text-xs text-green-400 font-mono bg-green-400/10 px-2 py-0.5 rounded border border-green-400/20">
+                    @{leetcodeUser}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center bg-black/40 rounded-full p-1 border border-white/10">
+                <button className="px-3 py-1 rounded-full text-xs font-medium text-gray-500 cursor-not-allowed hover:text-gray-400 transition-colors">
+                  ✔️
+                </button>
+                <button className="px-3 py-1 rounded-full text-xs font-bold text-white bg-[#FFA116]/20 border border-[#FFA116]/20 shadow-[0_0_10px_rgba(255,161,22,0.2)]">
+                  LeetCode
                 </button>
               </div>
             </div>
-          )}
+
+            {!leetcodeUser || (!leetcodeData && !leetcodeLoading) ? (
+              <div className="flex flex-col items-center justify-center gap-6 h-full py-2">
+                <div className="w-16 h-16 rounded-2xl bg-[#FFA116]/10 flex items-center justify-center shadow-[0_0_30px_rgba(255,161,22,0.1)] mb-2">
+                  <Code className="w-8 h-8 text-[#FFA116]" />
+                </div>
+
+                <div className="text-center space-y-2 max-w-md mx-auto">
+                  <h4 className="text-white font-bold text-xl">Connect LeetCode</h4>
+                  <p className="text-gray-400 text-sm">
+                    Link your account to track daily progress, solve counts, and global ranking directly from your dashboard.
+                  </p>
+                </div>
+
+                <form onSubmit={handleLeetCodeConnect} className="flex flex-col sm:flex-row gap-2 w-full max-w-md mx-auto mt-2">
+                  <input
+                    type="text"
+                    placeholder="LeetCode Username (e.g. neal_wu)"
+                    value={inputUser}
+                    onChange={(e) => setInputUser(e.target.value)}
+                    className="bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#FFA116]/50 transition-colors w-full placeholder:text-white/20"
+                  />
+                  <button
+                    type="submit"
+                    disabled={leetcodeLoading}
+                    className="bg-[#FFA116] hover:bg-[#ffb13d] text-black font-bold px-6 py-3 rounded-xl transition-all disabled:opacity-50 whitespace-nowrap shadow-lg shadow-[#FFA116]/20 hover:shadow-[#FFA116]/40 hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    {leetcodeLoading ? "..." : "Connect"}
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="w-full relative z-10 flex flex-col items-center justify-center pt-2">
+                <LeetCodeChart
+                  easy={getLeetCodeStat("Easy").count}
+                  medium={getLeetCodeStat("Medium").count}
+                  hard={getLeetCodeStat("Hard").count}
+                  total={getLeetCodeStat("All").count}
+                  totalQuestions={leetcodeData?.allQuestionsCount?.[0]?.count || 3300}
+                />
+
+                <div className="absolute top-0 right-0">
+                  <button
+                    onClick={() => { localStorage.removeItem("leetcode_username"); setLeetCodeUser(""); setLeetCodeData(null); }}
+                    className="text-[10px] text-white/20 hover:text-red-400 transition-colors"
+                  >
+                    Unlink
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Recent Club Posts Card */}
+          <div className="glass-card rounded-2xl p-6 relative overflow-hidden group flex-1">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl group-hover:bg-purple-500/10 transition-colors pointer-events-none" />
+
+            <div className="flex items-center justify-between mb-4 relative z-10">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <span className="w-1 h-5 bg-purple-500 rounded-full"></span>
+                Club Highlights
+              </h3>
+              <Link href="/social" className="text-xs text-white/40 hover:text-purple-400 transition-colors flex items-center gap-1">
+                View All <ExternalLink size={12} />
+              </Link>
+            </div>
+
+            {recentPostsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />
+                ))}
+              </div>
+            ) : recentPosts.length > 0 ? (
+              <div className="space-y-3">
+                {recentPosts.slice(0, 3).map((post) => (
+                  <Link
+                    key={post.post_id}
+                    href="/social"
+                    className="block p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-purple-500/30 transition-all group/post"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-black border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                        {post.club_icon_url ? (
+                          <img src={post.club_icon_url} alt="Club" className="w-full h-full object-cover" />
+                        ) : (
+                          <Users size={14} className="text-white/40" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-bold text-white truncate group-hover/post:text-purple-200 transition-colors">
+                            {post.club_name || (post.individual_email ? post.individual_email.split('@')[0] : "Student")}
+                          </p>
+                          <span className="text-[10px] text-white/30 whitespace-nowrap ml-2">
+                            {/* Simple Logic for time */}
+                            {new Date(post.timestamp * 1000).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-xs text-white/60 line-clamp-1 mt-0.5">
+                          {post.content}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-white/30">
+                <Newspaper size={24} className="mb-2 opacity-50" />
+                <p className="text-xs">No recent activity</p>
+              </div>
+            )}
+          </div>
         </div>
 
 

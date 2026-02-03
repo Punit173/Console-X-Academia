@@ -19,6 +19,8 @@ interface AppDataContextValue {
   setCredentials: (creds: Credentials | null) => void;
   refreshData: () => Promise<void>;
   logout: () => void;
+  sessionData: any | null;
+  setSessionData: (data: any | null) => void;
   isLoading: boolean;
   fetchError: boolean;
   authError: boolean;
@@ -31,6 +33,7 @@ const AppDataContext = createContext<AppDataContextValue | undefined>(undefined)
 export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   const [data, setDataState] = useState<ApiResponse | null>(null);
   const [credentials, setCredentialsState] = useState<Credentials | null>(null);
+  const [sessionData, setSessionDataState] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState(false);
   const [authError, setAuthError] = useState(false);
@@ -47,6 +50,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window !== "undefined") {
       const storedData = localStorage.getItem("academia-data");
       const storedCreds = localStorage.getItem("academia-creds");
+      const storedSession = localStorage.getItem("academia-session-data");
       const storedTime = localStorage.getItem("academia-last-updated");
 
       if (storedData) {
@@ -69,6 +73,12 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
           if (parsedCreds.email && parsedCreds.password) {
             setCredentialsState(parsedCreds);
           }
+        } catch { }
+      }
+
+      if (storedSession) {
+        try {
+          setSessionDataState(JSON.parse(storedSession));
         } catch { }
       }
 
@@ -107,6 +117,18 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem("academia-creds", JSON.stringify(newCreds));
       } else {
         localStorage.removeItem("academia-creds");
+        setSessionData(null); // Clear session if creds are cleared
+      }
+    }
+  };
+
+  const setSessionData = (newData: any | null) => {
+    setSessionDataState(newData);
+    if (typeof window !== "undefined") {
+      if (newData) {
+        localStorage.setItem("academia-session-data", JSON.stringify(newData));
+      } else {
+        localStorage.removeItem("academia-session-data");
       }
     }
   };
@@ -127,14 +149,26 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     setAuthError(false);
 
     try {
+      const payload: any = { ...credentials };
+      if (sessionData) {
+        payload.session_data = sessionData;
+      }
+
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         const json = await res.json();
+
+        // Update session data: Support direct 'session_data' or nested in 'data.session_data' just in case
+        const incomingSession = json.session_data || (json.data && json.data.session_data);
+        if (incomingSession) {
+          setSessionData(incomingSession);
+        }
+
         // Validate structure before setting
         if (json.status === "success" && isValidData(json)) {
           setData(json);
@@ -174,6 +208,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setData(null);
     setCredentials(null);
+    setSessionData(null);
     setAuthError(false);
     setLastUpdated(null);
     if (typeof window !== "undefined") {
@@ -182,7 +217,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AppDataContext.Provider value={{ data, setData, credentials, setCredentials, refreshData, isLoading, fetchError, authError, logout, isInitialized, lastUpdated }}>
+    <AppDataContext.Provider value={{ data, setData, credentials, setCredentials, sessionData, setSessionData, refreshData, isLoading, fetchError, authError, logout, isInitialized, lastUpdated }}>
       {children}
     </AppDataContext.Provider>
   );

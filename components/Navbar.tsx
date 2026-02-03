@@ -46,6 +46,12 @@ export default function Navbar() {
           hoverLink: "hover:text-white hover:bg-pink-600/10",
           installButton: "from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 hover:shadow-pink-500/50",
         };
+      case "/social":
+        return {
+          activeLink: "bg-violet-600/20 text-violet-300 border border-violet-500/30",
+          hoverLink: "hover:text-white hover:bg-violet-600/10",
+          installButton: "from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 hover:shadow-violet-500/50",
+        };
       default:
         return {
           activeLink: "bg-primary/10 text-primary border border-primary/20",
@@ -89,6 +95,13 @@ export default function Navbar() {
             href="/dashboard"
             label="Dashboard"
             active={pathname === "/dashboard"}
+            theme={theme}
+          />
+
+          <NavLink
+            href="/social"
+            label="Social"
+            active={pathname === "/social"}
             theme={theme}
           />
 
@@ -245,6 +258,7 @@ export default function Navbar() {
         <div className="mt-3 border-t border-white/10 pt-3 md:hidden">
           <div className="flex flex-col gap-2">
             <NavLink href="/dashboard" label="Dashboard" active={pathname === "/dashboard"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
+            <NavLink href="/social" label="Social" active={pathname === "/social"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
 
             <div className="px-3 text-xs font-bold text-white/40 uppercase mt-2">Academics</div>
             <NavLink href="/marks" label="Marks" active={pathname === "/marks"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
