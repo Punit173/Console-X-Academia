@@ -29,13 +29,34 @@ async function fetchFromApi(url: string, payload: any) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const { email, password, session_data } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
     }
 
-    const payload = { email, password };
+    const payload: any = { email, password };
+    if (session_data) {
+      payload.session_data = session_data;
+    }
+
+    // MOCK LOGIN FOR TESTING
+    if (email === "test" && password === "test") {
+      return NextResponse.json({
+        status: "success",
+        student_data: {
+          name: "Test User",
+          reg_no: "RA2011003010000",
+          net_id: "test_user",
+          email: "test@srmist.edu.in",
+          department: "Software Engineering",
+          semester: 6,
+          section: "A",
+          batch: 2024
+        }
+      });
+    }
+
     let apiRes: Response | null = null;
     let usedSource = "LOCAL";
 

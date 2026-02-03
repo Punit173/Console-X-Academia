@@ -38,8 +38,16 @@ export default function LoginPage() {
       });
 
       if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.details || errData.error || "Login failed");
+        console.log("Login Error Status:", res.status, res.statusText);
+        let errData;
+        try {
+          errData = await res.json();
+          console.log("Login Error Body:", errData);
+        } catch (e) {
+          console.log("Login Error Body (Non-JSON):", await res.text());
+        }
+
+        throw new Error((errData && (errData.details || errData.error)) || res.statusText || "Login failed");
       }
 
       const json = (await res.json()) as ApiResponse;

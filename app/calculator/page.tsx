@@ -261,16 +261,33 @@ export default function CGPACalculatorPage() {
 
     // --- Handlers: Import ---
     const fetchScraperData = async (nid: string, pwd: string) => {
+        const storedSession = localStorage.getItem("academia-session-data");
+        let sessionData = null;
+        if (storedSession) {
+            try { sessionData = JSON.parse(storedSession); } catch { }
+        }
+
+        const payload: any = { netid: nid, password: pwd };
+        if (sessionData) payload.session_data = sessionData;
+
         const response = await fetch('/api/proxy-scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ netid: nid, password: pwd })
+            body: JSON.stringify(payload)
         });
+
+        const res = await response.json();
+
         if (!response.ok) {
-            const res = await response.json();
             throw new Error(res.error || 'Failed to fetch data');
         }
-        return await response.json();
+
+        // Update session if present
+        if (res.session_data) {
+            localStorage.setItem("academia-session-data", JSON.stringify(res.session_data));
+        }
+
+        return res;
     };
 
     const processImportData = (result: any) => {

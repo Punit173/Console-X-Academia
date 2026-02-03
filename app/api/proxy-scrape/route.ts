@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { netid, password } = body;
+        const { netid, password, session_data } = body;
 
         if (!netid || !password) {
             return NextResponse.json(
@@ -22,16 +22,18 @@ export async function POST(request: Request) {
 
         console.log(`Proxying scrape request for ${netid} to ${constScraperUrl}`);
 
+        const payload: any = { netid, password };
+        if (session_data) {
+            payload.session_data = session_data;
+        }
+
         const response = await fetch(constScraperUrl, {
             method: "POST",
             headers: {
                 "accept": "application/json",
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                netid,
-                password
-            })
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
