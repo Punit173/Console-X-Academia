@@ -5,7 +5,6 @@ import { Analytics } from "@vercel/analytics/next"
 import { CalendarProvider } from "@/components/CalendarContext";
 import Navbar from "@/components/Navbar";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
-import IOSInstallPrompt from "@/components/IOSInstallPrompt";
 import InstallButton from "@/components/InstallButton";
 import LiveChatWidget from "@/components/LiveChatWidget";
 
@@ -90,7 +89,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
 
             <Navbar />
-            <IOSInstallPrompt />
             <InstallButton />
             <Analytics/>
             {/* <WhatsAppButton /> */}

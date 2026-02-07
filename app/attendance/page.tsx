@@ -6,9 +6,16 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { generateStandardPDF } from "@/utils/pdf-generator";
 import Link from "next/link";
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { Share2, Download, ArrowUpRight, Clock, UserCheck, BarChart2 as BarChartIcon } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import {
+  Share2,
+  Download,
+  ArrowUpRight,
+  Clock,
+  UserCheck,
+  BarChart2 as BarChartIcon,
+} from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -17,9 +24,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
-
 
 export default function AttendancePage() {
   const router = useRouter();
@@ -34,7 +40,6 @@ export default function AttendancePage() {
     }
   }, [data, router]);
 
-
   // --- Theme Helpers: Strict Blue/White/Black Palette ---
 
   // --- Theme Helpers: "Comfortable" Palette (Teal / Amber / Rose) ---
@@ -45,8 +50,10 @@ export default function AttendancePage() {
   };
 
   const getProgressBarColor = (percentage: number) => {
-    if (percentage >= 75) return "bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,0.4)]";
-    if (percentage >= 65) return "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]";
+    if (percentage >= 75)
+      return "bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,0.4)]";
+    if (percentage >= 65)
+      return "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]";
     return "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]";
   };
 
@@ -63,8 +70,12 @@ export default function AttendancePage() {
         <div className="p-6 rounded-full bg-blue-950/30 border border-blue-800/50 mb-4 shadow-[0_0_15px_rgba(30,58,138,0.2)]">
           <span className="text-4xl text-white">🔐</span>
         </div>
-        <h2 className="text-xl font-bold text-white mb-2">Authentication Required</h2>
-        <p className="text-blue-300/60 text-sm mb-6">Please login from the home page to view your attendance.</p>
+        <h2 className="text-xl font-bold text-white mb-2">
+          Authentication Required
+        </h2>
+        <p className="text-blue-300/60 text-sm mb-6">
+          Please login from the home page to view your attendance.
+        </p>
         <Link
           href="/"
           className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-95"
@@ -75,11 +86,14 @@ export default function AttendancePage() {
     );
   }
 
-  const attendance = data.attendance?.attendance || { overall_attendance: 0, total_hours_conducted: 0, courses: {} };
+  const attendance = data.attendance?.attendance || {
+    overall_attendance: 0,
+    total_hours_conducted: 0,
+    courses: {},
+  };
   const courses = attendance.courses || {};
 
-
-  const handleExport = (action: 'download' | 'share') => {
+  const handleExport = (action: "download" | "share") => {
     if (!data || !attendance) return;
     setIsGenerating(true);
 
@@ -89,7 +103,7 @@ export default function AttendancePage() {
 
     // 1. Dark Background
     doc.setFillColor(2, 6, 23); // Slate 950 (Deep Dark)
-    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+    doc.rect(0, 0, pageWidth, pageHeight, "F");
 
     // 2. Grid Pattern (Simulate CSS grid)
     doc.setDrawColor(30, 41, 59); // Slate 800 lines
@@ -104,32 +118,39 @@ export default function AttendancePage() {
     // 3. Title & Metadata
     doc.setFontSize(22);
     doc.setTextColor(20, 184, 166); // Teal 500
-    doc.text('CONSOLE X ACADEMIA', 14, 20);
+    doc.text("CONSOLE X ACADEMIA", 14, 20);
 
     doc.setFontSize(16);
     doc.setTextColor(255, 255, 255);
-    doc.text('Attendance Report', 14, 35);
+    doc.text("Attendance Report", 14, 35);
 
     doc.setFontSize(10);
     doc.setTextColor(148, 163, 184); // Slate 400
     const studentInfo = (data as any).student_info || {};
-    doc.text(`Name: ${studentInfo.student_name || 'Student'}`, 14, 45);
-    doc.text(`Reg No: ${studentInfo.register_number || 'N/A'}`, 14, 50);
+    doc.text(`Name: ${studentInfo.student_name || "Student"}`, 14, 45);
+    doc.text(`Reg No: ${studentInfo.register_number || "N/A"}`, 14, 50);
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 55);
 
     // 4. Overall Stats
     doc.setFontSize(12);
     doc.setTextColor(255, 255, 255);
-    doc.text(`Overall Attendance: ${attendance.overall_attendance.toFixed(1)}%`, 14, 70);
+    doc.text(
+      `Overall Attendance: ${attendance.overall_attendance.toFixed(1)}%`,
+      14,
+      70,
+    );
 
     // 5. Transform Data
     const tableRows = Object.entries(courses).map(([code, c]: any) => {
       // Robust Course Title Match
       const matchedCourse = data.timetable?.courses?.find((tc: any) => {
         const tCode = (tc.course_code || "").toLowerCase().trim();
-        const aCode = c.course_code?.toLowerCase().trim() || code.toLowerCase().trim();
+        const aCode =
+          c.course_code?.toLowerCase().trim() || code.toLowerCase().trim();
         if (!tCode) return false;
-        return aCode === tCode || aCode.startsWith(tCode) || tCode.includes(aCode);
+        return (
+          aCode === tCode || aCode.startsWith(tCode) || tCode.includes(aCode)
+        );
       });
       const title = matchedCourse?.course_title || c.course_title || code;
 
@@ -148,7 +169,9 @@ export default function AttendancePage() {
         marginText = safeBunks > 0 ? `Margin: ${safeBunks} hrs` : "No Margin";
       } else {
         const targetRatio = threshold / 100;
-        const needed = Math.ceil((targetRatio * conducted - present) / (1 - targetRatio));
+        const needed = Math.ceil(
+          (targetRatio * conducted - present) / (1 - targetRatio),
+        );
         marginText = `Required: ${needed} hrs`;
       }
 
@@ -158,16 +181,18 @@ export default function AttendancePage() {
         `${absent}`,
         `${percentage.toFixed(1)}%`,
         marginText,
-        getAttendanceStatus(percentage)
+        getAttendanceStatus(percentage),
       ];
     });
 
     // 6. Generate Table
     autoTable(doc, {
       startY: 80,
-      head: [['Course', 'Conducted', 'Absent', 'Percentage', 'Margin', 'Status']],
+      head: [
+        ["Course", "Conducted", "Absent", "Percentage", "Margin", "Status"],
+      ],
       body: tableRows,
-      theme: 'grid',
+      theme: "grid",
       styles: {
         fillColor: [2, 6, 23], // Slate 950
         textColor: [226, 232, 240], // Slate 200
@@ -177,7 +202,7 @@ export default function AttendancePage() {
       headStyles: {
         fillColor: [15, 23, 42], // Slate 900
         textColor: [45, 212, 191], // Teal 400
-        fontStyle: 'bold',
+        fontStyle: "bold",
         lineColor: [30, 41, 59],
       },
       alternateRowStyles: {
@@ -185,8 +210,8 @@ export default function AttendancePage() {
       },
     });
 
-    if (action === 'download') {
-      doc.save('Attendance_Report.pdf');
+    if (action === "download") {
+      doc.save("Attendance_Report.pdf");
       setIsGenerating(false);
     } else {
       setIsGenerating(false);
@@ -195,7 +220,6 @@ export default function AttendancePage() {
 
   return (
     <div className="w-full animate-fade-in space-y-8 pb-10">
-
       {/* Header */}
       <div className=" top-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-blue-900/30 pb-6 pt-4 -mt-4 relative transition-all">
         {/* Glow effect - restricted to navy/blue */}
@@ -219,7 +243,7 @@ export default function AttendancePage() {
                  I should aligning them to look exactly like the screenshot. 
              */}
           <button
-            onClick={() => handleExport('share')}
+            onClick={() => handleExport("share")}
             disabled={isGenerating}
             className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all text-blue-400"
           >
@@ -234,7 +258,7 @@ export default function AttendancePage() {
           </Link>
 
           <button
-            onClick={() => handleExport('download')}
+            onClick={() => handleExport("download")}
             disabled={isGenerating}
             className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all text-white"
           >
@@ -244,16 +268,21 @@ export default function AttendancePage() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
         {/* Overall Attendance */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
-          <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${getAttendanceColor(attendance.overall_attendance)}`}>
+        <div className="relative col-span-2 md:col-span-1 overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
+          <div
+            className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${getAttendanceColor(attendance.overall_attendance)}`}
+          >
             <BarChartIcon className="w-24 h-24" />
           </div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Overall Attendance</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+            Overall Attendance
+          </p>
           <div className="flex items-baseline gap-2 relative z-10">
-            <span className={`text-5xl font-black ${getAttendanceColor(attendance.overall_attendance)}`}>
+            <span
+              className={`text-4xl md:text-5xl font-bold ${getAttendanceColor(attendance.overall_attendance)}`}
+            >
               {attendance.overall_attendance.toFixed(1)}
             </span>
             <span className="text-xl text-gray-400">%</span>
@@ -262,91 +291,52 @@ export default function AttendancePage() {
           <div className="mt-4 w-full bg-slate-800/50 rounded-full h-2 overflow-hidden shadow-inner border border-white/5 relative z-10">
             <div
               className={`h-full ${getProgressBarColor(attendance.overall_attendance)} transition-all duration-1000 relative`}
-              style={{ width: `${Math.min(attendance.overall_attendance, 100)}%` }}
+              style={{
+                width: `${Math.min(attendance.overall_attendance, 100)}%`,
+              }}
             >
               {/* Subtle Shine */}
               <div className="absolute top-0 right-0 bottom-0 w-full bg-gradient-to-l from-white/20 to-transparent"></div>
             </div>
           </div>
           <p className="mt-2 text-xs text-gray-400">
-            Status: <span className={`font-bold tracking-wide ${getAttendanceColor(attendance.overall_attendance)}`}>{getAttendanceStatus(attendance.overall_attendance)}</span>
+            Status:{" "}
+            <span
+              className={`font-bold tracking-wide ${getAttendanceColor(attendance.overall_attendance)}`}
+            >
+              {getAttendanceStatus(attendance.overall_attendance)}
+            </span>
           </p>
         </div>
 
         {/* Total Hours Conducted */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
+        <div
+          className="relative overflow-hidden rounded-2xl border border-white/5  bg-slate-950/60 backdrop-blur-md  p-5 md:p-6  min-h-[160px] md:min-h-0 flex flex-col justify-between group transition-all duration-300 shadow-lg shadow-black/40  hover:bg-slate-900/60 hover:border-white/10"
+        >
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-blue-400">
             <Clock className="w-24 h-24" />
           </div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Hours Conducted</p>
-          <p className="text-5xl font-black text-white relative z-10">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+            Hours Conducted
+          </p>
+          <p className="text-4xl md:text-5xl font-bold">
             {attendance.total_hours_conducted}
           </p>
-          <p className="mt-4 text-xs text-gray-400 relative z-10">Total academic hours scheduled so far.</p>
         </div>
 
         {/* Total Hours Absent */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
+        <div
+          className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-5 md:p-6 min-h-[160px] md:min-h-0 flex flex-col justify-between group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10"
+        >
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-red-400">
             <UserCheck className="w-24 h-24" />
           </div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Hours Absent</p>
-          <p className="text-5xl font-black text-white relative z-10">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+            Hours Absent
+          </p>
+          <p className="text-4xl md:text-5xl font-bold text-white relative z-10">
             {attendance.total_hours_absent}
           </p>
-          <p className="mt-4 text-xs text-gray-400 relative z-10">Total hours missed across all subjects.</p>
-        </div>
-      </div>
-
-      {/* Chart Section */}
-      <div className="mt-8 mb-8">
-        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <span className="w-1 h-6 bg-teal-500 rounded-full"></span>
-          Subject Performance
-        </h2>
-        <div className="h-[400px] w-full glass-card rounded-2xl p-6 bg-slate-950/60 backdrop-blur-md border border-white/5 shadow-lg shadow-black/40">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={Object.entries(courses).map(([code, c]: any) => {
-                const matchedCourse = data.timetable?.courses?.find((tc: any) => {
-                  const tCode = (tc.course_code || "").toLowerCase().trim();
-                  const aCode = code.toLowerCase().trim();
-                  return aCode === tCode || aCode.startsWith(tCode) || aCode.includes(tCode);
-                });
-                const name = matchedCourse?.course_title || c.course_title || code.replace(/Regular|Arrear/gi, "").trim();
-                const conducted = c.hours_conducted || c.total_hours_conducted || 0;
-                const absent = c.hours_absent || c.total_hours_absent || 0;
-                return {
-                  name,
-                  Present: conducted - absent,
-                  Absent: absent,
-                };
-              })}
-              margin={{ top: 20, right: 30, left: 0, bottom: 80 }} // Bottom margin for labels
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-              <XAxis
-                dataKey="name"
-                angle={-45}
-                textAnchor="end"
-                height={80}
-                stroke="#94a3b8"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                itemStyle={{ fontSize: '12px' }}
-                labelStyle={{ color: '#94a3b8', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}
-                cursor={{ fill: 'rgba(255,255,255,0.02)' }}
-              />
-              <Legend wrapperStyle={{ paddingTop: '20px' }} />
-              <Bar dataKey="Present" stackId="a" fill="#14b8a6" radius={[0, 0, 4, 4]} barSize={30} />
-              <Bar dataKey="Absent" stackId="a" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={30} />
-            </BarChart>
-          </ResponsiveContainer>
         </div>
       </div>
 
@@ -359,7 +349,9 @@ export default function AttendancePage() {
 
         {Object.keys(courses).length === 0 ? (
           <div className="text-center py-12 rounded-xl border border-blue-900/20 bg-blue-950/20">
-            <p className="text-blue-200/50">No course attendance data available.</p>
+            <p className="text-blue-200/50">
+              No course attendance data available.
+            </p>
           </div>
         ) : (
           <div className="rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md overflow-hidden shadow-lg shadow-black/40">
@@ -367,26 +359,49 @@ export default function AttendancePage() {
               <table className="w-full text-left border-collapse">
                 <thead className="hidden md:table-header-group">
                   <tr className="border-b border-white/5 bg-white/5">
-                    <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Course</th>
-                    <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Attendance</th>
-                    <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Hours</th>
-                    <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Status</th>
+                    <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      Course
+                    </th>
+                    {/* <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">
+                      Status
+                    </th> */}
+                    <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">
+                      Attendance
+                    </th>
+                    <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">
+                      Hours
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 md:divide-none">
                   {Object.entries(courses).map(([code, c]: any, index) => {
                     // --- Robust Title Matching ---
-                    const matchedCourse = data.timetable?.courses?.find((tc: any) => {
-                      const tCode = (tc.course_code || "").toLowerCase().trim();
-                      const aCode = code.toLowerCase().trim();
-                      if (!tCode) return false;
-                      return aCode === tCode || aCode.startsWith(tCode) || aCode.includes(tCode) || tCode.includes(aCode);
-                    });
-                    const displayName = matchedCourse?.course_title || c.course_title || code.replace(/Regular|Arrear|Theory|Practical/gi, "").trim();
+                    const matchedCourse = data.timetable?.courses?.find(
+                      (tc: any) => {
+                        const tCode = (tc.course_code || "")
+                          .toLowerCase()
+                          .trim();
+                        const aCode = code.toLowerCase().trim();
+                        if (!tCode) return false;
+                        return (
+                          aCode === tCode ||
+                          aCode.startsWith(tCode) ||
+                          aCode.includes(tCode) ||
+                          tCode.includes(aCode)
+                        );
+                      },
+                    );
+                    const displayName =
+                      matchedCourse?.course_title ||
+                      c.course_title ||
+                      code
+                        .replace(/Regular|Arrear|Theory|Practical/gi, "")
+                        .trim();
 
                     // --- Margin Calculation Logic ---
                     const threshold = 75;
-                    const conducted = c.hours_conducted || c.total_hours_conducted || 0;
+                    const conducted =
+                      c.hours_conducted || c.total_hours_conducted || 0;
                     const absent = c.hours_absent || c.total_hours_absent || 0;
                     const present = conducted - absent;
                     const percentage = c.attendance_percentage || 0;
@@ -406,7 +421,9 @@ export default function AttendancePage() {
                       }
                     } else {
                       const targetRatio = threshold / 100;
-                      const needed = Math.ceil((targetRatio * conducted - present) / (1 - targetRatio));
+                      const needed = Math.ceil(
+                        (targetRatio * conducted - present) / (1 - targetRatio),
+                      );
                       marginMsg = `Required: ${needed}`;
                       marginType = "danger";
                     }
@@ -418,27 +435,30 @@ export default function AttendancePage() {
                         className="group transition-colors border-b md:border-b border-white/5 last:border-0 grid grid-cols-2 gap-4 md:table-row bg-white/5 md:bg-transparent rounded-xl md:rounded-none p-4 md:p-0 mb-4 md:mb-0 cursor-pointer hover:bg-white/5 relative"
                       >
                         <td className="col-span-2 md:col-auto md:table-cell p-0 md:p-4">
-                          <div className="flex items-center justify-between">
-                            
+                          <div className="flex items-start">
+
                             {/* Left content */}
-                            <div className="flex flex-col">
-                              <span className="font-bold text-gray-200 text-base mb-1 group-hover:text-white transition-colors">
-                                {displayName}
+                            <div className="flex flex-col w-2/3 pr-2">
+
+                              <span className="font-bold text-gray-200 text-base mb-1 group-hover:text-white transition-colors break-words">
+                                {displayName} 
                               </span>
                               <span className="text-[10px] font-mono text-gray-600 group-hover:text-gray-500 bg-black/20 px-1.5 py-0.5 rounded w-fit capitalize transition-colors">
-                                {code.replace(/Regular|Arrear/gi, "").toLowerCase()}
+                                {code
+                                  .replace(/Regular|Arrear/gi, "")
+                                  .toLowerCase()}
                               </span>
                             </div>
 
                             {/* Right content */}
-                            <div className="flex flex-col items-end">
+                            <div className="flex flex-col items-end w-1/3 pl-2 -space-y-0.5">
                               <span
                                 className={`inline-flex items-center px-3 py-1 rounded-full text-base font-medium ${
                                   marginType === "safe"
                                     ? "text-teal-300"
                                     : marginType === "warning"
-                                    ? "text-amber-300"
-                                    : "text-rose-300"
+                                      ? "text-amber-300"
+                                      : "text-rose-300"
                                 }`}
                               >
                                 {marginMsg}
@@ -448,29 +468,21 @@ export default function AttendancePage() {
                                   marginType === "safe"
                                     ? "text-teal-300"
                                     : marginType === "warning"
-                                    ? "text-amber-300"
-                                    : "text-rose-300"
+                                      ? "text-amber-300"
+                                      : "text-rose-300"
                                 }`}
                               >
                                 Margin
                               </span>
                             </div>
-
                           </div>
                         </td>
 
-                        {/* <td className="col-span-2 md:col-auto md:table-cell p-0 md:p-4 text-center md:text-right flex items-center justify-center md:block">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${marginType === 'safe' ? 'bg-teal-500/10 border-teal-500/20 text-teal-300' :
-                            marginType === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' :
-                              'bg-rose-500/10 border-rose-500/20 text-rose-300'
-                            }`}>
-                            {marginMsg}
-                          </span>
-                        </td> */}
-
                         <td className="md:table-cell p-0 md:p-4 text-center">
                           <div className="flex flex-col items-center justify-center h-full">
-                            <span className={`text-xl font-bold ${getAttendanceColor(percentage)}`}>
+                            <span
+                              className={`text-xl font-bold ${getAttendanceColor(percentage)}`}
+                            >
                               {percentage.toFixed(1)}%
                             </span>
                             <span className="text-[9px] font-medium text-gray-500 uppercase tracking-widest mt-0.5">
@@ -482,16 +494,23 @@ export default function AttendancePage() {
                         <td className="md:table-cell p-0 md:p-4 text-center">
                           <div className="flex flex-col gap-1 items-center justify-center h-full">
                             <div className="flex items-center gap-2 text-xs">
-                              <span className="text-gray-500 w-8 text-right">Done</span>
-                              <span className="text-gray-300 font-medium">{conducted}</span>
+                              <span className="text-gray-500 w-8 text-right">
+                                Done
+                              </span>
+                              <span className="text-gray-300 font-medium">
+                                {conducted}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2 text-xs">
-                              <span className="text-gray-500 w-8 text-right">Missed</span>
-                              <span className="text-gray-300 font-medium">{absent}</span>
+                              <span className="text-gray-500 w-8 text-right">
+                                Missed
+                              </span>
+                              <span className="text-gray-300 font-medium">
+                                {absent}
+                              </span>
                             </div>
                           </div>
                         </td>
-
                       </tr>
                     );
                   })}
