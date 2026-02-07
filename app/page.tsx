@@ -145,12 +145,12 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <InputField
-                label="NetID / Email"
+                label="Email"
                 icon={<User className="w-5 h-5" />}
                 type="text"
                 value={email}
                 onChange={setEmail}
-                placeholder="gn1189 or netid@srmist.edu.in"
+                placeholder="netid@srmist.edu.in"
               />
 
               <InputField

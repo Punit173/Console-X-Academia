@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     description: "All-in-one academic dashboard: Attendance, CGPA, Timetable & more.",
     siteName: "Console X Academia",
     images: [{
-      url: "/assets/logo.jpg",
+      url: "/assets/moblogo.png",
       width: 1200,
       height: 630,
       alt: "Console X Academia Dashboard"
@@ -96,10 +96,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {/* Scrollable Content Wrapper with Mask */}
             <div
               className="flex-1 w-full overflow-y-auto overflow-x-hidden"
-              style={{
-                maskImage: "linear-gradient(to bottom, transparent 0px, transparent 100px, black 140px, black 100%)",
-                WebkitMaskImage: "linear-gradient(to bottom, transparent 0px, transparent 100px, black 140px, black 100%)"
-              }}
+              // style={{
+              //   maskImage: "linear-gradient(to bottom, transparent 0px, transparent 100px, black 140px, black 100%)",
+              //   WebkitMaskImage: "linear-gradient(to bottom, transparent 0px, transparent 100px, black 140px, black 100%)"
+              // }}
             >
               {/* Main Content */}
               <main className="w-full pt-32 pb-12 px-4 sm:px-6">
@@ -109,7 +109,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </main>
 
               {/* Footer */}
-              <footer className="border-t border-white/5 py-8 w-full glass-card">
+              <footer className="border-t bottom-0 border-white/5 py-8 w-full glass-card">
                 <div className="w-full max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
 
                   <p>© 2025 Console Academia. All rights reserved.</p>
