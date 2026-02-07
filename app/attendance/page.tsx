@@ -242,115 +242,7 @@ export default function AttendancePage() {
           </button>
         </div>
       </div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        {/* Overall Attendance */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
-          <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${getAttendanceColor(attendance.overall_attendance)}`}>
-            <BarChartIcon className="w-24 h-24" />
-          </div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Overall Attendance</p>
-          <div className="flex items-baseline gap-2 relative z-10">
-            <span className={`text-5xl font-black ${getAttendanceColor(attendance.overall_attendance)}`}>
-              {attendance.overall_attendance.toFixed(1)}
-            </span>
-            <span className="text-xl text-gray-400">%</span>
-          </div>
-          {/* Progress Bar Container */}
-          <div className="mt-4 w-full bg-slate-800/50 rounded-full h-2 overflow-hidden shadow-inner border border-white/5 relative z-10">
-            <div
-              className={`h-full ${getProgressBarColor(attendance.overall_attendance)} transition-all duration-1000 relative`}
-              style={{ width: `${Math.min(attendance.overall_attendance, 100)}%` }}
-            >
-              {/* Subtle Shine */}
-              <div className="absolute top-0 right-0 bottom-0 w-full bg-gradient-to-l from-white/20 to-transparent"></div>
-            </div>
-          </div>
-          <p className="mt-2 text-xs text-gray-400">
-            Status: <span className={`font-bold tracking-wide ${getAttendanceColor(attendance.overall_attendance)}`}>{getAttendanceStatus(attendance.overall_attendance)}</span>
-          </p>
-        </div>
-
-        {/* Total Hours Conducted */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-blue-400">
-            <Clock className="w-24 h-24" />
-          </div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Hours Conducted</p>
-          <p className="text-5xl font-black text-white relative z-10">
-            {attendance.total_hours_conducted}
-          </p>
-          <p className="mt-4 text-xs text-gray-400 relative z-10">Total academic hours scheduled so far.</p>
-        </div>
-
-        {/* Total Hours Absent */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-red-400">
-            <UserCheck className="w-24 h-24" />
-          </div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Hours Absent</p>
-          <p className="text-5xl font-black text-white relative z-10">
-            {attendance.total_hours_absent}
-          </p>
-          <p className="mt-4 text-xs text-gray-400 relative z-10">Total hours missed across all subjects.</p>
-        </div>
-      </div>
-
-      {/* Chart Section */}
-      <div className="mt-8 mb-8">
-        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <span className="w-1 h-6 bg-teal-500 rounded-full"></span>
-          Subject Performance
-        </h2>
-        <div className="h-[400px] w-full glass-card rounded-2xl p-6 bg-slate-950/60 backdrop-blur-md border border-white/5 shadow-lg shadow-black/40">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={Object.entries(courses).map(([code, c]: any) => {
-                const matchedCourse = data.timetable?.courses?.find((tc: any) => {
-                  const tCode = (tc.course_code || "").toLowerCase().trim();
-                  const aCode = code.toLowerCase().trim();
-                  return aCode === tCode || aCode.startsWith(tCode) || aCode.includes(tCode);
-                });
-                const name = matchedCourse?.course_title || c.course_title || code.replace(/Regular|Arrear/gi, "").trim();
-                const conducted = c.hours_conducted || c.total_hours_conducted || 0;
-                const absent = c.hours_absent || c.total_hours_absent || 0;
-                return {
-                  name,
-                  Present: conducted - absent,
-                  Absent: absent,
-                };
-              })}
-              margin={{ top: 20, right: 30, left: 0, bottom: 80 }} // Bottom margin for labels
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-              <XAxis
-                dataKey="name"
-                angle={-45}
-                textAnchor="end"
-                height={80}
-                stroke="#94a3b8"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                itemStyle={{ fontSize: '12px' }}
-                labelStyle={{ color: '#94a3b8', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}
-                cursor={{ fill: 'rgba(255,255,255,0.02)' }}
-              />
-              <Legend wrapperStyle={{ paddingTop: '20px' }} />
-              <Bar dataKey="Present" stackId="a" fill="#14b8a6" radius={[0, 0, 4, 4]} barSize={30} />
-              <Bar dataKey="Absent" stackId="a" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={30} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Per-Course Attendance */}
+{/* Per-Course Attendance */}
       <div className="space-y-4">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <span className="w-1.5 h-6 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.6)]"></span>
@@ -501,6 +393,114 @@ export default function AttendancePage() {
           </div>
         )}
       </div>
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        {/* Overall Attendance */}
+        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
+          <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${getAttendanceColor(attendance.overall_attendance)}`}>
+            <BarChartIcon className="w-24 h-24" />
+          </div>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Overall Attendance</p>
+          <div className="flex items-baseline gap-2 relative z-10">
+            <span className={`text-5xl font-black ${getAttendanceColor(attendance.overall_attendance)}`}>
+              {attendance.overall_attendance.toFixed(1)}
+            </span>
+            <span className="text-xl text-gray-400">%</span>
+          </div>
+          {/* Progress Bar Container */}
+          <div className="mt-4 w-full bg-slate-800/50 rounded-full h-2 overflow-hidden shadow-inner border border-white/5 relative z-10">
+            <div
+              className={`h-full ${getProgressBarColor(attendance.overall_attendance)} transition-all duration-1000 relative`}
+              style={{ width: `${Math.min(attendance.overall_attendance, 100)}%` }}
+            >
+              {/* Subtle Shine */}
+              <div className="absolute top-0 right-0 bottom-0 w-full bg-gradient-to-l from-white/20 to-transparent"></div>
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-gray-400">
+            Status: <span className={`font-bold tracking-wide ${getAttendanceColor(attendance.overall_attendance)}`}>{getAttendanceStatus(attendance.overall_attendance)}</span>
+          </p>
+        </div>
+
+        {/* Total Hours Conducted */}
+        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-blue-400">
+            <Clock className="w-24 h-24" />
+          </div>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Hours Conducted</p>
+          <p className="text-5xl font-black text-white relative z-10">
+            {attendance.total_hours_conducted}
+          </p>
+          <p className="mt-4 text-xs text-gray-400 relative z-10">Total academic hours scheduled so far.</p>
+        </div>
+
+        {/* Total Hours Absent */}
+        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 group transition-all duration-300 shadow-lg shadow-black/40 hover:bg-slate-900/60 hover:border-white/10">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-red-400">
+            <UserCheck className="w-24 h-24" />
+          </div>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Hours Absent</p>
+          <p className="text-5xl font-black text-white relative z-10">
+            {attendance.total_hours_absent}
+          </p>
+          <p className="mt-4 text-xs text-gray-400 relative z-10">Total hours missed across all subjects.</p>
+        </div>
+      </div>
+
+      {/* Chart Section */}
+      <div className="mt-8 mb-8">
+        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+          <span className="w-1 h-6 bg-teal-500 rounded-full"></span>
+          Subject Performance
+        </h2>
+        <div className="h-[400px] w-full glass-card rounded-2xl p-6 bg-slate-950/60 backdrop-blur-md border border-white/5 shadow-lg shadow-black/40">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={Object.entries(courses).map(([code, c]: any) => {
+                const matchedCourse = data.timetable?.courses?.find((tc: any) => {
+                  const tCode = (tc.course_code || "").toLowerCase().trim();
+                  const aCode = code.toLowerCase().trim();
+                  return aCode === tCode || aCode.startsWith(tCode) || aCode.includes(tCode);
+                });
+                const name = matchedCourse?.course_title || c.course_title || code.replace(/Regular|Arrear/gi, "").trim();
+                const conducted = c.hours_conducted || c.total_hours_conducted || 0;
+                const absent = c.hours_absent || c.total_hours_absent || 0;
+                return {
+                  name,
+                  Present: conducted - absent,
+                  Absent: absent,
+                };
+              })}
+              margin={{ top: 20, right: 30, left: 0, bottom: 80 }} // Bottom margin for labels
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+              <XAxis
+                dataKey="name"
+                angle={-45}
+                textAnchor="end"
+                height={80}
+                stroke="#94a3b8"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                itemStyle={{ fontSize: '12px' }}
+                labelStyle={{ color: '#94a3b8', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}
+                cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+              />
+              <Legend wrapperStyle={{ paddingTop: '20px' }} />
+              <Bar dataKey="Present" stackId="a" fill="#14b8a6" radius={[0, 0, 4, 4]} barSize={30} />
+              <Bar dataKey="Absent" stackId="a" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={30} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      
     </div>
   );
 }

@@ -211,19 +211,47 @@ export default function AttendancePredictPage() {
 
         const start = new Date(startDate);
         const end = new Date(endDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        const dayOrders = getDayOrdersInRange(start, end);
-        setDayOrdersInRange(dayOrders);
+        // 1. Calculate Day Orders for the Leave Period (Missed Classes)
+        const dayOrdersMissed = getDayOrdersInRange(start, end);
+        setDayOrdersInRange(dayOrdersMissed);
 
-        const missedCounts = countClassesPerCourse(dayOrders);
+        // 2. Calculate Day Orders for the "Buffer Period" (Future Attended Classes)
+        // From Tomorrow until Day Before Start Date
+        let dayOrdersBuffer: number[] = [];
+        if (start > today) {
+            const bufferStart = new Date(today);
+            bufferStart.setDate(today.getDate() + 1); // Tomorrow
+
+            const bufferEnd = new Date(start);
+            bufferEnd.setDate(start.getDate() - 1); // Day before start
+
+            if (bufferEnd >= bufferStart) {
+                dayOrdersBuffer = getDayOrdersInRange(bufferStart, bufferEnd);
+            }
+        }
+
+        const missedCounts = countClassesPerCourse(dayOrdersMissed);
+        const bufferCounts = countClassesPerCourse(dayOrdersBuffer); // Classes we assumedly attend
 
         const preds = enrichedCourses.map(c => {
             const key = c.title + c.slot;
-            const missed = missedCounts[key] || 0;
 
-            const newConducted = c.conducted + missed;
-            const newAbsent = c.absent + missed;
-            const newPresent = c.conducted - c.absent;
+            const missed = missedCounts[key] || 0;
+            const attendedBuffer = bufferCounts[key] || 0;
+
+            // Current Stats
+            const currentConducted = c.conducted;
+            const currentAbsent = c.absent;
+            const currentPresent = currentConducted - currentAbsent;
+
+            // Predicted Stats
+            // We assume you attend ALL classes in the buffer period
+            const newPresent = currentPresent + attendedBuffer;
+            const newAbsent = currentAbsent + missed;
+            const newConducted = currentConducted + attendedBuffer + missed;
 
             const newPct = newConducted > 0 ? (newPresent / newConducted) * 100 : 0;
 
