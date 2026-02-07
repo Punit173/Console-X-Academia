@@ -14,12 +14,16 @@ export default function InstallButton() {
     const [showPrompt, setShowPrompt] = useState(false);
     const [isInstalled, setIsInstalled] = useState(false);
     const [isIOS, setIsIOS] = useState(false);
+    const [isAndroid, setIsAndroid] = useState(false);
+    const [isDismissed, setIsDismissed] = useState(false);
 
     useEffect(() => {
-        // Detect iOS
+        // Detect Platform
         const userAgent = window.navigator.userAgent.toLowerCase();
         const ios = /iphone|ipad|ipod/.test(userAgent);
+        const android = /android/.test(userAgent);
         setIsIOS(ios);
+        setIsAndroid(android);
 
         // Check if already installed
         if ((window.navigator as any).standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
@@ -27,7 +31,7 @@ export default function InstallButton() {
             return;
         }
 
-        // Listen for beforeinstallprompt event (Android & Desktop)
+        // Listen for beforeinstallprompt event (Desktop PWA)
         const handleBeforeInstallPrompt = (e: Event) => {
             e.preventDefault();
             setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -48,6 +52,11 @@ export default function InstallButton() {
     }, []);
 
     const handleInstallClick = async () => {
+        if (isAndroid) {
+            window.open("https://play.google.com/store/apps/details?id=com.akshat.academia", "_blank");
+            return;
+        }
+
         if (deferredPrompt) {
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
@@ -59,28 +68,37 @@ export default function InstallButton() {
         }
     };
 
-    // Don't show if already installed
-    if (isInstalled) return null;
+    // Don't show if already installed or dismissed
+    if (isInstalled || isDismissed) return null;
 
-    // Show install button if we have the prompt (Android/Desktop) or if iOS
-    const shouldShow = deferredPrompt !== null || isIOS;
+    // Show install button for Android (Play Store), iOS (Instructions), or Desktop PWA
+    const shouldShow = deferredPrompt !== null || isIOS || isAndroid;
 
     if (!shouldShow) return null;
 
     return (
         <>
             {/* Install Button */}
-            <div className="fixed bottom-20 right-4 z-40 sm:bottom-6 sm:right-6">
+            <div className="fixed bottom-20 right-4 z-40 sm:bottom-6 sm:right-6 group">
+                <button
+                    onClick={() => setIsDismissed(true)}
+                    className="absolute -top-1 -right-1 bg-black/60 hover:bg-red-500/80 text-white/60 hover:text-white rounded-full p-1 backdrop-blur-sm transition-all border border-white/10"
+                    title="Dismiss"
+                >
+                    <X className="w-3 h-3" />
+                </button>
                 <motion.button
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setShowPrompt(true)}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-full shadow-lg flex items-center gap-2 transition-all duration-200 border border-blue-400/50"
+                    onClick={() => isAndroid ? handleInstallClick() : setShowPrompt(true)}
+                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold py-3 px-5 rounded-full shadow-lg shadow-green-500/20 flex items-center gap-2 transition-all duration-200 border border-white/20"
                 >
                     <Download className="w-5 h-5" />
-                    <span className="hidden sm:inline">Install App</span>
+                    <span className="hidden sm:inline">
+                        {isAndroid ? "Get on Play Store" : "Install App"}
+                    </span>
                 </motion.button>
             </div>
 
@@ -93,11 +111,11 @@ export default function InstallButton() {
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: "100%", opacity: 0 }}
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="bg-gradient-to-b from-[#1c1c1e] to-[#0a0a0a] text-white w-full max-w-sm rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl border border-white/10"
+                            className="bg-black/80 backdrop-blur-xl border border-white/10 text-white w-full max-w-sm rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl relative"
                         >
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20">
                                         <Download className="w-6 h-6 text-white" />
                                     </div>
                                     <h3 className="text-lg font-bold">Install ConsoleXAcademia</h3>

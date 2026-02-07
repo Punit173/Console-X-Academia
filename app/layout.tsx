@@ -90,9 +90,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
 
             <Navbar />
-            <IOSInstallPrompt />
+            {/* <IOSInstallPrompt /> REMOVED: Managed by InstallButton now */}
             <InstallButton />
-            <Analytics/>
+            <Analytics />
             {/* <WhatsAppButton /> */}
 
             {/* Scrollable Content Wrapper with Mask */}
@@ -104,7 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               }}
             >
               {/* Main Content */}
-              <main className="w-full pt-32 pb-12 px-4 sm:px-6">
+              <main className="w-full pt-32 pb-40 px-4 sm:px-6">
                 <div className="w-full max-w-6xl mx-auto">
                   {children}
                 </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import { useAppData } from "@/components/AppDataContext";
 import { useCalendar } from "@/components/CalendarContext";
@@ -327,24 +327,26 @@ export default function AttendancePredictPage() {
         <div className="w-full animate-fade-in space-y-8 pb-10 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-6 relative">
-                <Link href="/attendance" className="absolute -top-8 left-0 text-gray-400 hover:text-white flex items-center gap-1 text-sm transition-colors">
-                    <ArrowLeft className="w-4 h-4" /> Back to Attendance
-                </Link>
+            <div className="pb-4 pt-4 mb-8 transition-all">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 relative">
+                    <Link href="/attendance" className="absolute -top-12 left-0 text-gray-400 hover:text-white flex items-center gap-1 text-sm transition-colors">
+                        <ArrowLeft className="w-4 h-4" /> Back to Attendance
+                    </Link>
 
-                <div className="absolute -left-4 top-0 w-20 h-20 bg-teal-900/10 blur-3xl rounded-full pointer-events-none"></div>
-                <div className="relative mt-4">
-                    <h1 className="text-3xl font-bold text-white tracking-tight mb-2 drop-shadow-sm">
-                        Predict <span className="text-teal-400">Attendance</span>
-                    </h1>
-                    <p className="text-gray-400 text-sm font-medium">
-                        Select a range to forecast your attendance if you take leave.
-                    </p>
+                    <div className="absolute -left-4 top-0 w-20 h-20 bg-teal-900/10 blur-3xl rounded-full pointer-events-none"></div>
+                    <div className="relative mt-2">
+                        <h1 className="text-3xl font-bold text-white tracking-tight mb-1 drop-shadow-sm">
+                            Predict <span className="text-teal-400">Attendance</span>
+                        </h1>
+                        <p className="text-gray-400 text-sm font-medium">
+                            Select a range to forecast your attendance if you take leave.
+                        </p>
+                    </div>
                 </div>
             </div>
 
             {/* Input Card */}
-            <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md p-6 shadow-lg shadow-black/40">
+            <div className="glass-card p-6 rounded-2xl">
                 <div className="flex flex-col md:flex-row gap-6 items-end">
                     <div className="flex-1 w-full space-y-2">
                         <label className="text-xs uppercase text-gray-400 font-bold ml-1 flex items-center gap-2">
@@ -394,7 +396,7 @@ export default function AttendancePredictPage() {
                         </span>
                     </div>
 
-                    <div className="rounded-2xl border border-white/5 bg-slate-950/60 backdrop-blur-md overflow-hidden shadow-lg shadow-black/40">
+                    <div className="glass-card rounded-2xl overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead className="hidden md:table-header-group">
@@ -407,67 +409,110 @@ export default function AttendancePredictPage() {
                                 </thead>
                                 <tbody className="divide-y divide-white/5 md:divide-none">
                                     {predictions.map((p, i) => (
-                                        <tr
-                                            key={i}
-                                            className="group transition-colors border-b md:border-b border-white/5 last:border-0 grid grid-cols-2 gap-4 md:table-row bg-white/5 md:bg-transparent rounded-xl md:rounded-none p-4 md:p-0 mb-4 md:mb-0"
-                                            style={{ animationDelay: `${i * 50}ms` }}
-                                        >
-                                            <td className="col-span-2 md:col-auto md:table-cell p-0 md:p-4">
-                                                <div className="flex flex-col">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className="text-[10px] font-mono font-bold text-gray-400 bg-white/5 border border-white/5 px-2 py-0.5 rounded shadow-sm">
-                                                            {p.slot || 'N/A'}
-                                                        </span>
-                                                        <span className="font-bold text-gray-200 text-base group-hover:text-white transition-colors line-clamp-1">
-                                                            {p.title}
+                                        <React.Fragment key={i}>
+                                            {/* MOBILE: Compact Result Card */}
+                                            <tr className="md:hidden block mb-3">
+                                                <td colSpan={4} className="block p-0">
+                                                    <div
+                                                        className="glass-card p-4 rounded-xl flex items-center justify-between active:scale-[0.95] transition-all"
+                                                        style={{ animationDelay: `${i * 50}ms` }}
+                                                    >
+                                                        <div className="flex items-center gap-3 overflow-hidden flex-1">
+                                                            <div className={`w-1 h-12 rounded-full ${p.predictedPercentage >= 75 ? 'bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]' : p.predictedPercentage >= 65 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]'}`}></div>
+                                                            <div className="flex flex-col min-w-0 gap-1">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-[10px] font-mono text-gray-500 uppercase bg-white/5 px-1 rounded">{p.title.slice(0, 3).toUpperCase()}{p.slot}</span>
+                                                                    {p.additionalClasses > 0 && (
+                                                                        <span className="text-[10px] text-amber-300 bg-amber-950/30 px-1.5 rounded border border-amber-900/30 flex items-center gap-0.5">
+                                                                            <AlertTriangle className="w-2.5 h-2.5" /> Miss {p.additionalClasses}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <h4 className="text-sm font-medium text-gray-300 pr-2 leading-tight line-clamp-2">{p.title}</h4>
+
+                                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                                    <span className="text-xs text-gray-500 line-through">{p.percentage.toFixed(0)}%</span>
+                                                                    <ArrowRight className="w-3 h-3 text-gray-600" />
+                                                                    <span className={`text-sm font-bold ${getAttendanceColor(p.predictedPercentage)}`}>{p.predictedPercentage.toFixed(1)}%</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex flex-col items-center justify-center pl-4 border-l border-white/5">
+                                                            <span className={`text-3xl font-black tracking-tighter leading-none ${p.marginType === 'safe' ? 'text-teal-400 drop-shadow-[0_0_10px_rgba(45,212,191,0.3)]' :
+                                                                p.marginType === 'warning' ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.3)]' :
+                                                                    'text-rose-400 drop-shadow-[0_0_10px_rgba(251,113,133,0.3)]'
+                                                                }`}>
+                                                                {p.marginValue}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            {/* DESKTOP: Table Row */}
+                                            <tr
+                                                key={i}
+                                                className="hidden md:table-row group transition-colors border-b border-white/5 last:border-0 hover:bg-white/5"
+                                                style={{ animationDelay: `${i * 50}ms` }}
+                                            >
+                                                <td className="p-4">
+                                                    <div className="flex flex-col">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="text-[10px] font-mono font-bold text-gray-400 bg-white/5 border border-white/5 px-2 py-0.5 rounded shadow-sm">
+                                                                {p.slot || 'N/A'}
+                                                            </span>
+                                                            <span className="font-bold text-gray-200 text-base group-hover:text-white transition-colors line-clamp-1">
+                                                                {p.title}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <td className="p-4 text-center">
+                                                    <div className="flex items-center justify-center gap-2 font-mono text-sm">
+                                                        <span className="text-gray-400">{p.percentage.toFixed(1)}%</span>
+                                                        <ArrowRight className="w-3 h-3 text-gray-600" />
+                                                        <span className={`font-bold text-base ${getAttendanceColor(p.predictedPercentage)}`}>
+                                                            {p.predictedPercentage.toFixed(1)}%
                                                         </span>
                                                     </div>
-                                                </div>
-                                            </td>
+                                                </td>
 
-                                            <td className="md:table-cell p-0 md:p-4 text-center">
-                                                <div className="flex items-center justify-center gap-2 font-mono text-sm bg-black/20 p-2 rounded-lg md:bg-transparent md:p-0">
-                                                    <span className="text-gray-400">{p.percentage.toFixed(1)}%</span>
-                                                    <ArrowRight className="w-3 h-3 text-gray-600" />
-                                                    <span className={`font-bold text-lg md:text-base ${getAttendanceColor(p.predictedPercentage)}`}>
-                                                        {p.predictedPercentage.toFixed(1)}%
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <td className="md:table-cell p-0 md:p-4 text-center">
-                                                <div className="flex flex-col items-center justify-center h-full">
-                                                    {p.additionalClasses > 0 ? (
-                                                        <div className="flex flex-col items-center">
-                                                            <div className="text-xs text-amber-300 flex items-center gap-1.5 bg-amber-950/20 px-2 py-1 rounded-lg border border-amber-900/30">
-                                                                <AlertTriangle className="w-3 h-3" />
-                                                                <span>Miss <strong>{p.additionalClasses}</strong></span>
+                                                <td className="p-4 text-center">
+                                                    <div className="flex flex-col items-center justify-center h-full">
+                                                        {p.additionalClasses > 0 ? (
+                                                            <div className="flex flex-col items-center">
+                                                                <div className="text-xs text-amber-300 flex items-center gap-1.5 bg-amber-950/20 px-2 py-1 rounded-lg border border-amber-900/30">
+                                                                    <AlertTriangle className="w-3 h-3" />
+                                                                    <span>Miss <strong>{p.additionalClasses}</strong></span>
+                                                                </div>
+                                                                {p.percentageDrop > 0.1 && (
+                                                                    <span className="text-[10px] text-rose-400 mt-1 font-mono">
+                                                                        ▼ {p.percentageDrop.toFixed(1)}%
+                                                                    </span>
+                                                                )}
                                                             </div>
-                                                            {p.percentageDrop > 0.1 && (
-                                                                <span className="text-[10px] text-rose-400 mt-1 font-mono">
-                                                                    ▼ {p.percentageDrop.toFixed(1)}%
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    ) : (
-                                                        <div className="text-xs text-teal-300 flex items-center gap-1.5 bg-teal-950/20 px-2 py-1 rounded-lg border border-teal-900/30">
-                                                            <CheckCircle className="w-3 h-3" />
-                                                            <span>No Classes</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
+                                                        ) : (
+                                                            <div className="text-xs text-teal-300 flex items-center gap-1.5 bg-teal-950/20 px-2 py-1 rounded-lg border border-teal-900/30">
+                                                                <CheckCircle className="w-3 h-3" />
+                                                                <span>No Classes</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
 
-                                            <td className="col-span-2 md:col-auto md:table-cell p-0 md:p-4 text-center md:text-right flex items-center justify-center md:block">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${p.marginType === 'safe' ? 'bg-teal-500/10 border-teal-500/20 text-teal-300' :
-                                                    p.marginType === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' :
-                                                        'bg-rose-500/10 border-rose-500/20 text-rose-300'
-                                                    }`}>
-                                                    {p.marginType === 'safe' ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                                                    {p.marginMsg}
-                                                </span>
-                                            </td>
-                                        </tr>
+                                                <td className="p-4 text-right">
+                                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${p.marginType === 'safe' ? 'bg-teal-500/10 border-teal-500/20 text-teal-300' :
+                                                        p.marginType === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' :
+                                                            'bg-rose-500/10 border-rose-500/20 text-rose-300'
+                                                        }`}>
+                                                        {p.marginType === 'safe' ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                                                        {p.marginType === 'safe' ? `${p.marginValue} Safe Bunks` : `${p.marginValue} Classes Needed`}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </React.Fragment>
                                     ))}
                                 </tbody>
                             </table>

@@ -13,7 +13,8 @@ import {
 } from "recharts";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Calculator, AlertTriangle, ArrowLeft } from "lucide-react";
+import { Calculator, AlertTriangle, ArrowLeft, Share2, Download, RefreshCw, TrendingUp } from "lucide-react";
+import ThreeDVisual from "@/components/ThreeDVisual";
 
 // --- Predictor Types & Constants ---
 type Grade = 'O' | 'A+' | 'A' | 'B+' | 'B' | 'C';
@@ -463,105 +464,148 @@ function MarksContent() {
 
   // --- Render Standard Marks View ---
   return (
-    <div className="w-full pb-16 animate-fade-in">
+    <div className="w-full animate-fade-in space-y-8 pb-10 relative">
+
+      {/* 3D Visual Background Element */}
+      <div className="absolute top-0 right-0 w-full h-[300px] overflow-hidden -z-10 opacity-60 pointer-events-none md:pointer-events-auto mt-14 md:mt-0">
+        <ThreeDVisual />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-        {/* Performance Overview Card */}
-        <div className="rounded-3xl bg-[#62D834] p-4 sm:p-6 lg:p-8 shadow-xl text-white">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-8">
-            <div className="flex-1 space-y-2">
-              <h1 className="text-2xl sm:text-3xl font-bold mb-1">
-                Performance Overview
+        {/* Header */}
+        <div className="pb-4 pt-4 mb-2 transition-all">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+            {/* Title Section */}
+            <div className="relative">
+              <div className="absolute -left-10 -top-10 w-32 h-32 bg-green-500/20 blur-[60px] rounded-full pointer-events-none"></div>
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-1 drop-shadow-sm flex items-center gap-2">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-200 via-white to-green-200">
+                  Performance
+                </span>
+                <span className="text-green-500">.</span>
               </h1>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-white/80">
-                <span className="font-mono bg-white/10 px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold">
+              <div className="flex items-center gap-3 text-slate-400 text-sm font-medium pl-0.5">
+                <span className="font-mono bg-white/5 px-2 py-0.5 rounded text-xs border border-white/5">
                   {data.attendance?.student_info?.registration_number || "N/A"}
                 </span>
-                <span className="hidden sm:inline text-white/50">•</span>
-                <span className="font-medium text-xs sm:text-sm">
-                  {data.attendance?.student_info?.name || "Student"}
-                </span>
+                <span>•</span>
+                <span>{data.attendance?.student_info?.name || "Student"}</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full lg:w-auto">
-              {[
-                { label: "Courses", val: totalCourses },
-                { label: "Assessments", val: totalAssessments },
-                { label: "Overall", val: `${formatNumber(overallPercentage)}%` },
-              ].map((stat, i) => (
-                <div
-                  key={i}
-                  className="bg-black/10 rounded-2xl px-2 py-3 sm:px-4 sm:py-4 text-center min-w-[80px]"
-                >
-                  <p className="text-[10px] sm:text-xs text-white/70 uppercase tracking-wide mb-1 font-semibold">
-                    {stat.label}
-                  </p>
-                  <p className="text-lg sm:text-2xl font-bold text-white">
-                    {stat.val}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+            {/* Actions */}
+            <div className="flex items-center gap-3 w-full md:w-auto">
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/15">
-            <p className="text-xs sm:text-sm text-white/80 font-medium">
-              Current semester report
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <button
                 onClick={() => generatePDF("share")}
                 disabled={isGenerating || isLoading}
-                className="px-4 py-2.5 flex-1 sm:flex-none justify-center rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all text-sm font-bold disabled:opacity-50 flex items-center"
+                className="p-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-slate-400 hover:text-white transition-all active:scale-95"
+                title="Share Report"
               >
-                Share
+                <Share2 className="w-5 h-5" />
               </button>
 
               <button
                 onClick={() => generatePDF("download")}
                 disabled={isGenerating || isLoading}
-                className="px-4 py-2.5 flex-1 sm:flex-none justify-center rounded-xl bg-white text-black hover:bg-neutral-100 transition-all text-sm font-bold disabled:opacity-50 whitespace-nowrap"
+                className="p-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-slate-400 hover:text-white transition-all active:scale-95"
+                title="Download Report"
               >
-                {isGenerating ? "Generating..." : "Download PDF"}
-              </button>
-
-              <button
-                onClick={() => setShowPredictor(true)}
-                className="px-4 py-2.5 flex-1 sm:flex-none justify-center rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:opacity-90 transition-all text-sm font-bold flex items-center gap-2"
-              >
-                <Calculator className="w-4 h-4" />
-                Predict
+                <Download className="w-5 h-5" />
               </button>
 
               <button
                 onClick={refreshData}
                 disabled={isLoading || isGenerating}
-                className={`p-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center ${isLoading ? "animate-spin" : ""
-                  }`}
+                className={`p-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-slate-400 hover:text-white transition-all active:scale-95 ${isLoading ? "animate-spin" : ""}`}
                 title="Refresh Data"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
+                <RefreshCw className="w-5 h-5" />
               </button>
+
+
+              {/* Predict Button */}
+              <div className="relative group/predict">
+                <div className="absolute -inset-0.5 bg-green-500 rounded-xl blur opacity-30 group-hover/predict:opacity-75 transition duration-1000 group-hover/predict:duration-200 animate-pulse"></div>
+                <button
+                  onClick={() => setShowPredictor(true)}
+                  className="relative px-6 py-2.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold shadow-lg shadow-green-500/20 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Calculator className="w-4 h-4" />
+                  <span>Predictor</span>
+                </button>
+              </div>
+
             </div>
           </div>
         </div>
 
-        {/* Course Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Stats Row */}
+        <div className="grid grid-cols-3 gap-3 md:gap-6">
+          {[
+            { label: "Courses", val: totalCourses },
+            { label: "Assessments", val: totalAssessments },
+            { label: "Overall %", val: `${formatNumber(overallPercentage)}%` },
+          ].map((stat, i) => (
+            <div key={i} className="glass-card p-4 rounded-2xl flex flex-col items-center justify-center text-center hover:border-green-500/30 transition-colors group">
+              <span className="text-xs uppercase tracking-wider text-slate-500 font-bold group-hover:text-green-400 transition-colors">{stat.label}</span>
+              <span className="text-2xl md:text-3xl font-black text-white mt-1">{stat.val}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Course Cards (Responsive) */}
+
+        {/* MOBILE: Compact Marks List */}
+        <div className="flex flex-col gap-3 md:hidden">
+          {Object.entries(marks).map(([courseCode, course], index) => {
+            const cleanedCourseCode = courseCode?.replace(/theory/gi, "")?.replace(/practical/gi, "")?.trim();
+            // @ts-ignore
+            const totalObtained = course.tests.reduce((sum: number, t: any) => sum + (t.obtained_marks ?? 0), 0);
+            // @ts-ignore
+            const totalMax = course.tests.reduce((sum: number, t: any) => sum + (t.max_marks ?? 0), 0);
+            const avgPercentage = course.tests.length > 0 && totalMax > 0 ? (totalObtained / totalMax) * 100 : 0;
+            const subjectName = getCourseTitle(courseCode);
+
+            const getTextColor = (p: number) => {
+              if (p >= 80) return "text-[#62D834] drop-shadow-[0_0_10px_rgba(98,216,52,0.3)]";
+              if (p >= 60) return "text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.3)]";
+              return "text-rose-400 drop-shadow-[0_0_10px_rgba(251,113,133,0.3)]";
+            };
+
+            return (
+              <div
+                key={courseCode}
+                id={courseCode}
+                className="glass-card p-4 rounded-xl flex items-center justify-between active:scale-[0.95] transition-all scroll-mt-24"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex items-center gap-3 overflow-hidden flex-1">
+                  <div className={`w-1 h-10 rounded-full ${avgPercentage >= 80 ? 'bg-[#62D834] shadow-[0_0_8px_rgba(98,216,52,0.5)]' : avgPercentage >= 60 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]'}`}></div>
+                  <div className="flex flex-col min-w-0 gap-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-gray-500 uppercase bg-white/5 px-1 rounded">{cleanedCourseCode}</span>
+                      {/* @ts-ignore */}
+                      <span className="text-[10px] text-white/30 lowercase">{course.course_type}</span>
+                    </div>
+                    <h4 className="text-sm font-medium text-gray-300 pr-2 leading-tight line-clamp-2">{subjectName}</h4>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center justify-center pl-4 border-l border-white/5">
+                  <span className={`text-3xl font-black tracking-tighter leading-none ${getTextColor(avgPercentage)}`}>
+                    {avgPercentage.toFixed(0)}%
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* DESKTOP: Full Grid with Graph */}
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Object.entries(marks).map(([courseCode, course], index) => {
             const cleanedCourseCode = courseCode?.replace(/theory/gi, "")?.replace(/practical/gi, "")?.trim();
             // @ts-ignore
@@ -583,14 +627,14 @@ function MarksContent() {
             return (
               <div
                 key={courseCode}
-                id={courseCode}
-                className="bg-zinc-950 rounded-2xl border border-zinc-800 overflow-hidden hover:border-[#62D834]/30 transition-all duration-300 scroll-mt-24"
+                id={`desktop-${courseCode}`}
+                className="glass-card rounded-2xl overflow-hidden hover:border-[#62D834]/30 transition-all duration-300 scroll-mt-24 group"
               >
-                <div className="p-6 border-b border-zinc-800">
+                <div className="p-6 border-b border-white/5 bg-white/5">
                   <div className="flex justify-between items-start gap-4 mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold font-mono text-black bg-gray-200 px-2 py-1 rounded">
+                        <span className="text-xs font-bold font-mono text-gray-400 bg-white/10 px-2 py-1 rounded">
                           {cleanedCourseCode}
                         </span>
                         <span className="text-xs text-white/40 uppercase tracking-wider">
@@ -598,20 +642,20 @@ function MarksContent() {
                           {course.course_type}
                         </span>
                       </div>
-                      <h3 className="font-semibold text-lg text-white">
+                      <h3 className="font-semibold text-lg text-white group-hover:text-white transition-colors">
                         {subjectName}
                       </h3>
                     </div>
 
                     <div className="text-right">
-                      <span className={`text-3xl font-bold text-white ${getPerformanceTextColor(avgPercentage)}`}>
+                      <span className={`text-3xl font-bold ${getPerformanceTextColor(avgPercentage)}`}>
                         {formatNumber(avgPercentage)}%
                       </span>
                     </div>
                   </div>
 
                   {graphData.length > 0 && (
-                    <div className="h-16 w-full">
+                    <div className="h-16 w-full opacity-60 group-hover:opacity-100 transition-opacity">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={graphData}>
                           <defs>
@@ -649,6 +693,10 @@ function MarksContent() {
                           <span className="text-sm font-medium text-white">
                             {formatNumber(t.obtained_marks)} <span className="text-white/30">/</span> {formatNumber(t.max_marks)}
                           </span>
+                        </div>
+                        {/* Tiny Progress Bar for each test */}
+                        <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${t.percentage >= 80 ? 'bg-[#62D834]' : t.percentage >= 60 ? 'bg-amber-500' : 'bg-rose-500'}`} style={{ width: `${t.percentage}%` }}></div>
                         </div>
                       </div>
                     ))
