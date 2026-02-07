@@ -197,7 +197,7 @@ export default function AttendancePage() {
     <div className="w-full animate-fade-in space-y-8 pb-10">
 
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-blue-900/30 pb-6 pt-4 -mt-4 relative transition-all">
+      <div className=" top-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-blue-900/30 pb-6 pt-4 -mt-4 relative transition-all">
         {/* Glow effect - restricted to navy/blue */}
         <div className="absolute -left-4 top-0 w-20 h-20 bg-blue-900/20 blur-3xl rounded-full pointer-events-none"></div>
         <div className="relative">
@@ -398,16 +398,16 @@ export default function AttendancePage() {
                       const maxTotal = present / (threshold / 100);
                       const safeBunks = Math.floor(maxTotal - conducted);
                       if (safeBunks > 0) {
-                        marginMsg = `Margin: ${safeBunks} hrs`;
+                        marginMsg = `${safeBunks}`;
                         marginType = "safe";
                       } else {
-                        marginMsg = "No Margin";
+                        marginMsg = "0";
                         marginType = "warning";
                       }
                     } else {
                       const targetRatio = threshold / 100;
                       const needed = Math.ceil((targetRatio * conducted - present) / (1 - targetRatio));
-                      marginMsg = `Required: ${needed} hrs`;
+                      marginMsg = `Required: ${needed}`;
                       marginType = "danger";
                     }
 
@@ -418,13 +418,55 @@ export default function AttendancePage() {
                         className="group transition-colors border-b md:border-b border-white/5 last:border-0 grid grid-cols-2 gap-4 md:table-row bg-white/5 md:bg-transparent rounded-xl md:rounded-none p-4 md:p-0 mb-4 md:mb-0 cursor-pointer hover:bg-white/5 relative"
                       >
                         <td className="col-span-2 md:col-auto md:table-cell p-0 md:p-4">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-gray-200 text-base mb-1 group-hover:text-white transition-colors">{displayName}</span>
-                            <span className="text-[10px] font-mono text-gray-600 group-hover:text-gray-500 bg-black/20 px-1.5 py-0.5 rounded w-fit capitalize transition-colors">
-                              {code.replace(/Regular|Arrear/gi, "").toLowerCase()}
-                            </span>
+                          <div className="flex items-center justify-between">
+                            
+                            {/* Left content */}
+                            <div className="flex flex-col">
+                              <span className="font-bold text-gray-200 text-base mb-1 group-hover:text-white transition-colors">
+                                {displayName}
+                              </span>
+                              <span className="text-[10px] font-mono text-gray-600 group-hover:text-gray-500 bg-black/20 px-1.5 py-0.5 rounded w-fit capitalize transition-colors">
+                                {code.replace(/Regular|Arrear/gi, "").toLowerCase()}
+                              </span>
+                            </div>
+
+                            {/* Right content */}
+                            <div className="flex flex-col items-end">
+                              <span
+                                className={`inline-flex items-center px-3 py-1 rounded-full text-base font-medium ${
+                                  marginType === "safe"
+                                    ? "text-teal-300"
+                                    : marginType === "warning"
+                                    ? "text-amber-300"
+                                    : "text-rose-300"
+                                }`}
+                              >
+                                {marginMsg}
+                              </span>
+                              <span
+                                className={`text-sm ${
+                                  marginType === "safe"
+                                    ? "text-teal-300"
+                                    : marginType === "warning"
+                                    ? "text-amber-300"
+                                    : "text-rose-300"
+                                }`}
+                              >
+                                Margin
+                              </span>
+                            </div>
+
                           </div>
                         </td>
+
+                        {/* <td className="col-span-2 md:col-auto md:table-cell p-0 md:p-4 text-center md:text-right flex items-center justify-center md:block">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${marginType === 'safe' ? 'bg-teal-500/10 border-teal-500/20 text-teal-300' :
+                            marginType === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' :
+                              'bg-rose-500/10 border-rose-500/20 text-rose-300'
+                            }`}>
+                            {marginMsg}
+                          </span>
+                        </td> */}
 
                         <td className="md:table-cell p-0 md:p-4 text-center">
                           <div className="flex flex-col items-center justify-center h-full">
@@ -450,14 +492,6 @@ export default function AttendancePage() {
                           </div>
                         </td>
 
-                        <td className="col-span-2 md:col-auto md:table-cell p-0 md:p-4 text-center md:text-right flex items-center justify-center md:block">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${marginType === 'safe' ? 'bg-teal-500/10 border-teal-500/20 text-teal-300' :
-                            marginType === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' :
-                              'bg-rose-500/10 border-rose-500/20 text-rose-300'
-                            }`}>
-                            {marginMsg}
-                          </span>
-                        </td>
                       </tr>
                     );
                   })}
