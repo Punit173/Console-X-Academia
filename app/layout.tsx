@@ -46,8 +46,8 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   icons: {
-    apple: "/assets/logo.jpg",
-    icon: "/assets/logo.jpg"
+    apple: "/assets/moblogo.png",
+    icon: "/assets/moblogo.png"
   }
 };
 

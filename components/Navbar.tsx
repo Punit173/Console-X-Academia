@@ -255,40 +255,57 @@ export default function Navbar() {
 
       {/* Mobile dropdown menu - FLATTENED LIST for simplicity on mobile */}
       {isMenuOpen && (
-        <div className="mt-3 border-t border-white/10 pt-3 md:hidden">
-          <div className="flex flex-col gap-2">
-            <NavLink href="/dashboard" label="Dashboard" active={pathname === "/dashboard"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
-            <NavLink href="/social" label="Social" active={pathname === "/social"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
+          <div className="mt-3 border-t border-white/10 pt-3 md:hidden">
+            <div className="flex flex-col gap-2">
 
-            <div className="px-3 text-xs font-bold text-white/40 uppercase mt-2">Academics</div>
-            <NavLink href="/marks" label="Marks" active={pathname === "/marks"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
-            <NavLink href="/attendance" label="Attendance" active={pathname === "/attendance"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
-            <NavLink href="/timetable" label="Timetable" active={pathname === "/timetable"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
-            <NavLink href="/calendar" label="Calendar" active={pathname === "/calendar"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
-            <NavLink href="/calculator" label="CGPA Calculator" active={pathname === "/calculator"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
-
-            <div className="px-3 text-xs font-bold text-white/40 uppercase mt-2">Campus</div>
-            <NavLink href="/announcements" label="Announcements" active={pathname === "/announcements"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
-            <NavLink href="/staff" label="Staff Finder" active={pathname === "/staff"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
-            <NavLink href="/resources" label="Resources" active={pathname === "/resources"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
-            <NavLink href="/links" label="Important Links" active={pathname === "/links"} mobile onClick={() => setIsMenuOpen(false)} theme={theme} />
-
-            <a
-              href="https://play.google.com/store/apps/details?id=com.akshat.academia"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`w-full px-4 py-2 text-sm font-bold bg-gradient-to-r ${theme.installButton} text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 mt-4`}
-            >
-              Install on
-              <img
-                src="https://img.icons8.com/?size=100&id=22982&format=png&color=ffffff"
-                alt="Google Play Icon"
-                className="w-4 h-4"
+              <NavLink
+                href="/dashboard"
+                label="Dashboard"
+                active={pathname === "/dashboard"}
+                mobile
+                onClick={() => setIsMenuOpen(false)}
+                theme={theme}
               />
-            </a>
+
+              <NavLink
+                href="/marks"
+                label="Marks"
+                active={pathname === "/marks"}
+                mobile
+                onClick={() => setIsMenuOpen(false)}
+                theme={theme}
+              />
+
+              <NavLink
+                href="/attendance"
+                label="Attendance"
+                active={pathname === "/attendance"}
+                mobile
+                onClick={() => setIsMenuOpen(false)}
+                theme={theme}
+              />
+
+              <NavLink
+                href="/timetable"
+                label="Timetable"
+                active={pathname === "/timetable"}
+                mobile
+                onClick={() => setIsMenuOpen(false)}
+                theme={theme}
+              />
+
+              <NavLink
+                href="/calendar"
+                label="Calendar"
+                active={pathname === "/calendar"}
+                mobile
+                onClick={() => setIsMenuOpen(false)}
+                theme={theme}
+              />
+
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </nav>
   );
 }

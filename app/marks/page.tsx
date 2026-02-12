@@ -538,12 +538,12 @@ function MarksContent() {
               <button
                 onClick={refreshData}
                 disabled={isLoading || isGenerating}
-                className={`p-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center ${isLoading ? "animate-spin" : ""
+                className={`p-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center 
                   }`}
                 title="Refresh Data"
               >
                 <svg
-                  className="w-5 h-5"
+                  className={`w-5 h-5 ${isLoading ? "animate-spin" : ""}`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
