@@ -484,25 +484,34 @@ function MarksContent() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full lg:w-auto">
-              {[
-                { label: "Courses", val: totalCourses },
-                { label: "Assessments", val: totalAssessments },
-                { label: "Overall", val: `${formatNumber(overallPercentage)}%` },
-              ].map((stat, i) => (
-                <div
-                  key={i}
-                  className="bg-black/10 rounded-2xl px-2 py-3 sm:px-4 sm:py-4 text-center min-w-[80px]"
-                >
-                  <p className="text-[10px] sm:text-xs text-white/70 uppercase tracking-wide mb-1 font-semibold">
-                    {stat.label}
-                  </p>
-                  <p className="text-lg sm:text-2xl font-bold text-white">
-                    {stat.val}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full lg:w-max">
+  {[
+    { label: "Courses", val: totalCourses },
+    { label: "Assessments", val: totalAssessments },
+    { label: "Overall Marks", val: `${totalObtainedAll}/${totalMaxAll}`, isLong: true },
+  ].map((stat, i) => (
+    <div
+      key={i}
+      className="bg-black/10 backdrop-blur-sm rounded-2xl p-3 sm:p-5 flex flex-col items-center justify-center min-w-0"
+    >
+      <p className="text-[9px] sm:text-xs text-white/70 uppercase tracking-wider mb-1 font-bold whitespace-nowrap">
+        {stat.label}
+      </p>
+      
+      {/* Mobile: text-xs/text-sm to prevent overflow 
+          Laptop: text-2xl/3xl for high visibility 
+      */}
+      <p className={`font-black text-white tabular-nums leading-tight text-center 
+        ${stat.isLong 
+          ? "text-[11px] xs:text-sm sm:text-xl lg:text-2xl break-all" 
+          : "text-base sm:text-2xl lg:text-3xl"
+        }`}
+      >
+        {stat.val}
+      </p>
+    </div>
+  ))}
+</div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/15">
