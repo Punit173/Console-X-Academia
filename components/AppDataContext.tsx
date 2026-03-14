@@ -91,12 +91,9 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
 
   /* Force Refresh on Init */
   useEffect(() => {
-    if (isInitialized && credentials && typeof window !== "undefined") {
-      // We only refresh if we have credentials (meaning user logged in)
-      // refreshData() handles the API call.
-      refreshData();
-    }
-  }, [isInitialized]); // Only run once when initialized
+    if (!isInitialized || !credentials) return;
+    refreshData();
+  }, [isInitialized, credentials]); // Only run once when initialized
 
   const setData = (newData: ApiResponse | null) => {
     setDataState(newData);
@@ -157,6 +154,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify(payload),
       });
 

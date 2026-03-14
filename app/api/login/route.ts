@@ -16,6 +16,7 @@ async function fetchFromApi(url: string, payload: any) {
       headers: {
         "Content-Type": "application/json",
       },
+      cache: "no-store",
       body: JSON.stringify(payload),
       signal: controller.signal,
     });

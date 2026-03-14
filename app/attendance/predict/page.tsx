@@ -19,7 +19,7 @@ interface EnrichedCourse {
 
 export default function AttendancePredictPage() {
     const router = useRouter();
-    const { data: apiData } = useAppData();
+    const { data: apiData, isInitialized } = useAppData();
     const { calendarData } = useCalendar();
 
     const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -32,12 +32,12 @@ export default function AttendancePredictPage() {
     // --- 1. Initialization & Course Enrichment ---
 
     useEffect(() => {
-        if (!apiData) {
+        if (isInitialized && !apiData) {
             router.push("/");
             return;
         }
         enrichCourses();
-    }, [apiData]);
+    }, [isInitialized, apiData, router]);
 
     const enrichCourses = () => {
         if (!apiData?.attendance?.attendance?.courses || !apiData?.timetable?.courses) return;

@@ -37,7 +37,7 @@ function MarksContent() {
   const highlightCode = searchParams ? searchParams.get('highlight') : null;
 
 
-  const { data, refreshData, isLoading } = useAppData();
+  const { data, refreshData, isLoading, isInitialized } = useAppData();
 
   // Scroll to highlighted element
   useEffect(() => {
@@ -63,10 +63,12 @@ function MarksContent() {
   const [courses, setCourses] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!data) {
+    if (isInitialized && !data) {
       router.push("/");
       return;
     }
+
+    if (!data) return;
 
     // Initialize Predictor Data
     if (data.attendance?.marks) {
@@ -92,7 +94,7 @@ function MarksContent() {
         });
       setCourses(loadedCourses);
     }
-  }, [data, router]);
+  }, [isInitialized, data, router]);
 
   // --- Predictor Helpers ---
   const updateCourse = (id: string, field: string, value: any) => {
@@ -488,7 +490,7 @@ function MarksContent() {
   {[
     { label: "Courses", val: totalCourses },
     { label: "Assessments", val: totalAssessments },
-    { label: "Overall Marks", val: `${totalObtainedAll}/${totalMaxAll}`, isLong: true },
+    { label: "Overall Marks", val: `${totalObtainedAll.toFixed(2)}/${totalMaxAll}`, isLong: true },
   ].map((stat, i) => (
     <div
       key={i}

@@ -67,7 +67,7 @@ export default function TimetablePage() {
   ];
 
   const router = useRouter();
-  const { data } = useAppData();
+  const { data, isInitialized } = useAppData();
   const hiddenTableRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -75,10 +75,10 @@ export default function TimetablePage() {
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
-    if (!data) {
+    if (isInitialized && !data) {
       router.push("/");
     }
-  }, [data, router]);
+  }, [isInitialized, data, router]);
 
   // Handle auto-scaling when preview opens
   useEffect(() => {
