@@ -303,6 +303,16 @@ export default function Navbar() {
                 theme={theme}
               />
 
+              <NavLink
+                href="/calculator"
+                label="Calculator"
+                active={pathname === "/calculator"}
+                mobile
+                onClick={() => setIsMenuOpen(false)}
+                theme={theme}
+              />
+
+
             </div>
           </div>
         )}
