@@ -6,14 +6,14 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'i.ibb.co',
-        port: '',
-        pathname: '/**', // Allow all paths
+        hostname: '**',
+        pathname: '/**',
       },
       {
-        protocol: 'https', // Just in case, also adding generic wildcard for other future hosts if strictness isn't paramount, but user asked for i.ibb.co specifically. Let's stick to i.ibb.co first.
-        hostname: '*.googleusercontent.com', // Common for auth profiles
-      }
+        protocol: 'http',
+        hostname: '**',
+        pathname: '/**',
+      },
     ],
   },
   async rewrites() {
