@@ -105,6 +105,13 @@ export default function Navbar() {
             theme={theme}
           />
 
+          <NavLink
+            href="/contactus"
+            label="Contact Us"
+            active={pathname === "/contactus"}
+            theme={theme}
+          />
+
           {/* Academics Dropdown */}
           <NavDropdown
             label="Academics"
@@ -307,6 +314,15 @@ export default function Navbar() {
                 href="/calculator"
                 label="Calculator"
                 active={pathname === "/calculator"}
+                mobile
+                onClick={() => setIsMenuOpen(false)}
+                theme={theme}
+              />
+
+              <NavLink
+                href="/contactus"
+                label="Contact Us"
+                active={pathname === "/contactus"}
                 mobile
                 onClick={() => setIsMenuOpen(false)}
                 theme={theme}

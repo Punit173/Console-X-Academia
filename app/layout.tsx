@@ -112,7 +112,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <footer className="border-t bottom-0 border-white/5 py-8 w-full glass-card">
                 <div className="w-full max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
 
-                  <p>© 2025 Console Academia. All rights reserved.</p>
+                  <p>© 2026 Console Academia. All rights reserved.</p>
 
                   <div className="flex gap-6 items-center">
 
