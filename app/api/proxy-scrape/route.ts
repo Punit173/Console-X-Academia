@@ -20,7 +20,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Server Configuration Error" }, { status: 500 });
         }
 
-        console.log(`Proxying scrape request for ${netid} to ${constScraperUrl}`);
+        // console.log(`Proxying scrape request for ${netid} to ${constScraperUrl}`);
 
         const payload: any = { netid, password };
         if (session_data) {

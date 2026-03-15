@@ -701,7 +701,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {fetchError && (
+      {/* {fetchError && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 flex items-center gap-3 animate-slide-in">
           <div className="bg-yellow-500/20 p-2 rounded-full">
             <Info className="w-4 h-4 text-yellow-500" />
@@ -715,7 +715,7 @@ export default function DashboardPage() {
             </p>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* 2.5. Split: LeetCode & Profile */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

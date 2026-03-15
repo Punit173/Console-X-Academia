@@ -124,7 +124,7 @@ export default function AttendancePage() {
       const safeBunks = Math.max(0, Math.floor(maxTotal - conducted));
       return {
         marginText: `${safeBunks}`,
-        marginLabel: "Margin",
+        marginLabel: "",
         marginType: (safeBunks > 0 ? "safe" : "warning") as
           | "safe"
           | "warning"
