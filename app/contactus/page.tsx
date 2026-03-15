@@ -3,6 +3,7 @@ import {
 	BadgeCheck,
 	ExternalLink,
 	Instagram,
+	Linkedin,
 	Mail,
 	MessageCircle,
 	Users,
@@ -11,6 +12,7 @@ import {
 const OFFICIAL_EMAIL = "console.business.team@gmail.com";
 const FEEDBACK_FORM_URL = "https://forms.gle/3soGUDsiBBN1ygvX9";
 const INSTAGRAM_URL = "https://www.instagram.com/console_x_academia";
+const LINKEDIN_URL = "https://www.linkedin.com/company/console-x-academia/";
 const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/B4lNYZtRrAj6lqqRMIGvF5";
 
 export default function ContactUsPage() {
@@ -125,16 +127,28 @@ export default function ContactUsPage() {
 						Built and maintained by the Console X Academia team to make student
 						academic workflows faster, cleaner, and smarter.
 					</p>
-					<a
-						href={INSTAGRAM_URL}
-						target="_blank"
-						rel="noreferrer"
-						className="mt-5 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-pink-300 transition hover:border-pink-400/40 hover:bg-pink-500/10"
-					>
-						<Instagram size={16} />
-						Follow on Instagram
-						<ExternalLink size={15} />
-					</a>
+					<div className="mt-5 flex flex-wrap items-center gap-3">
+						<a
+							href={INSTAGRAM_URL}
+							target="_blank"
+							rel="noreferrer"
+							className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-pink-300 transition hover:border-pink-400/40 hover:bg-pink-500/10"
+						>
+							<Instagram size={16} />
+							Follow on Instagram
+							<ExternalLink size={15} />
+						</a>
+						<a
+							href={LINKEDIN_URL}
+							target="_blank"
+							rel="noreferrer"
+							className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-sky-300 transition hover:border-sky-400/40 hover:bg-sky-500/10"
+						>
+							<Linkedin size={16} />
+							Follow on LinkedIn
+							<ExternalLink size={15} />
+						</a>
+					</div>
 				</section>
 			</div>
 		</div>
