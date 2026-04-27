@@ -1,7 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { AppDataProvider } from "@/components/AppDataContext";
-// import { Analytics } from "@vercel/analytics/next"
 import { CalendarProvider } from "@/components/CalendarContext";
 import Navbar from "@/components/Navbar";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
