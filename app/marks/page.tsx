@@ -652,17 +652,29 @@ function MarksContent() {
                   {course.tests.length === 0 ? (
                     <p className="text-white/40 text-sm text-center py-4">No assessments yet</p>
                   ) : (
-                    // @ts-ignore
-                    course.tests.map((t: any) => (
-                      <div key={t.test_name} className="space-y-2">
+                    <>
+                      {/* @ts-ignore */}
+                      {course.tests.map((t: any) => (
+                        <div key={t.test_name} className="space-y-2">
+                          <div className="flex justify-between items-baseline">
+                            <span className="text-sm text-white/70">{t.test_name}</span>
+                            <span className="text-sm font-medium text-white">
+                              {formatNumber(t.obtained_marks)} <span className="text-white/30">/</span> {formatNumber(t.max_marks)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Total for Subject */}
+                      <div className="pt-4 border-t border-zinc-700">
                         <div className="flex justify-between items-baseline">
-                          <span className="text-sm text-white/70">{t.test_name}</span>
-                          <span className="text-sm font-medium text-white">
-                            {formatNumber(t.obtained_marks)} <span className="text-white/30">/</span> {formatNumber(t.max_marks)}
+                          <span className="text-sm font-bold text-[#62D834]">Total</span>
+                          <span className="text-sm font-bold text-[#62D834]">
+                            {formatNumber(totalObtained)} <span className="text-white/30">/</span> {formatNumber(totalMax)}
                           </span>
                         </div>
                       </div>
-                    ))
+                    </>
                   )}
                 </div>
               </div>
